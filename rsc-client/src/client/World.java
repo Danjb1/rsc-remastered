@@ -141,7 +141,7 @@ public class World {
                         }
                     }
                 }
-                method413(j3, j4, l14, k7, i10);
+                renderTileMaybe(j3, j4, l14, k7, i10);
                 int i17 = ((getGroundElevation(j3 + 1, j4 + 1) - getGroundElevation(j3 + 1, j4))
                         + getGroundElevation(j3, j4 + 1)) - getGroundElevation(j3, j4);
                 if (k7 != i10 || i17 != 0) {
@@ -216,7 +216,7 @@ public class World {
                     selectedX[i20] = k4;
                     selectedY[i20] = i6;
                     gameModel.faceTag[i20] = 0x30d40 + i20;
-                    method413(k4, i6, 0, l7, l7);
+                    renderTileMaybe(k4, i6, 0, l7, l7);
                 } else if (getGroundTexturesOverlay(k4, i6) == 0
                         || Resources.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getUnknown() != 3) {
                     if (getGroundTexturesOverlay(k4, i6 + 1) > 0 && Resources
@@ -232,7 +232,7 @@ public class World {
                         selectedX[j20] = k4;
                         selectedY[j20] = i6;
                         gameModel.faceTag[j20] = 0x30d40 + j20;
-                        method413(k4, i6, 0, i8, i8);
+                        renderTileMaybe(k4, i6, 0, i8, i8);
                     }
                     if (getGroundTexturesOverlay(k4, i6 - 1) > 0 && Resources
                             .getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getUnknown() == 4) {
@@ -247,7 +247,7 @@ public class World {
                         selectedX[k20] = k4;
                         selectedY[k20] = i6;
                         gameModel.faceTag[k20] = 0x30d40 + k20;
-                        method413(k4, i6, 0, j8, j8);
+                        renderTileMaybe(k4, i6, 0, j8, j8);
                     }
                     if (getGroundTexturesOverlay(k4 + 1, i6) > 0 && Resources
                             .getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getUnknown() == 4) {
@@ -262,7 +262,7 @@ public class World {
                         selectedX[l20] = k4;
                         selectedY[l20] = i6;
                         gameModel.faceTag[l20] = 0x30d40 + l20;
-                        method413(k4, i6, 0, k8, k8);
+                        renderTileMaybe(k4, i6, 0, k8, k8);
                     }
                     if (getGroundTexturesOverlay(k4 - 1, i6) > 0 && Resources
                             .getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getUnknown() == 4) {
@@ -277,7 +277,7 @@ public class World {
                         selectedX[i21] = k4;
                         selectedY[i21] = i6;
                         gameModel.faceTag[i21] = 0x30d40 + i21;
-                        method413(k4, i6, 0, l8, l8);
+                        renderTileMaybe(k4, i6, 0, l8, l8);
                     }
                 }
             }
@@ -296,25 +296,25 @@ public class World {
         aModel.clear();
     }
 
-    public void method413(int i, int j, int k, int l, int i1) {
-        int j1 = i * 3;
-        int k1 = j * 3;
-        int l1 = sceneRenderer.method302(l);
-        int i2 = sceneRenderer.method302(i1);
-        l1 = l1 >> 1 & 0x7f7f7f;
-        i2 = i2 >> 1 & 0x7f7f7f;
+    public void renderTileMaybe(int i, int j, int k, int l, int i1) {
+        int x1 = i * 3;
+        int y1 = j * 3;
+        int col1 = sceneRenderer.getTextureColour(l);
+        int col2 = sceneRenderer.getTextureColour(i1);
+        col1 = col1 >> 1 & 0x7f7f7f;
+        col2 = col2 >> 1 & 0x7f7f7f;
         if (k == 0) {
-            gamePanel.drawLineX(j1, k1, 3, l1);
-            gamePanel.drawLineX(j1, k1 + 1, 2, l1);
-            gamePanel.drawLineX(j1, k1 + 2, 1, l1);
-            gamePanel.drawLineX(j1 + 2, k1 + 1, 1, i2);
-            gamePanel.drawLineX(j1 + 1, k1 + 2, 2, i2);
+            gamePanel.drawLineX(x1, y1, 3, col1);
+            gamePanel.drawLineX(x1, y1 + 1, 2, col1);
+            gamePanel.drawLineX(x1, y1 + 2, 1, col1);
+            gamePanel.drawLineX(x1 + 2, y1 + 1, 1, col2);
+            gamePanel.drawLineX(x1 + 1, y1 + 2, 2, col2);
         } else if (k == 1) {
-            gamePanel.drawLineX(j1, k1, 3, i2);
-            gamePanel.drawLineX(j1 + 1, k1 + 1, 2, i2);
-            gamePanel.drawLineX(j1 + 2, k1 + 2, 1, i2);
-            gamePanel.drawLineX(j1, k1 + 1, 1, l1);
-            gamePanel.drawLineX(j1, k1 + 2, 2, l1);
+            gamePanel.drawLineX(x1, y1, 3, col2);
+            gamePanel.drawLineX(x1 + 1, y1 + 1, 2, col2);
+            gamePanel.drawLineX(x1 + 2, y1 + 2, 1, col2);
+            gamePanel.drawLineX(x1, y1 + 1, 1, col1);
+            gamePanel.drawLineX(x1, y1 + 2, 2, col1);
         }
     }
     

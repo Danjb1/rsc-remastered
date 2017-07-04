@@ -225,34 +225,32 @@ public class GamePanel extends JPanel {
     }
 
     private void plotSale1(int ai[], int ai1[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2,
-            int j2, int k2) {
-        try {
-            int l2 = j;
-            for (int i3 = -k1; i3 < 0; i3 += k2) {
-                int j3 = (k >> 16) * j2;
-                for (int k3 = -j1; k3 < 0; k3++) {
-                    i = ai1[(j >> 16) + j3];
-                    if (i != 0) {
-                        ai[l++] = i;
-                    } else {
-                        l++;
-                    }
-                    j += l1;
+        int j2, int k2) {
+        
+        int l2 = j;
+        for (int i3 = -k1; i3 < 0; i3 += k2) {
+            int j3 = (k >> 16) * j2;
+            for (int k3 = -j1; k3 < 0; k3++) {
+                i = ai1[(j >> 16) + j3];
+                if (i != 0) {
+                    ai[l++] = i;
+                } else {
+                    l++;
                 }
-
-                k += i2;
-                j = l2;
-                l += i1;
+                j += l1;
             }
 
-            return;
-        } catch (Exception _ex) {
-            System.out.println("error in plot_scale");
+            k += i2;
+            j = l2;
+            l += i1;
         }
+
+        return;
     }
 
     public void textureScanline(int ai1[], int i, int j, int k, int l, int i1, int j1, int k1, int l1,
             int i2, int j2, int k2, int l2) {
+        
         if (i2 <= 0) {
             return;
         }
@@ -373,6 +371,7 @@ public class GamePanel extends JPanel {
 
     public void textureTranslucentScanline(int ai1[], int i, int j, int k, int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2) {
+
         if (i2 <= 0) {
             return;
         }
@@ -494,6 +493,7 @@ public class GamePanel extends JPanel {
 
     public void textureBackTranslucentScanline(int i, int j, int k, int ai1[], int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2, int i3) {
+
         if (j2 <= 0) {
             return;
         }
@@ -655,6 +655,7 @@ public class GamePanel extends JPanel {
 
     public void textureScanline2(int ai1[], int i, int j, int k, int l, int i1, int j1, int k1,
             int l1, int i2, int j2, int k2, int l2) {
+
         if (i2 <= 0) {
             return;
         }
@@ -765,6 +766,7 @@ public class GamePanel extends JPanel {
 
     public void textureTranslucentScanline2(int ai1[], int i, int j, int k, int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2) {
+
         if (i2 <= 0) {
             return;
         }
@@ -875,6 +877,7 @@ public class GamePanel extends JPanel {
 
     public void textureBackTranslucentScanline2(int i, int j, int k, int ai1[], int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2, int i3) {
+        
         if (j2 <= 0) {
             return;
         }
@@ -1034,45 +1037,8 @@ public class GamePanel extends JPanel {
 
     }
 
-    public void gradientScanline(int i, int j, int k, int ai1[], int l, int i1) {
-        if (i >= 0) {
-            return;
-        }
-        i1 <<= 1;
-        k = ai1[l >> 8 & 0xff];
-        l += i1;
-        int j1 = i / 8;
-        for (int k1 = j1; k1 < 0; k1++) {
-            pixels[j++] = k;
-            pixels[j++] = k;
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-        }
-
-        j1 = -(i % 8);
-        for (int l1 = 0; l1 < j1; l1++) {
-            pixels[j++] = k;
-            if ((l1 & 1) == 1) {
-                k = ai1[l >> 8 & 0xff];
-                l += i1;
-            }
-        }
-
-    }
-
     public void textureGradientScanline(int i, int j, int k, int ai1[], int l, int i1) {
+        
         if (i >= 0) {
             return;
         }
@@ -1120,6 +1086,7 @@ public class GamePanel extends JPanel {
     }
 
     public void gradientScanline2(int i, int j, int k, int ai1[], int l, int i1) {
+        
         if (i >= 0) {
             return;
         }
@@ -1166,6 +1133,7 @@ public class GamePanel extends JPanel {
     }
 
     public void drawLineX(int x1, int y1, int x2, int colour) {
+        
         if (y1 < 0 || y1 >= image.getHeight()) {
             return;
         }

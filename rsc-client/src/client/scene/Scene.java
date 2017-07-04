@@ -24,6 +24,8 @@ public class Scene {
         }
         view = new GameModel(MAX_SPRITES * 2, MAX_SPRITES);
         camera = new Camera();
+        
+        camera.setCamera(0, 0, 0, 912, 0, 0, 2000);
     }
 
     public void addModel(GameModel gameModel) {
