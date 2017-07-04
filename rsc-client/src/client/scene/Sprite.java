@@ -1,4 +1,4 @@
-package client;
+package client.scene;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

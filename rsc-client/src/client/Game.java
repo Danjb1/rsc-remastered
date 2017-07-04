@@ -10,6 +10,8 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JFrame;
 
+import client.scene.Sprite;
+
 public class Game implements KeyListener, MouseListener, MouseMotionListener {
 
     private static final int FPS = 50;
@@ -89,7 +91,8 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
             // Calculate time elapsed since last frame
             int timeSinceLastFrame;
             if (now > frameTimes[frameIndex]) {
-                timeSinceLastFrame = (int) (2560 * MS_PER_FRAME / (now - frameTimes[frameIndex]));
+                timeSinceLastFrame = (int)
+                        (2560 * MS_PER_FRAME / (now - frameTimes[frameIndex]));
             } else {
                 timeSinceLastFrame = 300;
             }
@@ -101,7 +104,8 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
                 timeSinceLastFrame = 256;
 
                 // Calculate time until next frame is due
-                sleepTime = (int) (MS_PER_FRAME - (now - frameTimes[frameIndex]) / 10L);
+                sleepTime = (int)
+                        (MS_PER_FRAME - (now - frameTimes[frameIndex]) / 10L);
 
                 // sleepTime must be at least 1
                 if (sleepTime < 1) {
@@ -240,6 +244,9 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
         sprites = loadingScreen.getSprites();
         loadingScreen = null;
         loginScreen = new LoginScreen();
+        
+        // For now, just pretend we've logged in straightaway
+        loginScreen = null;
     }
 
 }

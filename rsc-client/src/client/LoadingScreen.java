@@ -19,6 +19,7 @@ import client.entityhandling.defs.SpellDef;
 import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
 import client.res.Resources;
+import client.scene.Sprite;
 import client.util.DataUtils;
 
 public class LoadingScreen {
@@ -61,9 +62,11 @@ public class LoadingScreen {
         this.game = game;
 
         try {
-            // Ideally we would use getResource() here but we need a concrete File, not an input stream!
-            // This means we can't ship the data files inside the JAR unless we seriously
-            // re-work this code.
+            /*
+             * Ideally we would use getResource() here but we need a concrete
+             * File, not an input stream! This means we can't ship the data
+             * files inside the JAR unless we seriously re-work this code.
+             */
             spriteArchive = new ZipFile(new File(Resources.DATA_DIR + SPRITES_FILENAME));
         } catch (Exception e) {
             e.printStackTrace();
