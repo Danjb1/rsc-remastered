@@ -6,9 +6,9 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-import client.render.GameRenderer;
 import client.render.LoadingScreenRenderer;
 import client.render.LoginScreenRenderer;
+import client.res.Resources;
 import client.scene.Sprite;
 
 public class GamePanel extends JPanel {
@@ -58,7 +58,7 @@ public class GamePanel extends JPanel {
 
         // Draw game
         } else {
-            GameRenderer.render(game, this);
+            game.getSceneRenderer().render();
         }
         
         // Draw pixel data to the screen
@@ -68,7 +68,7 @@ public class GamePanel extends JPanel {
 
     public void drawSprite(int x, int y, int id) {
 
-        Sprite sprite = game.getSprite(id);
+        Sprite sprite = Resources.getSprite(id);
 
         if (sprite.hasDrawOffset()) {
             x += sprite.getDrawOffsetX();
@@ -172,7 +172,7 @@ public class GamePanel extends JPanel {
 
     public void spriteClip1(int x, int y, int width, int height, int id) {
 
-        Sprite sprite = game.getSprite(id);
+        Sprite sprite = Resources.getSprite(id);
         int j1 = sprite.getWidth();
         int k1 = sprite.getHeight();
         int l1 = 0;
@@ -1161,6 +1161,24 @@ public class GamePanel extends JPanel {
                 k = ai1[l >> 8 & 0xff];
                 l += i1;
             }
+        }
+
+    }
+
+    public void drawLineX(int x1, int y1, int x2, int colour) {
+        if (y1 < 0 || y1 >= image.getHeight()) {
+            return;
+        }
+        if (x1 < 0) {
+            x2 -= 0 - x1;
+            x1 = 0;
+        }
+        if (x1 + x2 > image.getWidth()) {
+            x2 = image.getWidth() - x1;
+        }
+        int xPixel = x1 + y1 * image.getWidth();
+        for (int yPixel = 0; yPixel < x2; yPixel++) {
+            pixels[xPixel + yPixel] = colour;
         }
 
     }

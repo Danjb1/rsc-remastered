@@ -39,7 +39,6 @@ public class GameModel {
     public boolean transparent;
     public int entityId;
     public int faceTag[];
-    public byte isLocalPlayer[];
     private boolean aBoolean260;
     public boolean aBoolean261;
     public boolean aBoolean262;
@@ -51,9 +50,9 @@ public class GameModel {
     private static int someConstantsRanges2[];
     private int anInt270;
     public int count1;
-    public int someVarX[];
-    public int someVarZ[];
-    public int someVarY[];
+    public int vertexX[];
+    public int vertexZ[];
+    public int vertexY[];
     public int xPosition[];
     public int yPosition[];
     public int zPosition[];
@@ -170,17 +169,17 @@ public class GameModel {
         initialise(j, k);
         someMatrix2 = new int[k][1];
         for (int l = 0; l < j; l++) {
-            someVarX[l] = DataUtils.getSigned2Bytes(abyte0, i);
+            vertexX[l] = DataUtils.getSigned2Bytes(abyte0, i);
             i += 2;
         }
 
         for (int i1 = 0; i1 < j; i1++) {
-            someVarZ[i1] = DataUtils.getSigned2Bytes(abyte0, i);
+            vertexZ[i1] = DataUtils.getSigned2Bytes(abyte0, i);
             i += 2;
         }
 
         for (int j1 = 0; j1 < j; j1++) {
-            someVarY[j1] = DataUtils.getSigned2Bytes(abyte0, i);
+            vertexY[j1] = DataUtils.getSigned2Bytes(abyte0, i);
             i += 2;
         }
 
@@ -449,56 +448,55 @@ public class GameModel {
         initialise(i, j);
     }
 
-    private void initialise(int count1, int count2) {
-        someVarX = new int[count1];
-        someVarZ = new int[count1];
-        someVarY = new int[count1];
-        vertexIntensity = new int[count1];
-        vertexAmbience = new byte[count1];
-        faceNumVertices = new int[count2];
-        faceVertices = new int[count2][];
-        faceFillFront = new int[count2];
-        faceFillBack = new int[count2];
-        faceIntensity = new int[count2];
-        normalScale = new int[count2];
-        normalMagnitude = new int[count2];
+    private void initialise(int maxVertices, int maxFaces) {
+        vertexX = new int[maxVertices];
+        vertexZ = new int[maxVertices];
+        vertexY = new int[maxVertices];
+        vertexIntensity = new int[maxVertices];
+        vertexAmbience = new byte[maxVertices];
+        faceNumVertices = new int[maxFaces];
+        faceVertices = new int[maxFaces][];
+        faceFillFront = new int[maxFaces];
+        faceFillBack = new int[maxFaces];
+        faceIntensity = new int[maxFaces];
+        normalScale = new int[maxFaces];
+        normalMagnitude = new int[maxFaces];
         if (!aBoolean264) {
-            projectVertexX = new int[count1];
-            projectVertexY = new int[count1];
-            projectVertexZ = new int[count1];
-            vertexViewX = new int[count1];
-            vertexViewY = new int[count1];
+            projectVertexX = new int[maxVertices];
+            projectVertexY = new int[maxVertices];
+            projectVertexZ = new int[maxVertices];
+            vertexViewX = new int[maxVertices];
+            vertexViewY = new int[maxVertices];
         }
         if (!unpickable) {
-            isLocalPlayer = new byte[count2];
-            faceTag = new int[count2];
+            faceTag = new int[maxFaces];
         }
         if (aBoolean260) {
-            xPosition = someVarX;
-            yPosition = someVarZ;
-            zPosition = someVarY;
+            xPosition = vertexX;
+            yPosition = vertexZ;
+            zPosition = vertexY;
         } else {
-            xPosition = new int[count1];
-            yPosition = new int[count1];
-            zPosition = new int[count1];
+            xPosition = new int[maxVertices];
+            yPosition = new int[maxVertices];
+            zPosition = new int[maxVertices];
         }
         if (!aBoolean262 || !aBoolean261) {
-            distXRatio = new int[count2];
-            distYRatio = new int[count2];
-            distZRatio = new int[count2];
+            distXRatio = new int[maxFaces];
+            distYRatio = new int[maxFaces];
+            distZRatio = new int[maxFaces];
         }
         if (!aBoolean261) {
-            anIntArray280 = new int[count2];
-            anIntArray281 = new int[count2];
-            anIntArray282 = new int[count2];
-            anIntArray283 = new int[count2];
-            anIntArray284 = new int[count2];
-            anIntArray285 = new int[count2];
+            anIntArray280 = new int[maxFaces];
+            anIntArray281 = new int[maxFaces];
+            anIntArray282 = new int[maxFaces];
+            anIntArray283 = new int[maxFaces];
+            anIntArray284 = new int[maxFaces];
+            anIntArray285 = new int[maxFaces];
         }
         numFaces = 0;
         someCount = 0;
-        this.count1 = count1;
-        this.count2 = count2;
+        this.count1 = maxVertices;
+        this.count2 = maxFaces;
         xSpeed = ySpeed = zSpeed = 0;
         somethingX = somethingY = somethingZ = 0;
         somethingElseX = somethingElseY = somethingElseZ = 256;
@@ -562,8 +560,8 @@ public class GameModel {
                 int ai[] = new int[gameModel.faceNumVertices[j1]];
                 int ai1[] = gameModel.faceVertices[j1];
                 for (int k1 = 0; k1 < gameModel.faceNumVertices[j1]; k1++) {
-                    ai[k1] = getSomeIndex(gameModel.someVarX[ai1[k1]], gameModel.someVarZ[ai1[k1]],
-                            gameModel.someVarY[ai1[k1]]);
+                    ai[k1] = getSomeIndex(gameModel.vertexX[ai1[k1]], gameModel.vertexZ[ai1[k1]],
+                            gameModel.vertexY[ai1[k1]]);
                 }
 
                 int l1 = createFace(gameModel.faceNumVertices[j1], ai, gameModel.faceFillFront[j1],
@@ -596,7 +594,7 @@ public class GameModel {
 
     public int getSomeIndex(int i, int j, int k) {
         for (int l = 0; l < someCount; l++) {
-            if (someVarX[l] == i && someVarZ[l] == j && someVarY[l] == k) {
+            if (vertexX[l] == i && vertexZ[l] == j && vertexY[l] == k) {
                 return l;
             }
         }
@@ -604,9 +602,9 @@ public class GameModel {
         if (someCount >= count1) {
             return -1;
         } else {
-            someVarX[someCount] = i;
-            someVarZ[someCount] = j;
-            someVarY[someCount] = k;
+            vertexX[someCount] = i;
+            vertexZ[someCount] = j;
+            vertexY[someCount] = k;
             return someCount++;
         }
     }
@@ -615,9 +613,9 @@ public class GameModel {
         if (someCount >= count1) {
             return -1;
         } else {
-            someVarX[someCount] = x;
-            someVarZ[someCount] = z;
-            someVarY[someCount] = y;
+            vertexX[someCount] = x;
+            vertexZ[someCount] = z;
+            vertexY[someCount] = y;
             return someCount++;
         }
     }
@@ -650,8 +648,8 @@ public class GameModel {
             int i3 = faceNumVertices[i2];
             int ai2[] = faceVertices[i2];
             for (int i4 = 0; i4 < i3; i4++) {
-                j2 += someVarX[ai2[i4]];
-                k2 += someVarY[ai2[i4]];
+                j2 += vertexX[ai2[i4]];
+                k2 += vertexY[ai2[i4]];
             }
 
             int k4 = j2 / (i3 * k) + (k2 / (i3 * l)) * i1;
@@ -675,8 +673,8 @@ public class GameModel {
             int l4 = faceNumVertices[j3];
             int ai3[] = faceVertices[j3];
             for (int i5 = 0; i5 < l4; i5++) {
-                k3 += someVarX[ai3[i5]];
-                j4 += someVarY[ai3[i5]];
+                k3 += vertexX[ai3[i5]];
+                j4 += vertexY[ai3[i5]];
             }
 
             int j5 = k3 / (l4 * k) + (j4 / (l4 * l)) * i1;
@@ -693,7 +691,7 @@ public class GameModel {
     public void copySomeDataIntoTheNextIndex(GameModel gameModel, int ai[], int count, int index) {
         int ai1[] = new int[count];
         for (int k = 0; k < count; k++) {
-            int l = ai1[k] = gameModel.getSomeIndex(someVarX[ai[k]], someVarZ[ai[k]], someVarY[ai[k]]);
+            int l = ai1[k] = gameModel.getSomeIndex(vertexX[ai[k]], vertexZ[ai[k]], vertexY[ai[k]]);
             gameModel.vertexIntensity[l] = vertexIntensity[ai[k]];
             gameModel.vertexAmbience[l] = vertexAmbience[ai[k]];
         }
@@ -1044,9 +1042,9 @@ public class GameModel {
         if (transformState == 2) {
             transformState = 0;
             for (int i = 0; i < someCount; i++) {
-                xPosition[i] = someVarX[i];
-                yPosition[i] = someVarZ[i];
-                zPosition[i] = someVarY[i];
+                xPosition[i] = vertexX[i];
+                yPosition[i] = vertexZ[i];
+                zPosition[i] = vertexY[i];
             }
 
             anInt248 = anInt250 = anInt252 = 0xff676981;
@@ -1056,9 +1054,9 @@ public class GameModel {
         if (transformState == 1) {
             transformState = 0;
             for (int j = 0; j < someCount; j++) {
-                xPosition[j] = someVarX[j];
-                yPosition[j] = someVarZ[j];
-                zPosition[j] = someVarY[j];
+                xPosition[j] = vertexX[j];
+                yPosition[j] = vertexZ[j];
+                zPosition[j] = vertexY[j];
             }
 
             if (state >= 2) {
@@ -1079,8 +1077,6 @@ public class GameModel {
         }
     }
 
-    //cameraX, cameraY, cameraZ, cameraYaw, cameraPitch, cameraRoll, viewDistance, clipNear
-    // int i,   int j  , int k,   int l,     int i1,      int j1,    int k1,       int l1
     public void project(Camera camera, int viewDistance, int clipNear) {
         doStuffBasedOnState();
         if (anInt252 > camera.getFrustumNearZ() ||
@@ -1150,9 +1146,9 @@ public class GameModel {
     public void resetSomeData() {
         doStuffBasedOnState();
         for (int i = 0; i < someCount; i++) {
-            someVarX[i] = xPosition[i];
-            someVarZ[i] = yPosition[i];
-            someVarY[i] = zPosition[i];
+            vertexX[i] = xPosition[i];
+            vertexZ[i] = yPosition[i];
+            vertexY[i] = zPosition[i];
         }
 
         xSpeed = ySpeed = zSpeed = 0;

@@ -24,6 +24,7 @@ import client.util.DataUtils;
 
 public class LoadingScreen {
 
+    private static final String LANDSCAPE_FILENAME = "Landscape.rscd";
     private static final String SPRITES_FILENAME = "Sprites.rscd";
 
     public static final int SPRITE_MEDIA_START = 2000;
@@ -40,20 +41,6 @@ public class LoadingScreen {
 
     private int[] experienceTable = new int[99];
 
-    public Sprite[] sprites = new Sprite[4000];
-    private ZipFile spriteArchive;
-
-    private NpcDef[] npcs;
-    private ItemDef[] items;
-    private TextureDef[] textures;
-    private AnimationDef[] animations;
-    private SpellDef[] spells;
-    private PrayerDef[] prayers;
-    private TileDef[] tiles;
-    private DoorDef[] doors;
-    private ElevationDef[] elevation;
-    private GameObjectDef[] objects;
-
     private int numInvImages;
 
     private List<String> models = new ArrayList<>();
@@ -61,13 +48,18 @@ public class LoadingScreen {
     public LoadingScreen(Game game) {
         this.game = game;
 
+        /*
+         * Load ZIParchives.
+         * 
+         * Ideally we would use getResource() here but we need a concrete
+         * File, not an input stream! This means we can't ship the data
+         * files inside the JAR unless we seriously re-work this code.
+         */
         try {
-            /*
-             * Ideally we would use getResource() here but we need a concrete
-             * File, not an input stream! This means we can't ship the data
-             * files inside the JAR unless we seriously re-work this code.
-             */
-            spriteArchive = new ZipFile(new File(Resources.DATA_DIR + SPRITES_FILENAME));
+            Resources.spriteArchive = new ZipFile(new File(
+                    Resources.DATA_DIR + SPRITES_FILENAME));
+            Resources.tileArchive = new ZipFile(new File(
+                    Resources.DATA_DIR + LANDSCAPE_FILENAME));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -86,65 +78,38 @@ public class LoadingScreen {
         }
 
         if (progress == 0) {
+            updateProgress(15, "Unpacking configuration");
             generateExperienceTable();
             loadGameData();
-            updateProgress(15, "Unpacking configuration");
             return;
 
         } else if (progress == 15) {
-            //            gameGraphics = new SurfaceSprite(this, windowWidth, windowHeight, 4000);
-            //            gameGraphics.setDimensions(0, 0, windowWidth, windowHeight);
-            //            Menu.aBoolean220 = false;
-            //            spellMenu = new Menu(gameGraphics, 5);
-            //            int l = ((Surface) (gameGraphics)).width2 - 199;
-            //            byte byte0 = 36;
-            //            spellMenuHandle = spellMenu.method162(l, byte0 + 24, 196, 90, 1, 500, true);
-            //            friendsMenu = new Menu(gameGraphics, 5);
-            //            friendsMenuHandle = friendsMenu.method162(l, byte0 + 40, 196, 126, 1, 500, true);
-            loadMedia();
             updateProgress(30, "Unpacking media");
+            loadMedia();
             return;
 
         } else if (progress == 30) {
-            //            loadEntity(); // 45%
             updateProgress(45, "Unpacking entities");
             return;
 
         } else if (progress == 45) {
-            //            scene = new Scene(gameGraphics, 15000, 15000, 1000);
-            //            scene.setBounds(windowWidth / 2, windowHeight / 2, windowWidth / 2, windowHeight / 2, windowWidth,
-            //                    viewDistance);
-            //            scene.clipFar3d = 2400;
-            //            scene.clipFar2d = 2400;
-            //            scene.fogZFalloff = 1;
-            //            scene.fogZDistance = 2300;
-            //            scene.setLight(-50, -10, -50);
-            //            world = new World(scene, gameGraphics);
-            //            loadTextures(); // 60%
             updateProgress(60, "Unpacking textures");
+            loadTextures();
             return;
 
         } else if (progress == 60) {
-            //            loadModels(); // 75%
             updateProgress(75, "Loading 3d models");
             return;
 
         } else if (progress == 75) {
-            //            loadSounds(); // 90%
             updateProgress(90, "Unpacking sound effects");
             return;
 
         } else if (progress == 90) {
             updateProgress(100, "Starting game...");
-            //            drawGameMenu();
-            //            makeLoginMenus();
-            //            characterCreation = new CharacterCreation(gameGraphics);
-            //            resetLoginVars();
         }
 
         game.finishedLoading();
-
-        //        Fonts.loadFonts(frame);
     }
 
     private void generateExperienceTable() {
@@ -158,25 +123,28 @@ public class LoadingScreen {
     }
 
     private void loadGameData() {
-        npcs       = (NpcDef[])        Resources.loadData("NPCs.rscd");
-        items      = (ItemDef[])       Resources.loadData("Items.rscd");
-        textures   = (TextureDef[])    Resources.loadData("Textures.rscd");
-        animations = (AnimationDef[])  Resources.loadData("Animations.rscd");
-        spells     = (SpellDef[])      Resources.loadData("Spells.rscd");
-        prayers    = (PrayerDef[])     Resources.loadData("Prayers.rscd");
-        tiles      = (TileDef[])       Resources.loadData("Tiles.rscd");
-        doors      = (DoorDef[])       Resources.loadData("Doors.rscd");
-        elevation  = (ElevationDef[])  Resources.loadData("Elevation.rscd");
-        objects    = (GameObjectDef[]) Resources.loadData("Objects.rscd");
+        Resources.npcs       = (NpcDef[])        Resources.loadData("NPCs.rscd");
+        Resources.items      = (ItemDef[])       Resources.loadData("Items.rscd");
+        Resources.textures   = (TextureDef[])    Resources.loadData("Textures.rscd");
+        Resources.animations = (AnimationDef[])  Resources.loadData("Animations.rscd");
+        Resources.spells     = (SpellDef[])      Resources.loadData("Spells.rscd");
+        Resources.prayers    = (PrayerDef[])     Resources.loadData("Prayers.rscd");
+        Resources.tiles      = (TileDef[])       Resources.loadData("Tiles.rscd");
+        Resources.doors      = (DoorDef[])       Resources.loadData("Doors.rscd");
+        Resources.elevation  = (ElevationDef[])  Resources.loadData("Elevation.rscd");
+        Resources.objects    = (GameObjectDef[]) Resources.loadData("Objects.rscd");
 
-        for (int id = 0; id < items.length; id++) {
-            if (items[id].getSprite() + 1 > numInvImages) {
-                numInvImages = items[id].getSprite() + 1;
+        // Initialise items
+        for (int id = 0; id < Resources.items.length; id++) {
+            if (Resources.items[id].getSprite() + 1 > numInvImages) {
+                numInvImages = Resources.items[id].getSprite() + 1;
             }
         }
 
-        for (int id = 0; id < objects.length; id++) {
-            objects[id].modelID = getModelIndex(objects[id].getObjectModel());
+        // Initialise objects
+        for (int id = 0; id < Resources.objects.length; id++) {
+            Resources.objects[id].modelID = 
+                    getModelIndex(Resources.objects[id].getObjectModel());
         }
     }
 
@@ -190,40 +158,6 @@ public class LoadingScreen {
         }
         return -1;
     }
-
-    //    private void loadModels() {
-    //
-    //        String[] modelNames = { "torcha2", "torcha3", "torcha4", "skulltorcha2", "skulltorcha3", "skulltorcha4",
-    //                "firea2", "firea3", "fireplacea2", "fireplacea3", "firespell2", "firespell3", "lightning2",
-    //                "lightning3", "clawspell2", "clawspell3", "clawspell4", "clawspell5", "spellcharge2", "spellcharge3" };
-    //        for (String name : modelNames) {
-    //            EntityHandler.getModelIndex(name);
-    //        }
-    //
-    //        byte[] models = load("models36.jag");
-    //        if (models == null) {
-    //            lastLoadedNull = true;
-    //            return;
-    //        }
-    //        for (int j = 0; j < EntityHandler.getModelCount(); j++) {
-    //            int k = DataOperations.method358(EntityHandler.getModelName(j) + ".ob3", models);
-    //            if (k == 0) {
-    //                gameDataModels[j] = new GameModel(1, 1);
-    //            } else {
-    //                gameDataModels[j] = new GameModel(models, k, true);
-    //            }
-    //            gameDataModels[j].transparent = EntityHandler.getModelName(j).equals("giantcrystal");
-    //        }
-    //    }
-
-    //    private void loadSprite(int id, String packageName, int amount) {
-    //        for (int i = id; i < id + amount; i++) {
-    //            if (!gameGraphics.loadSprite(i, packageName)) {
-    //                lastLoadedNull = true;
-    //                return;
-    //            }
-    //        }
-    //    }
 
     private void loadMedia() {
         loadSprite(SPRITE_MEDIA_START, "media", 1);
@@ -265,13 +199,14 @@ public class LoadingScreen {
 
     public boolean loadSprite(int id, String packageName) {
         try {
-            ZipEntry e = spriteArchive.getEntry(String.valueOf(id));
+            ZipEntry e = Resources.spriteArchive.getEntry(String.valueOf(id));
             if (e == null) {
                 System.err.println("Missing sprite: " + id);
                 return false;
             }
-            ByteBuffer data = DataUtils.streamToBuffer(new BufferedInputStream(spriteArchive.getInputStream(e)));
-            sprites[id] = Sprite.deserialise(data);
+            ByteBuffer data = DataUtils.streamToBuffer(new BufferedInputStream(
+                    Resources.spriteArchive.getInputStream(e)));
+            Resources.sprites[id] = Sprite.deserialise(data);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -279,104 +214,68 @@ public class LoadingScreen {
         }
     }
 
-    //    private void loadEntity() {
-    //        int animationNumber = 0;
-    //        label0: for (int animationIndex = 0; animationIndex < EntityHandler.animationCount(); animationIndex++) {
-    //            String s = EntityHandler.getAnimationDef(animationIndex).getName();
-    //            for (int nextAnimationIndex = 0; nextAnimationIndex < animationIndex; nextAnimationIndex++) {
-    //                if (!EntityHandler.getAnimationDef(nextAnimationIndex).getName().equalsIgnoreCase(s)) {
-    //                    continue;
-    //                }
-    //                EntityHandler.getAnimationDef(animationIndex).number = EntityHandler.getAnimationDef(nextAnimationIndex)
-    //                        .getNumber();
-    //                continue label0;
-    //            }
-    //
-    //            loadSprite(animationNumber, "entity", 15);
-    //            if (EntityHandler.getAnimationDef(animationIndex).hasA()) {
-    //                loadSprite(animationNumber + 15, "entity", 3);
-    //            }
-    //
-    //            if (EntityHandler.getAnimationDef(animationIndex).hasF()) {
-    //                loadSprite(animationNumber + 18, "entity", 9);
-    //            }
-    //            EntityHandler.getAnimationDef(animationIndex).number = animationNumber;
-    //            animationNumber += 27;
-    //        }
-    //    }
+    private void loadTextures() {
+        Resources.initialiseArrays(Resources.textures.length, 7, 11);
+        for (int i = 0; i < Resources.textures.length; i++) {
+            loadSprite(SPRITE_TEXTURE_START + i, "texture", 1);
+            Sprite sprite = Resources.getSprite(SPRITE_TEXTURE_START + i);
 
-    //    private void loadTextures() {
-    //        scene.initialiseArrays(EntityHandler.textureCount(), 7, 11);
-    //        for (int i = 0; i < EntityHandler.textureCount(); i++) {
-    //            loadSprite(SPRITE_TEXTURE_START + i, "texture", 1);
-    //            Sprite sprite = ((Surface) (gameGraphics)).sprites[SPRITE_TEXTURE_START + i];
-    //
-    //            int length = sprite.getWidth() * sprite.getHeight();
-    //            int[] pixels = sprite.getPixels();
-    //            int ai1[] = new int[32768];
-    //            for (int k = 0; k < length; k++) {
-    //                ai1[((pixels[k] & 0xf80000) >> 9) + ((pixels[k] & 0xf800) >> 6) + ((pixels[k] & 0xf8) >> 3)]++;
-    //            }
-    //            int[] dictionary = new int[256];
-    //            dictionary[0] = 0xff00ff;
-    //            int[] temp = new int[256];
-    //            for (int i1 = 0; i1 < ai1.length; i1++) {
-    //                int j1 = ai1[i1];
-    //                if (j1 > temp[255]) {
-    //                    for (int k1 = 1; k1 < 256; k1++) {
-    //                        if (j1 <= temp[k1]) {
-    //                            continue;
-    //                        }
-    //                        for (int i2 = 255; i2 > k1; i2--) {
-    //                            dictionary[i2] = dictionary[i2 - 1];
-    //                            temp[i2] = temp[i2 - 1];
-    //                        }
-    //                        dictionary[k1] = ((i1 & 0x7c00) << 9) + ((i1 & 0x3e0) << 6) + ((i1 & 0x1f) << 3) + 0x40404;
-    //                        temp[k1] = j1;
-    //                        break;
-    //                    }
-    //                }
-    //                ai1[i1] = -1;
-    //            }
-    //            byte[] indices = new byte[length];
-    //            for (int l1 = 0; l1 < length; l1++) {
-    //                int j2 = pixels[l1];
-    //                int k2 = ((j2 & 0xf80000) >> 9) + ((j2 & 0xf800) >> 6) + ((j2 & 0xf8) >> 3);
-    //                int l2 = ai1[k2];
-    //                if (l2 == -1) {
-    //                    int i3 = 0x3b9ac9ff;
-    //                    int j3 = j2 >> 16 & 0xff;
-    //                    int k3 = j2 >> 8 & 0xff;
-    //                    int l3 = j2 & 0xff;
-    //                    for (int i4 = 0; i4 < 256; i4++) {
-    //                        int j4 = dictionary[i4];
-    //                        int k4 = j4 >> 16 & 0xff;
-    //                        int l4 = j4 >> 8 & 0xff;
-    //                        int i5 = j4 & 0xff;
-    //                        int j5 = (j3 - k4) * (j3 - k4) + (k3 - l4) * (k3 - l4) + (l3 - i5) * (l3 - i5);
-    //                        if (j5 < i3) {
-    //                            i3 = j5;
-    //                            l2 = i4;
-    //                        }
-    //                    }
-    //
-    //                    ai1[k2] = l2;
-    //                }
-    //                indices[l1] = (byte) l2;
-    //            }
-    //            scene.defineTexture(i, indices, dictionary, sprite.getSomething1() / 64 - 1);
-    //        }
-    //    }
+            int length = sprite.getWidth() * sprite.getHeight();
+            int[] pixels = sprite.getPixels();
+            int ai1[] = new int[32768];
+            for (int k = 0; k < length; k++) {
+                ai1[((pixels[k] & 0xf80000) >> 9) + ((pixels[k] & 0xf800) >> 6) + ((pixels[k] & 0xf8) >> 3)]++;
+            }
+            int[] dictionary = new int[256];
+            dictionary[0] = 0xff00ff;
+            int[] temp = new int[256];
+            for (int i1 = 0; i1 < ai1.length; i1++) {
+                int j1 = ai1[i1];
+                if (j1 > temp[255]) {
+                    for (int k1 = 1; k1 < 256; k1++) {
+                        if (j1 <= temp[k1]) {
+                            continue;
+                        }
+                        for (int i2 = 255; i2 > k1; i2--) {
+                            dictionary[i2] = dictionary[i2 - 1];
+                            temp[i2] = temp[i2 - 1];
+                        }
+                        dictionary[k1] = ((i1 & 0x7c00) << 9) + ((i1 & 0x3e0) << 6) + ((i1 & 0x1f) << 3) + 0x40404;
+                        temp[k1] = j1;
+                        break;
+                    }
+                }
+                ai1[i1] = -1;
+            }
+            byte[] indices = new byte[length];
+            for (int l1 = 0; l1 < length; l1++) {
+                int j2 = pixels[l1];
+                int k2 = ((j2 & 0xf80000) >> 9) + ((j2 & 0xf800) >> 6) + ((j2 & 0xf8) >> 3);
+                int l2 = ai1[k2];
+                if (l2 == -1) {
+                    int i3 = 0x3b9ac9ff;
+                    int j3 = j2 >> 16 & 0xff;
+                    int k3 = j2 >> 8 & 0xff;
+                    int l3 = j2 & 0xff;
+                    for (int i4 = 0; i4 < 256; i4++) {
+                        int j4 = dictionary[i4];
+                        int k4 = j4 >> 16 & 0xff;
+                        int l4 = j4 >> 8 & 0xff;
+                        int i5 = j4 & 0xff;
+                        int j5 = (j3 - k4) * (j3 - k4) + (k3 - l4) * (k3 - l4) + (l3 - i5) * (l3 - i5);
+                        if (j5 < i3) {
+                            i3 = j5;
+                            l2 = i4;
+                        }
+                    }
 
-    //    private void loadSounds() {
-    //        try {
-    //            sounds = load("sounds1.mem");
-    //            streamAudioPlayer = new StreamAudioPlayer();
-    //            return;
-    //        } catch (Throwable throwable) {
-    //            System.out.println("Unable to init sounds:" + throwable);
-    //        }
-    //    }
+                    ai1[k2] = l2;
+                }
+                indices[l1] = (byte) l2;
+            }
+            Resources.defineTexture(i, indices, dictionary, sprite.getSomething1() / 64 - 1);
+        }
+    }
 
     protected final void updateProgress(int progress, String message) {
         this.progress = progress;
@@ -393,10 +292,6 @@ public class LoadingScreen {
 
     public int getProgress() {
         return progress;
-    }
-
-    public Sprite[] getSprites() {
-        return sprites;
     }
 
 }

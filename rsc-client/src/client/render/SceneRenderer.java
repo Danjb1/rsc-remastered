@@ -2,51 +2,41 @@ package client.render;
 
 import client.GamePanel;
 import client.World;
+import client.res.Resources;
 import client.scene.Camera;
 import client.scene.GameModel;
 import client.scene.Polygon;
 import client.scene.Scanline;
+import client.scene.Scene;
+import client.scene.SpriteEntity;
 
 public class SceneRenderer {
 
+    private static final int MAX_POLYGONS = 15000;
+    
+    private Scene scene;
     private Camera camera;
     private GamePanel gamePanel;
+    private int visiblePolygonCount;
+    private Polygon visiblePolygons[] = new Polygon[MAX_POLYGONS];
 
-    private long texturesLoaded;    
     private int rampCount = 50;
     private int gradientBase[] = new int[rampCount];
     private int gradientRamps[][] = new int[rampCount][256];
     private int anIntArray377[];
     private int clipNear = 5;
-    private int clipFar3d = 1000; // View distance for land
-    private int clipFar2d = 1000; // View distance for sprites
-    private int fogZFalloff = 20; // Fog "density"
-    private int fogZDistance = 10;
+    private int clipFar3d = 2400; // View distance for land
+    private int clipFar2d = 2400; // View distance for sprites
+    private int fogZFalloff = 1; // Fog "density"
+    private int fogZDistance = 2300;
     private boolean wideBand;
     private int width = 512;
     private int clipX;
     private int clipY;
     private int baseX = 256;
     private int baseY = 256;
-    private int viewDistance = 8;
+    private int viewDistance = 9;
     private int normalMagnitude = 4;
-    private int modelCount;
-    private GameModel models[];
-    private int visiblePolygonCount;
-    private Polygon visiblePolygons[];
-    private int spriteId[];
-    private int spriteWidth[];
-    private int spriteHeight[];
-    private GameModel view;
-    private int textureCount;
-    private byte textureColoursUsed[][];
-    private int textureColourList[][];
-    private int textureDimension[];
-    private long textureLoadedNumber[];
-    private int texturePixels[][];
-    private boolean textureBackTransparent[];
-    private int textureColours64[][];
-    private int textureColours128[][];
     private Scanline scanlines[];
     private int minY;
     private int maxY;
@@ -60,15 +50,22 @@ public class SceneRenderer {
     private int newEnd;
     private static byte aByteArray434[];
 
-    public SceneRenderer(GamePanel panel) {
+    public SceneRenderer(GamePanel panel, Scene scene) {
         this.gamePanel = panel;
+        this.scene = scene;
+        this.camera = scene.getCamera();
+
+        for (int l = 0; l < visiblePolygons.length; l++) {
+            visiblePolygons[l] = new Polygon();
+        }
+        
         clipX = panel.getWidth() / 2;
         clipY = panel.getHeight() / 2;
         if (aByteArray434 == null) {
             aByteArray434 = new byte[17691];
         }
     }
-    
+
     private void polygonsQSort(Polygon[] polygons, int low, int high) {
         if (low < high) {
             int min = low - 1;
@@ -187,16 +184,16 @@ public class SceneRenderer {
         int clipXModified = clipX * clipFar3d >> viewDistance;
         int clipYModified = clipY * clipFar3d >> viewDistance;
         camera.prepareForRendering(clipX, clipY, clipFar3d, clipXModified, clipYModified);
-        models[modelCount] = view;
-        view.transformState = 2;
-        for (int i = 0; i < modelCount; i++) {
-            models[i].project(camera, viewDistance, clipNear);
+        scene.getModels()[scene.getNumModels()] = scene.getView();
+        scene.getView().transformState = 2;
+        for (int i = 0; i < scene.getNumModels(); i++) {
+            scene.getModels()[i].project(camera, viewDistance, clipNear);
         }
-        models[modelCount].project(camera, viewDistance,
+        scene.getModels()[scene.getNumModels()].project(camera, viewDistance,
                 clipNear);
         visiblePolygonCount = 0;
-        for (int i = 0; i < modelCount; i++) {
-            GameModel gameModel = models[i];
+        for (int i = 0; i < scene.getNumModels(); i++) {
+            GameModel gameModel = scene.getModels()[i];
             if (gameModel.visible) {
                 for (int face = 0; face < gameModel.numFaces; face++) {
                     int numVertices = gameModel.faceNumVertices[face];
@@ -270,7 +267,7 @@ public class SceneRenderer {
             }
         }
 
-        GameModel model2d = view;
+        GameModel model2d = scene.getView();
         if (model2d.visible) {
             for (int face = 0; face < model2d.numFaces; face++) {
                 int faceVertices[] = model2d.faceVertices[face];
@@ -279,8 +276,9 @@ public class SceneRenderer {
                 int vy = model2d.vertexViewY[vertex0];
                 int vz = model2d.projectVertexZ[vertex0];
                 if (vz > clipNear && vz < clipFar2d) {
-                    int vw = (spriteWidth[face] << viewDistance) / vz;
-                    int vh = (spriteHeight[face] << viewDistance) / vz;
+                    SpriteEntity spriteEntity = scene.getSpriteEntities()[face];
+                    int vw = (spriteEntity.getWidth() << viewDistance) / vz;
+                    int vh = (spriteEntity.getHeight() << viewDistance) / vz;
                     if (vx - vw / 2 <= clipX && vx + vw / 2 >= -clipX && vy - vh <= clipY && vy >= -clipY) {
                         Polygon polygon2 = visiblePolygons[visiblePolygonCount];
                         polygon2.gameModel = model2d;
@@ -298,21 +296,22 @@ public class SceneRenderer {
         }
         polygonsQSort(visiblePolygons, 0, visiblePolygonCount - 1);
         polygonsIntersectSort(100, visiblePolygons, visiblePolygonCount);
-        for (int model = 0; model < visiblePolygonCount; model++) {
-            Polygon polygon = visiblePolygons[model];
+        for (int polygonIndex = 0; polygonIndex < visiblePolygonCount; polygonIndex++) {
+            Polygon polygon = visiblePolygons[polygonIndex];
             GameModel polygonModel = polygon.gameModel;
             int polyFace = polygon.face;
-            if (polygonModel == view) {
+            if (polygonModel == scene.getView()) {
+                SpriteEntity spriteEntity = scene.getSpriteEntities()[polyFace];
                 int faceverts[] = polygonModel.faceVertices[polyFace];
                 int face0 = faceverts[0];
                 int vx = polygonModel.vertexViewX[face0];
                 int vy = polygonModel.vertexViewY[face0];
                 int vz = polygonModel.projectVertexZ[face0];
-                int w = (spriteWidth[polyFace] << viewDistance) / vz;
-                int h = (spriteHeight[polyFace] << viewDistance) / vz;
+                int w = (spriteEntity.getWidth() << viewDistance) / vz;
+                int h = (spriteEntity.getHeight() << viewDistance) / vz;
                 int x = vx - w / 2;
                 int y = (baseY + vy) - h;
-                gamePanel.spriteClip1(x + baseX, y, w, h, spriteId[polyFace]);
+                gamePanel.spriteClip1(x + baseX, y, w, h, spriteEntity.getId());
             } else {
                 int plane = 0;
                 int light = 0;
@@ -395,7 +394,7 @@ public class SceneRenderer {
                         vertexShade[face] = 255;
                     }
                     if (polygon.faceFill >= 0) {
-                        if (textureDimension[polygon.faceFill] == 1) {
+                        if (Resources.textureDimension[polygon.faceFill] == 1) {
                             vertexShade[face] <<= 9;
                         } else {
                             vertexShade[face] <<= 6;
@@ -921,10 +920,10 @@ public class SceneRenderer {
             return;
         }
         if (l >= 0) {
-            if (l >= textureCount) {
+            if (l >= Resources.textureCount) {
                 l = 0;
             }
-            prepareTexture(l);
+            Resources.prepareTexture(l);
             int i1 = ai[0];
             int k1 = ai1[0];
             int j2 = ai2[0];
@@ -935,7 +934,7 @@ public class SceneRenderer {
             int i6 = ai[k] - i1;
             int j7 = ai1[k] - k1;
             int k8 = ai2[k] - j2;
-            if (textureDimension[l] == 1) {
+            if (Resources.textureDimension[l] == 1) {
                 int l9 = i6 * k1 - j7 * i1 << 12;
                 int k10 = j7 * j2 - k8 * k1 << (5 - viewDistance) + 7 + 4;
                 int i11 = k8 * i1 - i6 * j2 << (5 - viewDistance) + 7;
@@ -978,7 +977,7 @@ public class SceneRenderer {
                                 int l17 = clipX;
                                 k20 = l17 - j;
                             }
-                            gamePanel.textureTranslucentScanline(texturePixels[l], 0, 0, l9 + k14 * j, k11 + i15 * j,
+                            gamePanel.textureTranslucentScanline(Resources.texturePixels[l], 0, 0, l9 + k14 * j, k11 + i15 * j,
                                     i13 + k15 * j, k10, i12, k13, k20, i17 + j, i22, k23 << 2);
                             l9 += i11;
                             k11 += k12;
@@ -989,7 +988,7 @@ public class SceneRenderer {
 
                     return;
                 }
-                if (!textureBackTransparent[l]) {
+                if (!Resources.textureBackTransparent[l]) {
                     for (i = minY; i < maxY; i += byte1) {
                         Scanline scanline = scanlines[i];
                         j = scanline.startX >> 8;
@@ -1012,7 +1011,7 @@ public class SceneRenderer {
                                 int j18 = clipX;
                                 l20 = j18 - j;
                             }
-                            gamePanel.textureScanline(texturePixels[l], 0, 0, l9 + k14 * j, k11 + i15 * j,
+                            gamePanel.textureScanline(Resources.texturePixels[l], 0, 0, l9 + k14 * j, k11 + i15 * j,
                                     i13 + k15 * j, k10, i12, k13, l20, i17 + j, j22, l23 << 2);
                             l9 += i11;
                             k11 += k12;
@@ -1045,7 +1044,7 @@ public class SceneRenderer {
                             int l18 = clipX;
                             i21 = l18 - j;
                         }
-                        gamePanel.textureBackTranslucentScanline(0, 0, 0, texturePixels[l], l9 + k14 * j,
+                        gamePanel.textureBackTranslucentScanline(0, 0, 0, Resources.texturePixels[l], l9 + k14 * j,
                                 k11 + i15 * j, i13 + k15 * j, k10, i12, k13, i21, i17 + j, k22, i24);
                         l9 += i11;
                         k11 += k12;
@@ -1098,7 +1097,7 @@ public class SceneRenderer {
                             int j19 = clipX;
                             j21 = j19 - j;
                         }
-                        gamePanel.textureTranslucentScanline2(texturePixels[l], 0, 0, i10 + l14 * j, l11 + j15 * j,
+                        gamePanel.textureTranslucentScanline2(Resources.texturePixels[l], 0, 0, i10 + l14 * j, l11 + j15 * j,
                                 j13 + l15 * j, l10, j12, l13, j21, j17 + j, l22, j24);
                         i10 += j11;
                         l11 += l12;
@@ -1109,7 +1108,7 @@ public class SceneRenderer {
 
                 return;
             }
-            if (!textureBackTransparent[l]) {
+            if (!Resources.textureBackTransparent[l]) {
                 for (i = minY; i < maxY; i += byte2) {
                     Scanline scanline = scanlines[i];
                     j = scanline.startX >> 8;
@@ -1132,7 +1131,7 @@ public class SceneRenderer {
                             int l19 = clipX;
                             k21 = l19 - j;
                         }
-                        gamePanel.textureScanline2(texturePixels[l], 0, 0, i10 + l14 * j, l11 + j15 * j,
+                        gamePanel.textureScanline2(Resources.texturePixels[l], 0, 0, i10 + l14 * j, l11 + j15 * j,
                                 j13 + l15 * j, l10, j12, l13, k21, j17 + j, i23, k24);
                         i10 += j11;
                         l11 += l12;
@@ -1165,7 +1164,7 @@ public class SceneRenderer {
                         int j20 = clipX;
                         l21 = j20 - j;
                     }
-                    gamePanel.textureBackTranslucentScanline2(0, 0, 0, texturePixels[l], i10 + l14 * j,
+                    gamePanel.textureBackTranslucentScanline2(0, 0, 0, Resources.texturePixels[l], i10 + l14 * j,
                             l11 + j15 * j, j13 + l15 * j, l10, j12, l13, l21, j17 + j, j23, l24);
                     i10 += j11;
                     l11 += l12;
@@ -1278,44 +1277,6 @@ public class SceneRenderer {
                 }
                 gamePanel.gradientScanline2(-i7, l2 + j, 0, anIntArray377, j8, k9);
                 l2 += i2;
-            }
-        }
-
-    }
-
-    private static void gradientScanline(int ai[], int i, int j, int k, int ai1[], int l, int i1) {
-        if (i >= 0) {
-            return;
-        }
-        i1 <<= 1;
-        k = ai1[l >> 8 & 0xff];
-        l += i1;
-        int j1 = i / 8;
-        for (int k1 = j1; k1 < 0; k1++) {
-            ai[j++] = k;
-            ai[j++] = k;
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            ai[j++] = k;
-            ai[j++] = k;
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            ai[j++] = k;
-            ai[j++] = k;
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            ai[j++] = k;
-            ai[j++] = k;
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-        }
-
-        j1 = -(i % 8);
-        for (int l1 = 0; l1 < j1; l1++) {
-            ai[j++] = k;
-            if ((l1 & 1) == 1) {
-                k = ai1[l >> 8 & 0xff];
-                l += i1;
             }
         }
 
@@ -1625,145 +1586,13 @@ public class SceneRenderer {
         return !flag;
     }
 
-    public void initialiseArrays(int textureCount, int numTextureColours64, int numTextureColours128) {
-        this.textureCount = textureCount;
-        textureColoursUsed = new byte[textureCount][];
-        textureColourList = new int[textureCount][];
-        textureDimension = new int[textureCount];
-        textureLoadedNumber = new long[textureCount];
-        textureBackTransparent = new boolean[textureCount];
-        texturePixels = new int[textureCount][];
-        texturesLoaded = 0L;
-        textureColours64 = new int[numTextureColours64][]; // 64x64 rgba
-        textureColours128 = new int[numTextureColours128][]; // 128x128 rgba
-    }
-
-    public void defineTexture(int id, byte[] usedColours, int[] colours, int wide128) {
-        textureColoursUsed[id] = usedColours;
-        textureColourList[id] = colours;
-        textureDimension[id] = wide128; // is 1 if the texture is 128+ pixels wide, 0 if <128
-        textureLoadedNumber[id] = 0L;
-        textureBackTransparent[id] = false;
-        texturePixels[id] = null;
-        prepareTexture(id);
-    }
-
-    public void prepareTexture(int i) {
-        if (i < 0) {
-            return;
-        }
-        textureLoadedNumber[i] = texturesLoaded++;
-        if (texturePixels[i] != null) {
-            return;
-        }
-        if (textureDimension[i] == 0) {
-            for (int j = 0; j < textureColours64.length; j++) {
-                if (textureColours64[j] == null) {
-                    textureColours64[j] = new int[16384];
-                    texturePixels[i] = textureColours64[j];
-                    setTexturePixels(i);
-                    return;
-                }
-            }
-
-            long l = 1L << 30;
-            int i1 = 0;
-            for (int k1 = 0; k1 < textureCount; k1++) {
-                if (k1 != i && textureDimension[k1] == 0 && texturePixels[k1] != null && textureLoadedNumber[k1] < l) {
-                    l = textureLoadedNumber[k1];
-                    i1 = k1;
-                }
-            }
-
-            texturePixels[i] = texturePixels[i1];
-            texturePixels[i1] = null;
-            setTexturePixels(i);
-            return;
-        }
-        for (int k = 0; k < textureColours128.length; k++) {
-            if (textureColours128[k] == null) {
-                textureColours128[k] = new int[0x10000];
-                texturePixels[i] = textureColours128[k];
-                setTexturePixels(i);
-                return;
-            }
-        }
-
-        long l1 = 1L << 30;
-        int j1 = 0;
-        for (int i2 = 0; i2 < textureCount; i2++) {
-            if (i2 != i && textureDimension[i2] == 1 && texturePixels[i2] != null && textureLoadedNumber[i2] < l1) {
-                l1 = textureLoadedNumber[i2];
-                j1 = i2;
-            }
-        }
-
-        texturePixels[i] = texturePixels[j1];
-        texturePixels[j1] = null;
-        setTexturePixels(i);
-    }
-
-    private void setTexturePixels(int i) {
-        int textureWidth = textureDimension[i] == 0 ? 64 : 128;
-        int colours[] = texturePixels[i];
-        int colourCount = 0;
-        for (int k = 0; k < textureWidth; k++) {
-            for (int l = 0; l < textureWidth; l++) {
-                int index = textureColoursUsed[i][l + k * textureWidth] & 0xff;
-                int j1 = textureColourList[i][index];
-                j1 &= 0xf8f8ff;
-                if (j1 == 0) {
-                    j1 = 1;
-                } else if (j1 == 0xf800ff) {
-                    j1 = 0;
-                    textureBackTransparent[i] = true;
-                }
-                colours[colourCount++] = j1;
-            }
-
-        }
-
-        for (int i1 = 0; i1 < colourCount; i1++) {
-            int colour = colours[i1];
-            colours[colourCount + i1] = colour - (colour >>> 3) & 0xf8f8ff;
-            colours[colourCount * 2 + i1] = colour - (colour >>> 2) & 0xf8f8ff;
-            colours[colourCount * 3 + i1] = colour - (colour >>> 2) - (colour >>> 3) & 0xf8f8ff;
-        }
-
-    }
-
-    public void doSomethingWithFountain(int i) {
-        if (texturePixels[i] == null) {
-            return;
-        }
-        int colours[] = texturePixels[i];
-        for (int j = 0; j < 64; j++) {
-            int k = j + 4032;
-            int l = colours[k];
-            for (int j1 = 0; j1 < 63; j1++) {
-                colours[k] = colours[k - 64];
-                k -= 64;
-            }
-
-            texturePixels[i][k] = l;
-        }
-        char c = 4096;
-        for (int i1 = 0; i1 < c; i1++) {
-            int k1 = colours[i1];
-            colours[c + i1] = k1 - (k1 >>> 3) & 0xf8f8ff;
-            colours[c * 2 + i1] = k1 - (k1 >>> 2) & 0xf8f8ff;
-            colours[c * 3 + i1] = k1 - (k1 >>> 2) - (k1 >>> 3) & 0xf8f8ff;
-        }
-
-    }
-
     public int method302(int i) {
         if (i == World.COLOUR_TRANSPARENT) {
             return 0;
         }
-        prepareTexture(i);
+        Resources.prepareTexture(i);
         if (i >= 0) {
-            return texturePixels[i][0];
+            return Resources.texturePixels[i][0];
         }
         if (i < 0) {
             i = -(i + 1);
@@ -1774,26 +1603,6 @@ public class SceneRenderer {
         } else {
             return 0;
         }
-    }
-
-    public void setLight(int distX, int distY, int distZ) {
-        if (distX == 0 && distY == 0 && distZ == 0) {
-            distX = 32;
-        }
-        for (int l = 0; l < modelCount; l++) {
-            models[l].setLight(distX, distY, distZ);
-        }
-
-    }
-
-    public void setLight(int i, int j, int distX, int distY, int distZ) {
-        if (distX == 0 && distY == 0 && distZ == 0) {
-            distX = 32;
-        }
-        for (int j1 = 0; j1 < modelCount; j1++) {
-            models[j1].setLight(i, j, distX, distY, distZ);
-        }
-
     }
 
     public static int rgbToInt(int r, int g, int b) {
@@ -2143,5 +1952,5 @@ public class SceneRenderer {
             scanlines[k1] = new Scanline();
         }
     }
-
+    
 }

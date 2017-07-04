@@ -1,62 +1,47 @@
 package client.scene;
 
+/**
+ * A collection of models and sprites along with lighting settings, ready for
+ * rendering.
+ * 
+ * @author Dan Bryce
+ */
 public class Scene {
 
-    public static final int MIN_HEIGHT = 300;
-    public static final int MAX_HEIGHT = 1500;
-    public static final int ZOOM_INCREMENT = 25;
-    public static final int DEFAULT_HEIGHT = 550;
+    private static final int MAX_MODELS = 15000;
+    private static final int MAX_SPRITES = 1000;
 
-    private int modelCount;
-    private int maxModels;
-    private GameModel models[];
-    private int modelState[];
-    private Polygon visiblePolygons[];
-    private int spriteCount;
-    private int spriteId[];
-    private int spriteX[];
-    private int spriteZ[];
-    private int spriteY[];
-    private int spriteWidth[];
-    private int spriteHeight[];
-    private int spriteTranslateX[];
     private GameModel view;
+    private Camera camera;
+    private int numModels;
+    private GameModel models[] = new GameModel[MAX_MODELS];
+    private int numSprites;
+    private SpriteEntity spriteEntities[] = new SpriteEntity[MAX_SPRITES];
     
-    public Scene(int modelLimit, int polygonLimit, int spriteLimit) {
-        maxModels = modelLimit;
-        models = new GameModel[maxModels];
-        modelState = new int[maxModels]; // Only set, not used
-        visiblePolygons = new Polygon[polygonLimit];
-        for (int l = 0; l < polygonLimit; l++) {
-            visiblePolygons[l] = new Polygon();
+    public Scene() {
+        for (int l = 0; l < spriteEntities.length; l++) {
+            spriteEntities[l] = new SpriteEntity();
         }
-        view = new GameModel(spriteLimit * 2, spriteLimit);
-        spriteId = new int[spriteLimit];
-        spriteWidth = new int[spriteLimit];
-        spriteHeight = new int[spriteLimit];
-        spriteX = new int[spriteLimit];
-        spriteY = new int[spriteLimit];
-        spriteZ = new int[spriteLimit];
-        spriteTranslateX = new int[spriteLimit];
+        view = new GameModel(MAX_SPRITES * 2, MAX_SPRITES);
+        camera = new Camera();
     }
 
     public void addModel(GameModel gameModel) {
         if (gameModel == null) {
             System.out.println("Warning tried to add null object!");
         }
-        if (modelCount < maxModels) {
-            modelState[modelCount] = 0;
-            models[modelCount++] = gameModel;
+        if (numModels < MAX_MODELS) {
+            models[numModels] = gameModel;
+            numModels++;
         }
     }
 
     public void removeModel(GameModel gameModel) {
-        for (int i = 0; i < modelCount; i++) {
+        for (int i = 0; i < numModels; i++) {
             if (models[i] == gameModel) {
-                modelCount--;
-                for (int j = i; j < modelCount; j++) {
+                numModels--;
+                for (int j = i; j < numModels; j++) {
                     models[j] = models[j + 1];
-                    modelState[j] = modelState[j + 1];
                 }
 
             }
@@ -65,48 +50,80 @@ public class Scene {
 
     public void dispose() {
         clear();
-        for (int i = 0; i < modelCount; i++) {
+        for (int i = 0; i < numModels; i++) {
             models[i] = null;
         }
-        modelCount = 0;
+        numModels = 0;
     }
 
     public void clear() {
-        spriteCount = 0;
+        numSprites = 0;
         view.clear();
     }
 
     public void reduceSprites(int i) {
-        spriteCount -= i;
+        numSprites -= i;
         view.reduceCounters(i, i * 2);
-        if (spriteCount < 0) {
-            spriteCount = 0;
+        if (numSprites < 0) {
+            numSprites = 0;
         }
     }
 
-    public int addSprite(int i, int x, int z, int y, int width, int height, int tag) {
-        spriteId[spriteCount] = i;
-        spriteX[spriteCount] = x;
-        spriteZ[spriteCount] = z;
-        spriteY[spriteCount] = y;
-        spriteWidth[spriteCount] = width;
-        spriteHeight[spriteCount] = height;
-        spriteTranslateX[spriteCount] = 0;
-        int l1 = view.createVertex(x, z, y);
-        int i2 = view.createVertex(x, z - height, y);
-        int ai[] = { l1, i2 };
-        view.createFace(2, ai, 0, 0);
-        view.faceTag[spriteCount] = tag;
-        view.isLocalPlayer[spriteCount++] = 0;
-        return spriteCount - 1;
+    public int addSpriteEntity(SpriteEntity spriteEntity, int tag) {
+        spriteEntities[numSprites] = spriteEntity;
+        int v1 = view.createVertex(
+                spriteEntity.getX(),
+                spriteEntity.getY(),
+                spriteEntity.getZ());
+        int v2 = view.createVertex(
+                spriteEntity.getX(),
+                spriteEntity.getZ() - spriteEntity.getHeight(),
+                spriteEntity.getY());
+        int vertices[] = { v1, v2 };
+        view.createFace(2, vertices, 0, 0);
+        view.faceTag[numSprites] = tag;
+        numSprites++;
+        return numSprites - 1;
     }
 
-    public void setLocalPlayer(int i) {
-        view.isLocalPlayer[i] = 1;
+    public void setLight(int distX, int distY, int distZ) {
+        if (distX == 0 && distY == 0 && distZ == 0) {
+            distX = 32;
+        }
+        for (int l = 0; l < numModels; l++) {
+            models[l].setLight(distX, distY, distZ);
+        }
+
     }
 
-    public void setSpriteTranslateX(int i, int val) {
-        spriteTranslateX[i] = val;
+    public void setLight(int i, int j, int distX, int distY, int distZ) {
+        if (distX == 0 && distY == 0 && distZ == 0) {
+            distX = 32;
+        }
+        for (int j1 = 0; j1 < numModels; j1++) {
+            models[j1].setLight(i, j, distX, distY, distZ);
+        }
+
+    }
+
+    public GameModel getView() {
+        return view;
+    }
+    
+    public Camera getCamera() {
+        return camera;
+    }
+    
+    public int getNumModels() {
+        return numModels;
+    }
+    
+    public GameModel[] getModels() {
+        return models;
+    }
+    
+    public SpriteEntity[] getSpriteEntities() {
+        return spriteEntities;
     }
 
 }

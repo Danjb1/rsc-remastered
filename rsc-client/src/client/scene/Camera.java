@@ -29,7 +29,7 @@ public class Camera {
     private int frustumMaxY;
     private int frustumFarZ;
     private int frustumNearZ;
-
+    
     public void prepareForRendering(int clipX, int clipY, int clipFar3d, int clipXModified, int clipYModified) {
         frustumMaxX = 0;
         frustumMinX = 0;

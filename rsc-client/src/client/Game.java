@@ -10,6 +10,8 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JFrame;
 
+import client.render.SceneRenderer;
+import client.scene.Scene;
 import client.scene.Sprite;
 
 public class Game implements KeyListener, MouseListener, MouseMotionListener {
@@ -23,8 +25,13 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
 
     private GamePanel gamePanel;
     private JFrame frame;
+    private Sprite[] sprites;
+    
+    private Scene scene;
 
-    public Sprite[] sprites;
+    private World world;
+    private int regionX, regionY;
+    private int mapBoundaryX1, mapBoundaryX2, mapBoundaryY1, mapBoundaryY2;
 
     /**
      * Flag used to tell the game to exit.
@@ -35,10 +42,8 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
     private boolean exiting;
 
     private LoadingScreen loadingScreen;
-
     private LoginScreen loginScreen;
-
-    private int experienceArray[] = new int[99];
+    private SceneRenderer sceneRenderer;
 
     public static void main(String[] args) {
         Game game = new Game();
@@ -236,17 +241,50 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
         return loginScreen;
     }
 
-    public Sprite getSprite(int id) {
-        return sprites[id];
-    }
-
     public void finishedLoading() {
-        sprites = loadingScreen.getSprites();
         loadingScreen = null;
         loginScreen = new LoginScreen();
         
-        // For now, just pretend we've logged in straightaway
+        // For now, just pretend we've logged in straight away
+        login();
+    }
+    
+    private void login() {
         loginScreen = null;
+        scene = new Scene();
+        scene.setLight(-50, -10, -50);
+        sceneRenderer = new SceneRenderer(gamePanel, scene);
+        world = new World(scene, sceneRenderer, gamePanel);
+        loadNextRegion(0, 0);
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+    
+    public SceneRenderer getSceneRenderer() {
+        return sceneRenderer;
+    }
+
+    private void loadNextRegion(int x, int y) {
+
+        // Eventually these values should come from the server
+        int planeWidth = 2304;
+        int planeHeight = 1776;
+        
+        x += planeWidth;
+        y += planeHeight;
+        int i1 = (x + 24) / 48;
+        int j1 = (y + 24) / 48;
+        regionX = i1 * 48 - 48;
+        regionY = j1 * 48 - 48;
+        mapBoundaryX1 = i1 * 48 - 32;
+        mapBoundaryY1 = j1 * 48 - 32;
+        mapBoundaryX2 = i1 * 48 + 32;
+        mapBoundaryY2 = j1 * 48 + 32;
+        world.loadRegion(x, y);
+        regionX -= planeWidth;
+        regionY -= planeHeight;
     }
 
 }

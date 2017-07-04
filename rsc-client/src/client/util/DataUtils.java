@@ -42,4 +42,8 @@ public class DataUtils {
         return new BufferedInputStream(new FileInputStream(path));
     }
 
+    public static int rgbToInt(int r, int g, int b) {
+        return -1 - (r / 8) * 1024 - (g / 8) * 32 - (b / 8);
+    }
+
 }
