@@ -25,13 +25,10 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
 
     private GamePanel gamePanel;
     private JFrame frame;
-    private Sprite[] sprites;
     
     private Scene scene;
 
     private World world;
-    private int regionX, regionY;
-    private int mapBoundaryX1, mapBoundaryX2, mapBoundaryY1, mapBoundaryY2;
 
     /**
      * Flag used to tell the game to exit.
@@ -152,7 +149,6 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
 
     private void tick() {
         // TODO Auto-generated method stub
-
     }
 
     private void loadGame() {
@@ -274,17 +270,7 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
         
         x += planeWidth;
         y += planeHeight;
-        int i1 = (x + 24) / 48;
-        int j1 = (y + 24) / 48;
-        regionX = i1 * 48 - 48;
-        regionY = j1 * 48 - 48;
-        mapBoundaryX1 = i1 * 48 - 32;
-        mapBoundaryY1 = j1 * 48 - 32;
-        mapBoundaryX2 = i1 * 48 + 32;
-        mapBoundaryY2 = j1 * 48 + 32;
         world.loadRegion(x, y);
-        regionX -= planeWidth;
-        regionY -= planeHeight;
     }
 
 }

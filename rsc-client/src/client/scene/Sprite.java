@@ -22,8 +22,8 @@ public class Sprite {
     private int drawOffsetX = 0;
     private int drawOffsetY = 0;
 
-    private int something1 = 0;
-    private int something2 = 0;
+    private int textureWidthMaybe;
+    private int textureHeightMaybe;
 
     public Sprite() {
         pixels = new int[0];
@@ -37,17 +37,17 @@ public class Sprite {
         this.height = height;
     }
 
-    public void setSomething(int something1, int something2) {
-        this.something1 = something1;
-        this.something2 = something2;
+    public void setTextureDimensions(int textureWidthMaybe, int textureHeightMaybe) {
+        this.textureWidthMaybe = textureWidthMaybe;
+        this.textureHeightMaybe = textureHeightMaybe;
     }
 
-    public int getSomething1() {
-        return something1;
+    public int getTextureWidth() {
+        return textureWidthMaybe;
     }
 
-    public int getSomething2() {
-        return something2;
+    public int getTextureHeight() {
+        return textureHeightMaybe;
     }
 
     public void setName(int id, String packageName) {
@@ -162,8 +162,8 @@ public class Sprite {
         out.putInt(drawOffsetX);
         out.putInt(drawOffsetY);
 
-        out.putInt(something1);
-        out.putInt(something2);
+        out.putInt(textureWidthMaybe);
+        out.putInt(textureHeightMaybe);
 
         for (int c = 0; c < pixels.length; c++) {
             out.putInt(pixels[c]);
@@ -192,8 +192,8 @@ public class Sprite {
         int xShift = in.getInt();
         int yShift = in.getInt();
 
-        int something1 = in.getInt();
-        int something2 = in.getInt();
+        int textureWidth = in.getInt();
+        int textureHeight = in.getInt();
 
         int[] pixels = new int[width * height];
         if (in.remaining() < (pixels.length * 4)) {
@@ -206,7 +206,7 @@ public class Sprite {
         Sprite sprite = new Sprite(pixels, width, height);
         sprite.setHasDrawOffset(requiresShift);
         sprite.setDrawOffset(xShift, yShift);
-        sprite.setSomething(something1, something2);
+        sprite.setTextureDimensions(textureWidth, textureHeight);
 
         return sprite;
     }

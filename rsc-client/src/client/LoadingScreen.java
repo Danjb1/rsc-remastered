@@ -273,7 +273,7 @@ public class LoadingScreen {
                 }
                 indices[l1] = (byte) l2;
             }
-            Resources.defineTexture(i, indices, dictionary, sprite.getSomething1() / 64 - 1);
+            Resources.defineTexture(i, indices, dictionary, sprite.getTextureWidth() / 64 - 1);
         }
     }
 

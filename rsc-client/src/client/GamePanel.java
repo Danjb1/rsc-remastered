@@ -180,8 +180,8 @@ public class GamePanel extends JPanel {
         int j2 = (j1 << 16) / width;
         int k2 = (k1 << 16) / height;
         if (sprite.hasDrawOffset()) {
-            int l2 = sprite.getSomething1();
-            int j3 = sprite.getSomething2();
+            int l2 = sprite.getTextureWidth();
+            int j3 = sprite.getTextureHeight();
             j2 = (l2 << 16) / width;
             k2 = (j3 << 16) / height;
             x += ((sprite.getDrawOffsetX() * width + l2) - 1) / l2;
@@ -221,19 +221,19 @@ public class GamePanel extends JPanel {
             k3 += j4;
         }
         byte byte0 = 1;
-        plotSale1(pixels, sprite.getPixels(), 0, l1, i2, i3, k3, width, height, j2, k2, j1, byte0);
+        plotSale1(sprite.getPixels(), 0, l1, i2, i3, k3, width, height, j2, k2, j1, byte0);
     }
 
-    private void plotSale1(int ai[], int ai1[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2,
+    private void plotSale1(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2,
         int j2, int k2) {
         
         int l2 = j;
         for (int i3 = -k1; i3 < 0; i3 += k2) {
             int j3 = (k >> 16) * j2;
             for (int k3 = -j1; k3 < 0; k3++) {
-                i = ai1[(j >> 16) + j3];
+                i = texturePixels[(j >> 16) + j3];
                 if (i != 0) {
-                    ai[l++] = i;
+                    pixels[l++] = i;
                 } else {
                     l++;
                 }
@@ -248,7 +248,7 @@ public class GamePanel extends JPanel {
         return;
     }
 
-    public void textureScanline(int ai1[], int i, int j, int k, int l, int i1, int j1, int k1, int l1,
+    public void textureScanline(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1, int l1,
             int i2, int j2, int k2, int l2) {
         
         if (i2 <= 0) {
@@ -284,61 +284,61 @@ public class GamePanel extends JPanel {
             i += k2 & 0x600000;
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
-            i += k3;
-            j += l3;
-            i = (i & 0x3fff) + (k2 & 0x600000);
-            i4 = k2 >> 23;
-            k2 += l2;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
-            i += k3;
-            j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
-            i += k3;
-            j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
-            i += k3;
-            j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            i += k3;
+            j += l3;
+            i = (i & 0x3fff) + (k2 & 0x600000);
+            i4 = k2 >> 23;
+            k2 += l2;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            i += k3;
+            j += l3;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            i += k3;
+            j += l3;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            i += k3;
+            j += l3;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i = i3;
             j = j3;
             k += j1;
@@ -363,13 +363,13 @@ public class GamePanel extends JPanel {
                 i4 = k2 >> 23;
                 k2 += l2;
             }
-            pixels[j2++] = ai1[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
             i += k3;
             j += l3;
         }
     }
 
-    public void textureTranslucentScanline(int ai1[], int i, int j, int k, int l, int i1, int j1,
+    public void textureTranslucentScanline(int texturePixels[], int i, int j, int k, int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2) {
 
         if (i2 <= 0) {
@@ -405,61 +405,61 @@ public class GamePanel extends JPanel {
             i += k2 & 0x600000;
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
-            i += k3;
-            j += l3;
-            i = (i & 0x3fff) + (k2 & 0x600000);
-            i4 = k2 >> 23;
-            k2 += l2;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
-            i += k3;
-            j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
-            i += k3;
-            j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
-            i += k3;
-            j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            i += k3;
+            j += l3;
+            i = (i & 0x3fff) + (k2 & 0x600000);
+            i4 = k2 >> 23;
+            k2 += l2;
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            i += k3;
+            j += l3;
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            i += k3;
+            j += l3;
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            i += k3;
+            j += l3;
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i = i3;
             j = j3;
             k += j1;
@@ -484,14 +484,14 @@ public class GamePanel extends JPanel {
                 i4 = k2 >> 23;
                 k2 += l2;
             }
-            pixels[j2++] = (ai1[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
         }
 
     }
 
-    public void textureBackTranslucentScanline(int i, int j, int k, int ai1[], int l, int i1, int j1,
+    public void textureBackTranslucentScanline(int i, int j, int k, int texturePixels[], int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2, int i3) {
 
         if (j2 <= 0) {
@@ -531,7 +531,7 @@ public class GamePanel extends JPanel {
             l2 += i3;
             if (j4 < 16) {
                 for (int l4 = 0; l4 < j4; l4++) {
-                    if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                    if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                         pixels[k2] = i;
                     }
                     k2++;
@@ -545,52 +545,25 @@ public class GamePanel extends JPanel {
                 }
 
             } else {
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
-                }
-                k2++;
-                j += l3;
-                k += i4;
-                j = (j & 0x3fff) + (l2 & 0x600000);
-                k4 = l2 >> 23;
-                l2 += i3;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
-                }
-                k2++;
-                j += l3;
-                k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
-                }
-                k2++;
-                j += l3;
-                k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
-                }
-                k2++;
-                j += l3;
-                k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
@@ -599,25 +572,25 @@ public class GamePanel extends JPanel {
                 j = (j & 0x3fff) + (l2 & 0x600000);
                 k4 = l2 >> 23;
                 l2 += i3;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
@@ -626,25 +599,52 @@ public class GamePanel extends JPanel {
                 j = (j & 0x3fff) + (l2 & 0x600000);
                 k4 = l2 >> 23;
                 l2 += i3;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                    pixels[k2] = i;
+                }
+                k2++;
+                j += l3;
+                k += i4;
+                j = (j & 0x3fff) + (l2 & 0x600000);
+                k4 = l2 >> 23;
+                l2 += i3;
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                    pixels[k2] = i;
+                }
+                k2++;
+                j += l3;
+                k += i4;
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                    pixels[k2] = i;
+                }
+                k2++;
+                j += l3;
+                k += i4;
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
+                    pixels[k2] = i;
+                }
+                k2++;
+                j += l3;
+                k += i4;
+                if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
@@ -653,9 +653,11 @@ public class GamePanel extends JPanel {
 
     }
 
-    public void textureScanline2(int ai1[], int i, int j, int k, int l, int i1, int j1, int k1,
+    public void textureScanline2(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1,
             int l1, int i2, int j2, int k2, int l2) {
 
+        //System.out.println(i + ", " + j + ", " + k + ", " + l + ", " + i1 + ", " + j1 + ", " + k1 + ", " + l1 + ", " + i2 + ", " + j2 + ", " + k2 + ", " + l2);
+        
         if (i2 <= 0) {
             return;
         }
@@ -693,7 +695,7 @@ public class GamePanel extends JPanel {
             k2 += l2;
             if (i4 < 16) {
                 for (int k4 = 0; k4 < i4; k4++) {
-                    pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                    pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                     i += k3;
                     j += l3;
                     if ((k4 & 3) == 3) {
@@ -704,67 +706,67 @@ public class GamePanel extends JPanel {
                 }
 
             } else {
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
-                i += k3;
-                j += l3;
-                i = (i & 0xfff) + (k2 & 0xc0000);
-                j4 = k2 >> 20;
-                k2 += l2;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
-                i += k3;
-                j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
-                i += k3;
-                j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
-                i += k3;
-                j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
                 i = (i & 0xfff) + (k2 & 0xc0000);
                 j4 = k2 >> 20;
                 k2 += l2;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
                 i = (i & 0xfff) + (k2 & 0xc0000);
                 j4 = k2 >> 20;
                 k2 += l2;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
                 i += k3;
                 j += l3;
-                pixels[j2++] = ai1[(j & 0xfc0) + (i >> 6)] >>> j4;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
+                i += k3;
+                j += l3;
+                i = (i & 0xfff) + (k2 & 0xc0000);
+                j4 = k2 >> 20;
+                k2 += l2;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
+                i += k3;
+                j += l3;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
+                i += k3;
+                j += l3;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
+                i += k3;
+                j += l3;
+                pixels[j2++] = texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4;
             }
         }
 
     }
 
-    public void textureTranslucentScanline2(int ai1[], int i, int j, int k, int l, int i1, int j1,
+    public void textureTranslucentScanline2(int texturePixels[], int i, int j, int k, int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2) {
 
         if (i2 <= 0) {
@@ -804,7 +806,7 @@ public class GamePanel extends JPanel {
             k2 += l2;
             if (i4 < 16) {
                 for (int k4 = 0; k4 < i4; k4++) {
-                    pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                    pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                     i += k3;
                     j += l3;
                     if ((k4 & 3) == 3) {
@@ -815,67 +817,67 @@ public class GamePanel extends JPanel {
                 }
 
             } else {
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
-                i += k3;
-                j += l3;
-                i = (i & 0xfff) + (k2 & 0xc0000);
-                j4 = k2 >> 20;
-                k2 += l2;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
-                i += k3;
-                j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
-                i += k3;
-                j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
-                i += k3;
-                j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
                 i = (i & 0xfff) + (k2 & 0xc0000);
                 j4 = k2 >> 20;
                 k2 += l2;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
                 i = (i & 0xfff) + (k2 & 0xc0000);
                 j4 = k2 >> 20;
                 k2 += l2;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
                 i += k3;
                 j += l3;
-                pixels[j2++] = (ai1[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                i += k3;
+                j += l3;
+                i = (i & 0xfff) + (k2 & 0xc0000);
+                j4 = k2 >> 20;
+                k2 += l2;
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                i += k3;
+                j += l3;
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                i += k3;
+                j += l3;
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
+                i += k3;
+                j += l3;
+                pixels[j2++] = (texturePixels[(j & 0xfc0) + (i >> 6)] >>> j4) + (pixels[j2] >> 1 & 0x7f7f7f);
             }
         }
 
     }
 
-    public void textureBackTranslucentScanline2(int i, int j, int k, int ai1[], int l, int i1, int j1,
+    public void textureBackTranslucentScanline2(int i, int j, int k, int texturePixels[], int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2, int i3) {
         
         if (j2 <= 0) {
@@ -915,7 +917,7 @@ public class GamePanel extends JPanel {
             l2 += i3;
             if (j4 < 16) {
                 for (int l4 = 0; l4 < j4; l4++) {
-                    if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                    if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                         pixels[k2] = i;
                     }
                     k2++;
@@ -929,52 +931,25 @@ public class GamePanel extends JPanel {
                 }
 
             } else {
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    pixels[k2] = i;
-                }
-                k2++;
-                j += l3;
-                k += i4;
-                j = (j & 0xfff) + (l2 & 0xc0000);
-                k4 = l2 >> 20;
-                l2 += i3;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    pixels[k2] = i;
-                }
-                k2++;
-                j += l3;
-                k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    pixels[k2] = i;
-                }
-                k2++;
-                j += l3;
-                k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
-                    pixels[k2] = i;
-                }
-                k2++;
-                j += l3;
-                k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
@@ -983,25 +958,25 @@ public class GamePanel extends JPanel {
                 j = (j & 0xfff) + (l2 & 0xc0000);
                 k4 = l2 >> 20;
                 l2 += i3;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
@@ -1010,25 +985,52 @@ public class GamePanel extends JPanel {
                 j = (j & 0xfff) + (l2 & 0xc0000);
                 k4 = l2 >> 20;
                 l2 += i3;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
                 j += l3;
                 k += i4;
-                if ((i = ai1[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                    pixels[k2] = i;
+                }
+                k2++;
+                j += l3;
+                k += i4;
+                j = (j & 0xfff) + (l2 & 0xc0000);
+                k4 = l2 >> 20;
+                l2 += i3;
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                    pixels[k2] = i;
+                }
+                k2++;
+                j += l3;
+                k += i4;
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                    pixels[k2] = i;
+                }
+                k2++;
+                j += l3;
+                k += i4;
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
+                    pixels[k2] = i;
+                }
+                k2++;
+                j += l3;
+                k += i4;
+                if ((i = texturePixels[(k & 0xfc0) + (j >> 6)] >>> k4) != 0) {
                     pixels[k2] = i;
                 }
                 k2++;
