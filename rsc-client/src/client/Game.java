@@ -12,7 +12,6 @@ import javax.swing.JFrame;
 
 import client.render.SceneRenderer;
 import client.scene.Scene;
-import client.scene.Sprite;
 
 public class Game implements KeyListener, MouseListener, MouseMotionListener {
 
@@ -148,7 +147,6 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
     }
 
     private void tick() {
-        // TODO Auto-generated method stub
     }
 
     private void loadGame() {
@@ -248,10 +246,9 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
     private void login() {
         loginScreen = null;
         scene = new Scene();
-        scene.setLight(-50, -10, -50);
         sceneRenderer = new SceneRenderer(gamePanel, scene);
         world = new World(scene, sceneRenderer, gamePanel);
-        loadNextRegion(0, 0);
+        world.loadRegion(50, 50);
     }
 
     public Scene getScene() {
@@ -262,15 +259,8 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
         return sceneRenderer;
     }
 
-    private void loadNextRegion(int x, int y) {
-
-        // Eventually these values should come from the server
-        int planeWidth = 2304;
-        int planeHeight = 1776;
-        
-        x += planeWidth;
-        y += planeHeight;
-        world.loadRegion(x, y);
+    public World getWorld() {
+        return world;
     }
 
 }

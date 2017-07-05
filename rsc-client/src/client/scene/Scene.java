@@ -26,6 +26,8 @@ public class Scene {
         camera = new Camera();
         
         camera.setCamera(0, 0, 0, 912, 0, 0, 2000);
+        
+        setLight(-50, -10, -50);
     }
 
     public void addModel(GameModel gameModel) {

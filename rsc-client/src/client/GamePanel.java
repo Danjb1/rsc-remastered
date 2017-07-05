@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+import client.render.GameRenderer;
 import client.render.LoadingScreenRenderer;
 import client.render.LoginScreenRenderer;
 import client.res.Resources;
@@ -58,7 +59,7 @@ public class GamePanel extends JPanel {
 
         // Draw game
         } else {
-            game.getSceneRenderer().render();
+            GameRenderer.render(this, game);
         }
         
         // Draw pixel data to the screen
@@ -1087,13 +1088,13 @@ public class GamePanel extends JPanel {
 
     }
 
-    public void gradientScanline2(int i, int j, int k, int ai1[], int l, int i1) {
+    public void gradientScanline2(int i, int j, int k, int currentGradientRamps[], int l, int i1) {
         
         if (i >= 0) {
             return;
         }
         i1 <<= 2;
-        k = ai1[l >> 8 & 0xff];
+        k = currentGradientRamps[l >> 8 & 0xff];
         l += i1;
         int j1 = i / 16;
         for (int k1 = j1; k1 < 0; k1++) {
@@ -1101,25 +1102,25 @@ public class GamePanel extends JPanel {
             pixels[j++] = k;
             pixels[j++] = k;
             pixels[j++] = k;
-            k = ai1[l >> 8 & 0xff];
+            k = currentGradientRamps[l >> 8 & 0xff];
             l += i1;
             pixels[j++] = k;
             pixels[j++] = k;
             pixels[j++] = k;
             pixels[j++] = k;
-            k = ai1[l >> 8 & 0xff];
+            k = currentGradientRamps[l >> 8 & 0xff];
             l += i1;
             pixels[j++] = k;
             pixels[j++] = k;
             pixels[j++] = k;
             pixels[j++] = k;
-            k = ai1[l >> 8 & 0xff];
+            k = currentGradientRamps[l >> 8 & 0xff];
             l += i1;
             pixels[j++] = k;
             pixels[j++] = k;
             pixels[j++] = k;
             pixels[j++] = k;
-            k = ai1[l >> 8 & 0xff];
+            k = currentGradientRamps[l >> 8 & 0xff];
             l += i1;
         }
 
@@ -1127,7 +1128,7 @@ public class GamePanel extends JPanel {
         for (int l1 = 0; l1 < j1; l1++) {
             pixels[j++] = k;
             if ((l1 & 3) == 3) {
-                k = ai1[l >> 8 & 0xff];
+                k = currentGradientRamps[l >> 8 & 0xff];
                 l += i1;
             }
         }
@@ -1151,6 +1152,10 @@ public class GamePanel extends JPanel {
             pixels[xPixel + yPixel] = colour;
         }
 
+    }
+
+    public int[] getPixels() {
+        return pixels;
     }
 
 }

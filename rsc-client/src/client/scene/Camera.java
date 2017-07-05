@@ -2,6 +2,8 @@ package client.scene;
 
 public class Camera {
 
+    public static final int DEFAULT_HEIGHT = 550;
+    
     private static int sin2048Cache[] = new int[2048];
     private static int sin512Cache[] = new int[512];
     
@@ -29,6 +31,11 @@ public class Camera {
     private int frustumMaxY;
     private int frustumFarZ;
     private int frustumNearZ;
+    
+    public Camera() {
+        setCamera(0, 0, 0, 912, 0, 0, 2000);
+//        setCamera: 8512, -408, 4160, 912, 456, 0, 1100
+    }
     
     public void prepareForRendering(int clipX, int clipY, int clipFar3d, int clipXModified, int clipYModified) {
         frustumMaxX = 0;
@@ -181,6 +188,18 @@ public class Camera {
     
     public int getYaw() {
         return yaw;
+    }
+    
+    public void setPitch(int pitch) {
+        this.pitch = pitch;
+    }
+    
+    public void setRoll(int roll) {
+        this.roll = roll;
+    }
+    
+    public void setYaw(int yaw) {
+        this.yaw = yaw;
     }
     
     public int getFrustumMinX() {

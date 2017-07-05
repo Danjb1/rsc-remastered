@@ -22,9 +22,9 @@ public class World {
 
     private Sector[] sectors;
 
-    private int[][] anIntArrayArray581;
-    private GameModel[] aModelArray596;
     private int[] groundTextureArray;
+    private GameModel[] aModelArray596;
+    private GameModel[][] aModelArrayArray580;
     private GameModel[][] aModelArrayArray598;
 
     public World(Scene scene, SceneRenderer sceneRenderer, GamePanel gamePanel) {
@@ -35,10 +35,10 @@ public class World {
         selectedX = new int[18432];
         selectedY = new int[18432];
 
-        aModelArrayArray598 = new GameModel[4][64];
-        anIntArrayArray581 = new int[96][96];
-        requiresClean = true;
         aModelArray596 = new GameModel[64];
+        aModelArrayArray580 = new GameModel[4][64];
+        aModelArrayArray598 = new GameModel[4][64];
+        requiresClean = true;
         groundTextureArray = new int[256];
         sectors = new Sector[4];
 
@@ -69,233 +69,150 @@ public class World {
         System.gc();
     }
 
-    public void loadRegion(int i, int j) {
+    public void loadRegion(int x, int y) {
         garbageCollect();
-        loadRegion(i, j, true);
+        loadRegion(x, y, 0, true);
     }
 
-    private void loadRegion(int i, int j, boolean flag) {
-        
+    public void loadRegion(int x, int y, int height, boolean flag) {
+
         // Load Sectors
-        int l = (i + 24) / 48;
-        int i1 = (j + 24) / 48;
-        sectors[0] = Resources.loadSector(l - 1, i1 - 1, 0);
-        sectors[1] = Resources.loadSector(l, i1 - 1, 0);
-        sectors[2] = Resources.loadSector(l - 1, i1, 0);
-        sectors[3] = Resources.loadSector(l, i1, 0);
+        sectors[0] = Resources.loadSector(x - 1, y - 1, 0);
+        sectors[1] = Resources.loadSector(x, y - 1, 0);
+        sectors[2] = Resources.loadSector(x - 1, y, 0);
+        sectors[3] = Resources.loadSector(x, y, 0);
         
         setGroundTexturesOverlay();
         
         if (aModel == null) {
             aModel = new GameModel(18688, 18688, true, true, false, false, true);
         }
-        
-        if (!flag) {
-            aModel.clear();
-            return;
-        }
-        
-        GameModel gameModel = aModel;
-        gameModel.clear();
-        for (int j2 = 0; j2 < 96; j2++) {
-            for (int i3 = 0; i3 < 96; i3++) {
-                int i4 = -getGroundElevation(j2, i3);
-                if (getGroundTexturesOverlay(j2, i3) > 0
-                        && Resources.getTileDef(getGroundTexturesOverlay(j2, i3) - 1).getUnknown() == 4) {
-                    i4 = 0;
-                }
-                if (getGroundTexturesOverlay(j2 - 1, i3) > 0
-                        && Resources.getTileDef(getGroundTexturesOverlay(j2 - 1, i3) - 1).getUnknown() == 4) {
-                    i4 = 0;
-                }
-                if (getGroundTexturesOverlay(j2, i3 - 1) > 0
-                        && Resources.getTileDef(getGroundTexturesOverlay(j2, i3 - 1) - 1).getUnknown() == 4) {
-                    i4 = 0;
-                }
-                if (getGroundTexturesOverlay(j2 - 1, i3 - 1) > 0 && Resources
-                        .getTileDef(getGroundTexturesOverlay(j2 - 1, i3 - 1) - 1).getUnknown() == 4) {
-                    i4 = 0;
-                }
-                int j5 = gameModel.getSomeIndex(j2 * 128, i4, i3 * 128);
-                int j7 = (int) (Math.random() * 10D) - 5;
-                gameModel.setByteAtIndexToValue(j5, j7);
-            }
-        }
-
-        for (int j3 = 0; j3 < 95; j3++) {
-            for (int j4 = 0; j4 < 95; j4++) {
-                int k5 = getGroundTexture(j3, j4);
-                int k7 = groundTextureArray[k5];
-                int i10 = k7;
-                int l14 = 0;
-                if (getGroundTexturesOverlay(j3, j4) > 0) {
-                    int l16 = getGroundTexturesOverlay(j3, j4);
-                    int l5 = Resources.getTileDef(l16 - 1).getUnknown();
-                    k7 = i10 = Resources.getTileDef(l16 - 1).getColour();
-                    if (l5 == 4) {
-                        k7 = 1;
-                        i10 = 1;
-                        if (l16 == 12) {
-                            k7 = 31;
-                            i10 = 31;
-                        }
+        if (flag) {
+            GameModel gameModel = aModel;
+            gameModel.clear();
+            for (int j2 = 0; j2 < 96; j2++) {
+                for (int i3 = 0; i3 < 96; i3++) {
+                    int i4 = -getGroundElevation(j2, i3);
+                    if (getGroundTexturesOverlay(j2, i3) > 0
+                            && Resources.getTileDef(getGroundTexturesOverlay(j2, i3) - 1).getUnknown() == 4) {
+                        i4 = 0;
                     }
-                }
-                renderTileMaybe(j3, j4, l14, k7, i10);
-                int i17 = ((getGroundElevation(j3 + 1, j4 + 1) - getGroundElevation(j3 + 1, j4))
-                        + getGroundElevation(j3, j4 + 1)) - getGroundElevation(j3, j4);
-                if (k7 != i10 || i17 != 0) {
-                    int ai[] = new int[3];
-                    int ai7[] = new int[3];
-                    if (l14 == 0) {
-                        if (k7 != 0xbc614e) {
-                            ai[0] = j4 + j3 * 96 + 96;
-                            ai[1] = j4 + j3 * 96;
-                            ai[2] = j4 + j3 * 96 + 1;
-                            int l21 = gameModel.createFace(3, ai, 0xbc614e, k7);
-                            selectedX[l21] = j3;
-                            selectedY[l21] = j4;
-                            gameModel.faceTag[l21] = 0x30d40 + l21;
-                        }
-                        if (i10 != 0xbc614e) {
-                            ai7[0] = j4 + j3 * 96 + 1;
-                            ai7[1] = j4 + j3 * 96 + 96 + 1;
-                            ai7[2] = j4 + j3 * 96 + 96;
-                            int i22 = gameModel.createFace(3, ai7, 0xbc614e, i10);
-                            selectedX[i22] = j3;
-                            selectedY[i22] = j4;
-                            gameModel.faceTag[i22] = 0x30d40 + i22;
-                        }
-                    } else {
-                        if (k7 != 0xbc614e) {
-                            ai[0] = j4 + j3 * 96 + 1;
-                            ai[1] = j4 + j3 * 96 + 96 + 1;
-                            ai[2] = j4 + j3 * 96;
-                            int j22 = gameModel.createFace(3, ai, 0xbc614e, k7);
-                            selectedX[j22] = j3;
-                            selectedY[j22] = j4;
-                            gameModel.faceTag[j22] = 0x30d40 + j22;
-                        }
-                        if (i10 != 0xbc614e) {
-                            ai7[0] = j4 + j3 * 96 + 96;
-                            ai7[1] = j4 + j3 * 96;
-                            ai7[2] = j4 + j3 * 96 + 96 + 1;
-                            int k22 = gameModel.createFace(3, ai7, 0xbc614e, i10);
-                            selectedX[k22] = j3;
-                            selectedY[k22] = j4;
-                            gameModel.faceTag[k22] = 0x30d40 + k22;
-                        }
+                    if (getGroundTexturesOverlay(j2 - 1, i3) > 0
+                            && Resources.getTileDef(getGroundTexturesOverlay(j2 - 1, i3) - 1).getUnknown() == 4) {
+                        i4 = 0;
                     }
-                } else if (k7 != 0xbc614e) {
-                    int ai1[] = new int[4];
-                    ai1[0] = j4 + j3 * 96 + 96;
-                    ai1[1] = j4 + j3 * 96;
-                    ai1[2] = j4 + j3 * 96 + 1;
-                    ai1[3] = j4 + j3 * 96 + 96 + 1;
-                    int l19 = gameModel.createFace(4, ai1, 0xbc614e, k7);
-                    selectedX[l19] = j3;
-                    selectedY[l19] = j4;
-                    gameModel.faceTag[l19] = 0x30d40 + l19;
+                    if (getGroundTexturesOverlay(j2, i3 - 1) > 0
+                            && Resources.getTileDef(getGroundTexturesOverlay(j2, i3 - 1) - 1).getUnknown() == 4) {
+                        i4 = 0;
+                    }
+                    if (getGroundTexturesOverlay(j2 - 1, i3 - 1) > 0 && Resources
+                            .getTileDef(getGroundTexturesOverlay(j2 - 1, i3 - 1) - 1).getUnknown() == 4) {
+                        i4 = 0;
+                    }
+                    int j5 = gameModel.getSomeIndex(j2 * 128, i4, i3 * 128);
+                    int j7 = (int) (Math.random() * 10D) - 5;
+                    gameModel.setByteAtIndexToValue(j5, j7);
                 }
             }
 
-        }
-
-        for (int k4 = 1; k4 < 95; k4++) {
-            for (int i6 = 1; i6 < 95; i6++) {
-                if (getGroundTexturesOverlay(k4, i6) > 0
-                        && Resources.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getUnknown() == 4) {
-                    int l7 = Resources.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getColour();
-                    int j10 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                    int l12 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                    int i15 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                            (i6 + 1) * 128);
-                    int j17 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
-                    int ai2[] = { j10, l12, i15, j17 };
-                    int i20 = gameModel.createFace(4, ai2, l7, 0xbc614e);
-                    selectedX[i20] = k4;
-                    selectedY[i20] = i6;
-                    gameModel.faceTag[i20] = 0x30d40 + i20;
-                    renderTileMaybe(k4, i6, 0, l7, l7);
-                } else if (getGroundTexturesOverlay(k4, i6) == 0
-                        || Resources.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getUnknown() != 3) {
-                    if (getGroundTexturesOverlay(k4, i6 + 1) > 0 && Resources
-                            .getTileDef(getGroundTexturesOverlay(k4, i6 + 1) - 1).getUnknown() == 4) {
-                        int i8 = Resources.getTileDef(getGroundTexturesOverlay(k4, i6 + 1) - 1).getColour();
-                        int k10 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                        int i13 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                        int j15 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                (i6 + 1) * 128);
-                        int k17 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
-                        int ai3[] = { k10, i13, j15, k17 };
-                        int j20 = gameModel.createFace(4, ai3, i8, 0xbc614e);
-                        selectedX[j20] = k4;
-                        selectedY[j20] = i6;
-                        gameModel.faceTag[j20] = 0x30d40 + j20;
-                        renderTileMaybe(k4, i6, 0, i8, i8);
+            for (int j3 = 0; j3 < 95; j3++) {
+                for (int j4 = 0; j4 < 95; j4++) {
+                    int k5 = getGroundTexture(j3, j4);
+                    int k7 = groundTextureArray[k5];
+                    int i10 = k7;
+                    int l14 = 0;
+                    if (height == 1 || height == 2) {
+                        k7 = 0xbc614e;
+                        i10 = 0xbc614e;
                     }
-                    if (getGroundTexturesOverlay(k4, i6 - 1) > 0 && Resources
-                            .getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getUnknown() == 4) {
-                        int j8 = Resources.getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getColour();
-                        int l10 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                        int j13 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                        int k15 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                (i6 + 1) * 128);
-                        int l17 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
-                        int ai4[] = { l10, j13, k15, l17 };
-                        int k20 = gameModel.createFace(4, ai4, j8, 0xbc614e);
-                        selectedX[k20] = k4;
-                        selectedY[k20] = i6;
-                        gameModel.faceTag[k20] = 0x30d40 + k20;
-                        renderTileMaybe(k4, i6, 0, j8, j8);
+                    if (getGroundTexturesOverlay(j3, j4) > 0) {
+                        int l16 = getGroundTexturesOverlay(j3, j4);
+                        int l5 = Resources.getTileDef(l16 - 1).getUnknown();
+                        k7 = i10 = Resources.getTileDef(l16 - 1).getColour();
+                        if (l5 == 4) {
+                            k7 = 1;
+                            i10 = 1;
+                            if (l16 == 12) {
+                                k7 = 31;
+                                i10 = 31;
+                            }
+                        }
                     }
-                    if (getGroundTexturesOverlay(k4 + 1, i6) > 0 && Resources
-                            .getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getUnknown() == 4) {
-                        int k8 = Resources.getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getColour();
-                        int i11 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                        int k13 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                        int l15 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                (i6 + 1) * 128);
-                        int i18 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
-                        int ai5[] = { i11, k13, l15, i18 };
-                        int l20 = gameModel.createFace(4, ai5, k8, 0xbc614e);
-                        selectedX[l20] = k4;
-                        selectedY[l20] = i6;
-                        gameModel.faceTag[l20] = 0x30d40 + l20;
-                        renderTileMaybe(k4, i6, 0, k8, k8);
-                    }
-                    if (getGroundTexturesOverlay(k4 - 1, i6) > 0 && Resources
-                            .getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getUnknown() == 4) {
-                        int l8 = Resources.getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getColour();
-                        int j11 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                        int l13 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                        int i16 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                (i6 + 1) * 128);
-                        int j18 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
-                        int ai6[] = { j11, l13, i16, j18 };
-                        int i21 = gameModel.createFace(4, ai6, l8, 0xbc614e);
-                        selectedX[i21] = k4;
-                        selectedY[i21] = i6;
-                        gameModel.faceTag[i21] = 0x30d40 + i21;
-                        renderTileMaybe(k4, i6, 0, l8, l8);
+                    renderTileMaybe(j3, j4, l14, k7, i10);
+                    int i17 = ((getGroundElevation(j3 + 1, j4 + 1) - getGroundElevation(j3 + 1, j4))
+                            + getGroundElevation(j3, j4 + 1)) - getGroundElevation(j3, j4);
+                    if (k7 != i10 || i17 != 0) {
+                        int ai[] = new int[3];
+                        int ai7[] = new int[3];
+                        if (l14 == 0) {
+                            if (k7 != 0xbc614e) {
+                                ai[0] = j4 + j3 * 96 + 96;
+                                ai[1] = j4 + j3 * 96;
+                                ai[2] = j4 + j3 * 96 + 1;
+                                int l21 = gameModel.createFace(3, ai, 0xbc614e, k7);
+                                selectedX[l21] = j3;
+                                selectedY[l21] = j4;
+                                gameModel.faceTag[l21] = 0x30d40 + l21;
+                            }
+                            if (i10 != 0xbc614e) {
+                                ai7[0] = j4 + j3 * 96 + 1;
+                                ai7[1] = j4 + j3 * 96 + 96 + 1;
+                                ai7[2] = j4 + j3 * 96 + 96;
+                                int i22 = gameModel.createFace(3, ai7, 0xbc614e, i10);
+                                selectedX[i22] = j3;
+                                selectedY[i22] = j4;
+                                gameModel.faceTag[i22] = 0x30d40 + i22;
+                            }
+                        } else {
+                            if (k7 != 0xbc614e) {
+                                ai[0] = j4 + j3 * 96 + 1;
+                                ai[1] = j4 + j3 * 96 + 96 + 1;
+                                ai[2] = j4 + j3 * 96;
+                                int j22 = gameModel.createFace(3, ai, 0xbc614e, k7);
+                                selectedX[j22] = j3;
+                                selectedY[j22] = j4;
+                                gameModel.faceTag[j22] = 0x30d40 + j22;
+                            }
+                            if (i10 != 0xbc614e) {
+                                ai7[0] = j4 + j3 * 96 + 96;
+                                ai7[1] = j4 + j3 * 96;
+                                ai7[2] = j4 + j3 * 96 + 96 + 1;
+                                int k22 = gameModel.createFace(3, ai7, 0xbc614e, i10);
+                                selectedX[k22] = j3;
+                                selectedY[k22] = j4;
+                                gameModel.faceTag[k22] = 0x30d40 + k22;
+                            }
+                        }
+                    } else if (k7 != 0xbc614e) {
+                        int ai1[] = new int[4];
+                        ai1[0] = j4 + j3 * 96 + 96;
+                        ai1[1] = j4 + j3 * 96;
+                        ai1[2] = j4 + j3 * 96 + 1;
+                        ai1[3] = j4 + j3 * 96 + 96 + 1;
+                        int l19 = gameModel.createFace(4, ai1, 0xbc614e, k7);
+                        selectedX[l19] = j3;
+                        selectedY[l19] = j4;
+                        gameModel.faceTag[l19] = 0x30d40 + l19;
                     }
                 }
+
+            }
+
+            gameModel.getDistanceToSomething(true, 40, 48, -50, -10, -50);
+            aModelArray596 = aModel.createModelArray(0, 0, 1536, 1536, 8, 64, 233, false);
+            for (int j6 = 0; j6 < 64; j6++) {
+                scene.addModel(aModelArray596[j6]);
             }
         }
 
-        gameModel.getDistanceToSomething(true, 40, 48, -50, -10, -50);
-        aModelArray596 = aModel.createModelArray(0, 0, 1536, 1536, 8, 64, 233, false);
-        for (int j6 = 0; j6 < 64; j6++) {
-            scene.addModel(aModelArray596[j6]);
-        }
-        for (int i9 = 0; i9 < 96; i9++) {
-            for (int k11 = 0; k11 < 96; k11++) {
-                anIntArrayArray581[i9][k11] = getGroundElevation(i9, k11);
-            }
-        }
         aModel.clear();
+        aModel.getDistanceToSomething(false, 60, 24, -50, -10, -50);
+        aModelArrayArray580[height] = aModel.createModelArray(0, 0, 1536, 1536, 8, 64, 338, true);
+        aModel.clear();
+        aModel.getDistanceToSomething(true, 50, 50, -50, -10, -50);
+        aModelArrayArray598[height] = aModel.createModelArray(0, 0, 1536, 1536, 8, 64, 169, true);
     }
-
+    
     public void renderTileMaybe(int i, int j, int k, int l, int i1) {
         int x1 = i * 3;
         int y1 = j * 3;
