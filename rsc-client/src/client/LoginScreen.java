@@ -2,7 +2,7 @@ package client;
 
 public class LoginScreen {
 
-    public static enum State {
+    public enum State {
         MAIN_MENU,
         NEW_USER_MENU,
         LOGIN_MENU

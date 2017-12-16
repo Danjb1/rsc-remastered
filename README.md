@@ -56,13 +56,13 @@ These are not to be confused with the RuneScape 2 versions, which follow a simil
  > **[r289](http://rsclients.wikia.com/wiki/Revision_289)** - Early version popular with private servers (January 23 2005)  
  > **[r317](http://rsclients.wikia.com/wiki/Revision_317)** - Early version popular with private servers (May 5th 2005)  
 
-Ideally, OpenRSC will include all the features from the latest RuneScape Classic client. Realistically, though, it depends on the availabiltiy of the game's data files (read on).
+Ideally, OpenRSC will include all the features from the latest RuneScape Classic client. Realistically, though, it depends on the availability of the game's data files (read on).
 
 ### Where does the game data come from?
 
 The client is useless without the game data (maps, images, sounds, etc.).
 
-Historically, the RuneScape game data was sent to the client in the form of "jag" and "mem" files. Fortunately, the [community](https://github.com/SamHammersley/JAG-Archive-Editor) [has](https://github.com/tomfitzhenry/RuneScape-classic-dump/blob/master/RSC%20Map%20Generator/RSC%20Map%20Generator/src/com/hikilaka/file/JagArchiveLoader.java) [managed](https://sites.google.com/site/commiesRuneScapedocumentation/cache/archives) to decipher these file formats, and has repackaged the necessary files into RSCD archives, which are essentially ZIP files.
+Historically, the RuneScape game data was sent to the client in the form of "jag" and "mem" files. Fortunately, the [community](https://github.com/SamHammersley/JAG-Archive-Editor) [has](https://github.com/tomfitzhenry/RuneScape-classic-dump/blob/master/RSC%20Map%20Generator/RSC%20Map%20Generator/src/com/hikilaka/file/JagArchiveLoader.java) [managed](https://sites.google.com/site/commiesRuneScapedocumentation/cache/archives) to decipher these file formats, and has repackaged the necessary files into RSCD archives, the simplest of which are essentially ZIP files.
 
 The following RSCD files are required by OpenRSC:
 
@@ -79,9 +79,7 @@ The following RSCD files are required by OpenRSC:
     Textures.rscd
     Tiles.rscd
 
-They are not included in this project, but they can easily be found [elsewhere](https://www.google.co.uk/#q=site:github.com+landscape.rscd).
-
-I believe these files contain the game data from *mudclient204*, extracted from the following cache files:
+It is my understanding that these files contain the game data from *mudclient204*, extracted from the following cache files:
 
     config85.jag
     entity24.jag

@@ -245,8 +245,6 @@ public class GamePanel extends JPanel {
             j = l2;
             l += i1;
         }
-
-        return;
     }
 
     public void textureScanline(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1, int l1,
@@ -657,8 +655,6 @@ public class GamePanel extends JPanel {
     public void textureScanline2(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1,
             int l1, int i2, int j2, int k2, int l2) {
 
-        //System.out.println(i + ", " + j + ", " + k + ", " + l + ", " + i1 + ", " + j1 + ", " + k1 + ", " + l1 + ", " + i2 + ", " + j2 + ", " + k2 + ", " + l2);
-        
         if (i2 <= 0) {
             return;
         }

@@ -1,7 +1,6 @@
 package client;
 
 import client.model.Sector;
-import client.render.SceneRenderer;
 import client.res.Resources;
 import client.scene.GameModel;
 import client.scene.Scene;
@@ -12,8 +11,6 @@ public class World {
     public static final int COLOUR_TRANSPARENT = 12345678;
 
     private Scene scene;
-    private SceneRenderer sceneRenderer;
-    private GamePanel gamePanel;
     
     private int[] selectedX;
     private int[] selectedY;
@@ -27,10 +24,8 @@ public class World {
     private GameModel[][] aModelArrayArray580;
     private GameModel[][] aModelArrayArray598;
 
-    public World(Scene scene, SceneRenderer sceneRenderer, GamePanel gamePanel) {
+    public World(Scene scene) {
         this.scene = scene;
-        this.sceneRenderer = sceneRenderer;
-        this.gamePanel = gamePanel;
 
         selectedX = new int[18432];
         selectedY = new int[18432];
@@ -138,7 +133,7 @@ public class World {
                             }
                         }
                     }
-                    renderTileMaybe(j3, j4, l14, k7, i10);
+                    
                     int i17 = ((getGroundElevation(j3 + 1, j4 + 1) - getGroundElevation(j3 + 1, j4))
                             + getGroundElevation(j3, j4 + 1)) - getGroundElevation(j3, j4);
                     if (k7 != i10 || i17 != 0) {
@@ -211,28 +206,6 @@ public class World {
         aModel.clear();
         aModel.getDistanceToSomething(true, 50, 50, -50, -10, -50);
         aModelArrayArray598[height] = aModel.createModelArray(0, 0, 1536, 1536, 8, 64, 169, true);
-    }
-    
-    public void renderTileMaybe(int i, int j, int k, int l, int i1) {
-        int x1 = i * 3;
-        int y1 = j * 3;
-        int col1 = sceneRenderer.getTextureColour(l);
-        int col2 = sceneRenderer.getTextureColour(i1);
-        col1 = col1 >> 1 & 0x7f7f7f;
-        col2 = col2 >> 1 & 0x7f7f7f;
-        if (k == 0) {
-            gamePanel.drawLineX(x1, y1, 3, col1);
-            gamePanel.drawLineX(x1, y1 + 1, 2, col1);
-            gamePanel.drawLineX(x1, y1 + 2, 1, col1);
-            gamePanel.drawLineX(x1 + 2, y1 + 1, 1, col2);
-            gamePanel.drawLineX(x1 + 1, y1 + 2, 2, col2);
-        } else if (k == 1) {
-            gamePanel.drawLineX(x1, y1, 3, col2);
-            gamePanel.drawLineX(x1 + 1, y1 + 1, 2, col2);
-            gamePanel.drawLineX(x1 + 2, y1 + 2, 1, col2);
-            gamePanel.drawLineX(x1, y1 + 1, 1, col1);
-            gamePanel.drawLineX(x1, y1 + 2, 2, col1);
-        }
     }
     
     public int getTileDef(int x, int y) {

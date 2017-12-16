@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class Sector {
+
     /**
      * The width of a sector
      */
@@ -39,7 +40,7 @@ public class Sector {
     /**
      * Sets the Tile at the given index
      */
-    public void setTile(int i, Tile t) {
+    private void setTile(int i, Tile t) {
         tiles[i] = t;
     }
 

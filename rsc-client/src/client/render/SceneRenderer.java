@@ -10,6 +10,12 @@ import client.scene.Scanline;
 import client.scene.Scene;
 import client.scene.SpriteEntity;
 
+/**
+ * Class capable of rendering a scene.
+ * 
+ * This is essentially a 3d software renderer; we could save a lot of complexity
+ * by porting to OpenGL instead.
+ */
 public class SceneRenderer {
 
     private static final int MAX_POLYGONS = 15000;
@@ -94,7 +100,7 @@ public class SceneRenderer {
         }
     }
 
-    private void polygonsQSort(Polygon[] polygons, int low, int high) {
+    private static void polygonsQSort(Polygon[] polygons, int low, int high) {
         if (low < high) {
             int min = low - 1;
             int max = high + 1;
@@ -121,7 +127,7 @@ public class SceneRenderer {
         }
     }
 
-    public void polygonsIntersectSort(int step, Polygon[] polygons, int count) {
+    private void polygonsIntersectSort(int step, Polygon[] polygons, int count) {
         for (int k = 0; k <= count; k++) {
             polygons[k].skipSomething = false;
             polygons[k].index = k;
@@ -161,7 +167,7 @@ public class SceneRenderer {
         } while (true);
     }
 
-    public boolean polygonsOrder(Polygon[] polygons, int start, int end) {
+    private boolean polygonsOrder(Polygon[] polygons, int start, int end) {
         do {
             Polygon polygon = polygons[start];
             for (int k = start + 1; k <= end; k++) {
@@ -1207,6 +1213,7 @@ public class SceneRenderer {
                         int l19 = clipX;
                         k21 = l19 - scanlineStartX;
                     }
+                    
                     gamePanel.textureScanline2(
                             Resources.texturePixels[textureId],
                             0,
@@ -1221,6 +1228,7 @@ public class SceneRenderer {
                             j17 + scanlineStartX,
                             i23,
                             k24);
+                        
                     i10 += j11;
                     l11 += l12;
                     j13 += j14;
@@ -1339,7 +1347,9 @@ public class SceneRenderer {
                     int l5 = clipX;
                     i7 = l5 - scanlineStartX;
                 }
+                
                 gamePanel.gradientScanline2(-i7, l2 + scanlineStartX, 0, currentGradientRamps, j8, k9);
+                    
                 l2 += width;
             }
         }
@@ -1649,30 +1659,7 @@ public class SceneRenderer {
         return !flag;
     }
 
-    public int getTextureColour(int i) {
-        if (i == World.COLOUR_TRANSPARENT) {
-            return 0;
-        }
-        Resources.prepareTexture(i);
-        if (i >= 0) {
-            return Resources.texturePixels[i][0];
-        }
-        if (i < 0) {
-            i = -(i + 1);
-            int j = i >> 10 & 0x1f;
-            int k = i >> 5 & 0x1f;
-            int l = i & 0x1f;
-            return (j << 19) + (k << 11) + (l << 3);
-        } else {
-            return 0;
-        }
-    }
-
-    public static int rgbToInt(int r, int g, int b) {
-        return -1 - (r / 8) * 1024 - (g / 8) * 32 - (b / 8);
-    }
-
-    public int method306(int i, int j, int k, int l, int i1) {
+    private static int method306(int i, int j, int k, int l, int i1) {
         if (l == j) {
             return i;
         } else {
@@ -1680,7 +1667,7 @@ public class SceneRenderer {
         }
     }
 
-    public boolean method307(int i, int j, int k, int l, boolean flag) {
+    private static boolean method307(int i, int j, int k, int l, boolean flag) {
         if (flag && i <= k || i < k) {
             if (i > l) {
                 return true;
@@ -1701,12 +1688,11 @@ public class SceneRenderer {
         }
         if (j < l) {
             return true;
-        } else {
-            return flag;
         }
+        return flag;
     }
 
-    public boolean method308(int i, int j, int k, boolean flag) {
+    private static boolean method308(int i, int j, int k, boolean flag) {
         if (flag && i <= k || i < k) {
             if (j > k) {
                 return true;
@@ -1720,7 +1706,7 @@ public class SceneRenderer {
         }
     }
 
-    public boolean intersect(int ai[], int ai1[], int ai2[], int ai3[]) {
+    private static boolean intersect(int ai[], int ai1[], int ai2[], int ai3[]) {
         int i = ai.length;
         int j = ai2.length;
         byte byte0 = 0;

@@ -24,10 +24,9 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
 
     private GamePanel gamePanel;
     private JFrame frame;
-    
-    private Scene scene;
 
     private World world;
+    private Scene scene;
 
     /**
      * Flag used to tell the game to exit.
@@ -40,6 +39,9 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
     private LoadingScreen loadingScreen;
     private LoginScreen loginScreen;
     private SceneRenderer sceneRenderer;
+    
+    private int regionX = 57;
+    private int regionY = 55;
 
     public static void main(String[] args) {
         Game game = new Game();
@@ -213,8 +215,25 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        // TODO Auto-generated method stub
+        
+        // Explore the world with the keyboard
+        switch (e.getKeyCode()) {
+        case KeyEvent.VK_LEFT:
+            regionX--;
+            break;
+        case KeyEvent.VK_RIGHT:
+            regionX++;
+            break;
+        case KeyEvent.VK_UP:
+            regionY--;
+            break;
+        case KeyEvent.VK_DOWN:
+            regionY++;
+            break;
+        }
 
+        System.out.println("Loading region: " + regionX + ", " + regionY);
+        world.loadRegion(regionX, regionY);
     }
 
     @Override
@@ -247,8 +266,8 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
         loginScreen = null;
         scene = new Scene();
         sceneRenderer = new SceneRenderer(gamePanel, scene);
-        world = new World(scene, sceneRenderer, gamePanel);
-        world.loadRegion(50, 50);
+        world = new World(scene);
+        world.loadRegion(regionX, regionY);
     }
 
     public Scene getScene() {
