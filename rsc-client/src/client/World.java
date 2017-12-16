@@ -232,9 +232,11 @@ public class World {
             }
         }
 
-        aModel.clear();
         aModel.getDistanceToSomething(false, 60, 24, -50, -10, -50);
         aModelArrayArray580[height] = aModel.createModelArray(0, 0, 1536, 1536, 8, 64, 338, true);
+        for (int l2 = 0; l2 < 64; l2++) {
+            scene.addModel(aModelArrayArray580[height][l2]);
+        }
         
         aModel.clear();
         aModel.getDistanceToSomething(true, 50, 50, -50, -10, -50);
