@@ -144,6 +144,13 @@ public class Resources {
         return tiles[id];
     }
 
+    public static DoorDef getDoorDef(int id) {
+        if (id < 0 || id >= doors.length) {
+            return null;
+        }
+        return doors[id];
+    }
+
     public static Sector loadSector(int sectionX, int sectionY, int height) {
         Sector s = null;
         try {
