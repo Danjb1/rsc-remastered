@@ -233,7 +233,7 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
         }
 
         System.out.println("Loading region: " + regionX + ", " + regionY);
-        world.loadRegion(regionX, regionY);
+        world.loadRegion(regionX, regionY, 0);
     }
 
     @Override
@@ -267,7 +267,7 @@ public class Game implements KeyListener, MouseListener, MouseMotionListener {
         scene = new Scene();
         sceneRenderer = new SceneRenderer(gamePanel, scene);
         world = new World(scene);
-        world.loadRegion(regionX, regionY);
+        world.loadRegion(regionX, regionY, 0);
     }
 
     public Scene getScene() {
