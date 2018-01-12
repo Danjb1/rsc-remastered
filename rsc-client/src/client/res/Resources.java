@@ -151,16 +151,30 @@ public class Resources {
         return doors[id];
     }
 
-    public static Sector loadSector(int sectionX, int sectionY, int height) {
+    public static ElevationDef getElevationDef(int id) {
+        if (id < 0 || id >= elevation.length) {
+            return null;
+        }
+        return elevation[id];
+    }
+
+    public static GameObjectDef getObjectDef(int id) {
+        if (id < 0 || id >= objects.length) {
+            return null;
+        }
+        return objects[id];
+    }
+
+    public static Sector loadSector(int sectionX, int sectionY, int layer) {
         Sector s = null;
         try {
-            String filename = "h" + height + "x" + sectionX + "y" + sectionY;
+            String filename = "h" + layer + "x" + sectionX + "y" + sectionY;
             ZipEntry e = tileArchive.getEntry(filename);
             if (e == null) {
                 s = new Sector();
-                if (height == 0 || height == 3) {
+                if (layer == 0 || layer == 3) {
                     for (int i = 0; i < 2304; i++) {
-                        s.getTile(i).groundOverlay = (byte) (height == 0 ? -6 : 8);
+                        s.getTile(i).groundOverlay = (byte) (layer == 0 ? -6 : 8);
                     }
                 }
             } else {

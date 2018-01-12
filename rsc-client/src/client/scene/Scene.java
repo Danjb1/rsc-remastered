@@ -17,6 +17,27 @@ public class Scene {
     private GameModel models[] = new GameModel[MAX_MODELS];
     private int numSprites;
     private SpriteEntity spriteEntities[] = new SpriteEntity[MAX_SPRITES];
+
+    public int clipX;
+    public int clipY;
+    public int clipNear = 5;
+    
+    /**
+     * View distance for 3d models.
+     */
+    public int clipFar3d = 2200 + (Camera.DEFAULT_HEIGHT * 2);
+    
+    /**
+     * View distance for sprites.
+     */
+    public int clipFar2d = 2200 + (Camera.DEFAULT_HEIGHT * 2);
+    
+    /**
+     * Fog "density".
+     */
+    public int fogZFalloff = 1;
+    
+    public int fogZDistance = 2100 + (Camera.DEFAULT_HEIGHT * 2);
     
     public Scene() {
         for (int l = 0; l < spriteEntities.length; l++) {

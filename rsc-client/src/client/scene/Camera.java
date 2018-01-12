@@ -32,11 +32,6 @@ public class Camera {
     private int frustumFarZ;
     private int frustumNearZ;
     
-    public Camera() {
-        setCamera(0, 0, 0, 912, 0, 0, 2000);
-//        setCamera: 8512, -408, 4160, 912, 456, 0, 1100
-    }
-    
     public void prepareForRendering(int clipX, int clipY, int clipFar3d, int clipXModified, int clipYModified) {
         frustumMaxX = 0;
         frustumMinX = 0;
