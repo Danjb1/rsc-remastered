@@ -2,10 +2,8 @@ package client.render;
 
 import java.awt.Graphics;
 
-import client.Game;
-import client.GamePanel;
-import client.LoginScreen;
-import client.LoginScreen.State;
+import client.Canvas;
+import client.states.LoginScreen;
 
 public class LoginScreenRenderer {
 
@@ -25,22 +23,12 @@ public class LoginScreenRenderer {
      */
     public static final int LOGO_SPRITE_WIDTH = 438;
 
-    public static void render(GamePanel gamePanel, Graphics g, Game game,
+    public static void render(Canvas canvas, Graphics g, 
             LoginScreen loginScreen) {
 
-        LoginScreen.State state = loginScreen.getState();
-
-        int x = gamePanel.getWidth() / 2 - LOGO_SPRITE_WIDTH / 2
+        int x = canvas.getWidth() / 2 - LOGO_SPRITE_WIDTH / 2
                 - LOGO_SPRITE_OFFSET_X;
-        gamePanel.drawSprite(x, 50, SPRITE_ID_LOGO);
-
-        if (state == State.MAIN_MENU) {
-            // TODO
-        } else if (state == State.NEW_USER_MENU) {
-            // TODO
-        } else if (state == State.LOGIN_MENU) {
-            // TODO
-        }
+        canvas.drawSprite(x, 50, SPRITE_ID_LOGO);
     }
 
 }

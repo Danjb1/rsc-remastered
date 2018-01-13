@@ -1,5 +1,6 @@
-package client;
+package client.states;
 
+import java.awt.Graphics;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -8,6 +9,9 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import client.Canvas;
+import client.RsLauncher;
+import client.State;
 import client.entityhandling.defs.AnimationDef;
 import client.entityhandling.defs.DoorDef;
 import client.entityhandling.defs.ElevationDef;
@@ -18,11 +22,12 @@ import client.entityhandling.defs.PrayerDef;
 import client.entityhandling.defs.SpellDef;
 import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
+import client.render.LoadingScreenRenderer;
 import client.res.Resources;
 import client.scene.Sprite;
 import client.util.DataUtils;
 
-public class LoadingScreen {
+public class LoadingScreen extends State {
 
     private static final String LANDSCAPE_FILENAME = "Landscape.rscd";
     private static final String SPRITES_FILENAME = "Sprites.rscd";
@@ -34,8 +39,8 @@ public class LoadingScreen {
     public static final int SPRITE_PROJECTILE_START = 3160;
     public static final int SPRITE_TEXTURE_START = 3220;
 
-    private Game game;
-
+    private RsLauncher rs;
+    
     private String message = "Loading...";
     private int progress = -1;
 
@@ -45,15 +50,15 @@ public class LoadingScreen {
 
     private List<String> models = new ArrayList<>();
 
-    public LoadingScreen(Game game) {
-        this.game = game;
+    public LoadingScreen(RsLauncher rs) {
+        this.rs = rs;
 
         /*
-         * Load ZIParchives.
+         * Load ZIP archives.
          * 
-         * Ideally we would use getResource() here but we need a concrete
-         * File, not an input stream! This means we can't ship the data
-         * files inside the JAR unless we seriously re-work this code.
+         * Ideally we would use getResource() here but we need a concrete File,
+         * not an input stream! This means we can't ship the data files inside
+         * the JAR unless we seriously re-work this code.
          */
         try {
             Resources.spriteArchive = new ZipFile(new File(
@@ -63,6 +68,11 @@ public class LoadingScreen {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void render(Canvas canvas, Graphics g) {
+        LoadingScreenRenderer.render(g, canvas, this);
     }
 
     /**
@@ -109,7 +119,7 @@ public class LoadingScreen {
             updateProgress(100, "Starting game...");
         }
 
-        game.finishedLoading();
+        rs.finishedLoading();
     }
 
     private void generateExperienceTable() {

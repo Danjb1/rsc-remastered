@@ -5,9 +5,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 
-import javax.swing.JFrame;
-
-import client.LoadingScreen;
+import client.Canvas;
+import client.states.LoadingScreen;
 
 public class LoadingScreenRenderer {
 
@@ -18,11 +17,11 @@ public class LoadingScreenRenderer {
     private static final int OUTLINE_WIDTH = BAR_WIDTH + 3;
     private static final int OUTLINE_HEIGHT = BAR_HEIGHT + 3;
 
-    public static void render(Graphics g, JFrame frame,
+    public static void render(Graphics g, Canvas canvas,
             LoadingScreen loadingScreen) {
 
-        int width = frame.getContentPane().getWidth();
-        int height = frame.getContentPane().getHeight();
+        int width = canvas.getWidth();
+        int height = canvas.getHeight();
 
         // Draw background
         g.setColor(Color.BLACK);
@@ -39,14 +38,14 @@ public class LoadingScreenRenderer {
 
         // Draw loading message
         g.setColor(Color.WHITE);
-        drawString(g, frame, loadingScreen.getMessage(), LOADING_FONT,
+        drawString(g, loadingScreen.getMessage(), LOADING_FONT,
                 x + BAR_WIDTH / 2,
                 y + BAR_HEIGHT / 2);
     }
 
-    private static void drawString(Graphics g, JFrame frame, String s,
+    private static void drawString(Graphics g, String s,
             Font font, int x, int y) {
-        FontMetrics fontMetrics = frame.getFontMetrics(font);
+        FontMetrics fontMetrics = g.getFontMetrics(font);
         fontMetrics.stringWidth(s);
         g.setFont(font);
         g.drawString(s,

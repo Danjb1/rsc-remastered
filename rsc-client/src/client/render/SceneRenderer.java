@@ -1,6 +1,6 @@
 package client.render;
 
-import client.GamePanel;
+import client.Canvas;
 import client.World;
 import client.res.Resources;
 import client.scene.Camera;
@@ -20,9 +20,10 @@ public class SceneRenderer {
 
     private static final int MAX_POLYGONS = 15000;
     
+    private static final int VIEW_DISTANCE = 9;
+    
     private Scene scene;
     private Camera camera;
-    private GamePanel gamePanel;
     private int visiblePolygonCount;
     private Polygon visiblePolygons[] = new Polygon[MAX_POLYGONS];
 
@@ -47,8 +48,7 @@ public class SceneRenderer {
     private int newStart;
     private int newEnd;
 
-    public SceneRenderer(GamePanel panel, Scene scene) {
-        this.gamePanel = panel;
+    public SceneRenderer(Scene scene, int width, int height) {
         this.scene = scene;
         this.camera = scene.getCamera();
 
@@ -56,145 +56,17 @@ public class SceneRenderer {
             visiblePolygons[l] = new Polygon();
         }
         
-        scene.clipX = panel.getWidth() / 2;
-        scene.clipY = panel.getHeight() / 2;
+        scene.clipX = width / 2;
+        scene.clipY = height / 2;
         
-        setBounds(panel.getWidth() / 2,
-                panel.getHeight() / 2,
-                panel.getWidth() / 2,
-                panel.getHeight() / 2,
-                panel.getWidth(),
-                9);
+        setBounds(
+                width / 2, height / 2,
+                width / 2, height / 2,
+                width,
+                VIEW_DISTANCE);
     }
 
-    public void setBounds(int baseX, int baseY, int clipX, int clipY, int width, int viewDistance) {
-        scene.clipX = clipX;
-        scene.clipY = clipY;
-        this.baseX = baseX;
-        this.baseY = baseY;
-        this.width = width;
-        this.viewDistance = viewDistance;
-        scanlines = new Scanline[scene.clipY + baseY];
-        for (int k1 = 0; k1 < scene.clipY + baseY; k1++) {
-            scanlines[k1] = new Scanline();
-        }
-    }
-
-    private static void polygonsQSort(Polygon[] polygons, int low, int high) {
-        if (low < high) {
-            int min = low - 1;
-            int max = high + 1;
-            int mid = (low + high) / 2;
-            Polygon tmp = polygons[mid];
-            polygons[mid] = polygons[low];
-            polygons[low] = tmp;
-            int j1 = tmp.depth;
-            while (min < max) {
-                do {
-                    max--;
-                } while (polygons[max].depth < j1);
-                do {
-                    min++;
-                } while (polygons[min].depth > j1);
-                if (min < max) {
-                    Polygon polygon = polygons[min];
-                    polygons[min] = polygons[max];
-                    polygons[max] = polygon;
-                }
-            }
-            polygonsQSort(polygons, low, max);
-            polygonsQSort(polygons, max + 1, high);
-        }
-    }
-
-    private void polygonsIntersectSort(int step, Polygon[] polygons, int count) {
-        for (int k = 0; k <= count; k++) {
-            polygons[k].skipSomething = false;
-            polygons[k].index = k;
-            polygons[k].index2 = -1;
-        }
-
-        int l = 0;
-        do {
-            while (polygons[l].skipSomething) {
-                l++;
-            }
-            if (l == count) {
-                return;
-            }
-            Polygon polygon = polygons[l];
-            polygon.skipSomething = true;
-            int i1 = l;
-            int j1 = l + step;
-            if (j1 >= count) {
-                j1 = count - 1;
-            }
-            for (int k1 = j1; k1 >= i1 + 1; k1--) {
-                Polygon other = polygons[k1];
-                if (polygon.minPlaneX < other.maxPlaneX && other.minPlaneX < polygon.maxPlaneX
-                        && polygon.minPlaneY < other.maxPlaneY && other.minPlaneY < polygon.maxPlaneY
-                        && polygon.index != other.index2 && !arePolygonsSeparate(polygon, other)
-                        && heuristicPolygon(other, polygon)) {
-                    polygonsOrder(polygons, i1, k1);
-                    if (polygons[k1] != other) {
-                        k1++;
-                    }
-                    i1 = newStart;
-                    other.index2 = polygon.index;
-                }
-            }
-
-        } while (true);
-    }
-
-    private boolean polygonsOrder(Polygon[] polygons, int start, int end) {
-        do {
-            Polygon polygon = polygons[start];
-            for (int k = start + 1; k <= end; k++) {
-                Polygon tmp = polygons[k];
-                if (!arePolygonsSeparate(tmp, polygon)) {
-                    break;
-                }
-                polygons[start] = tmp;
-                polygons[k] = polygon;
-                start = k;
-                if (start == end) {
-                    newStart = start;
-                    newEnd = start - 1;
-                    return true;
-                }
-            }
-
-            Polygon polygon2 = polygons[end];
-            for (int l = end - 1; l >= start; l--) {
-                Polygon entity_3 = polygons[l];
-                if (!arePolygonsSeparate(polygon2, entity_3)) {
-                    break;
-                }
-                polygons[end] = entity_3;
-                polygons[l] = polygon2;
-                end = l;
-                if (start == end) {
-                    newStart = end + 1;
-                    newEnd = end;
-                    return true;
-                }
-            }
-
-            if (start + 1 >= end) {
-                newStart = start;
-                newEnd = end;
-                return false;
-            }
-            if (!polygonsOrder(polygons, start + 1, end)) {
-                newStart = start;
-                return false;
-            }
-            end = newEnd;
-        } while (true);
-    }
-
-    public void render() {
+    public void render(Canvas canvas) {
         
         int clipXModified = scene.clipX * scene.clipFar3d >> viewDistance;
         int clipYModified = scene.clipY * scene.clipFar3d >> viewDistance;
@@ -326,7 +198,7 @@ public class SceneRenderer {
                 int h = (spriteEntity.getHeight() << viewDistance) / vz;
                 int x = vx - w / 2;
                 int y = (baseY + vy) - h;
-                gamePanel.spriteClip1(x + baseX, y, w, h, spriteEntity.getId());
+                canvas.spriteClip1(x + baseX, y, w, h, spriteEntity.getId());
             } else {
                 int plane = 0;
                 int light = 0;
@@ -419,10 +291,137 @@ public class SceneRenderer {
 
                 generateScanlines(0, 0, 0, 0, plane, planeX, planeY, vertexShade, polygonModel, polyFace);
                 if (maxY > minY) {
-                    rasterize(numFaces, vertexX, vertexY, vertexZ, polygon.faceFill, polygonModel);
+                    rasterize(canvas, numFaces, vertexX, vertexY, vertexZ, polygon.faceFill, polygonModel);
                 }
             }
         }
+    }
+
+    public void setBounds(int baseX, int baseY, int clipX, int clipY, int width, int viewDistance) {
+        scene.clipX = clipX;
+        scene.clipY = clipY;
+        this.baseX = baseX;
+        this.baseY = baseY;
+        this.width = width;
+        this.viewDistance = viewDistance;
+        scanlines = new Scanline[scene.clipY + baseY];
+        for (int k1 = 0; k1 < scene.clipY + baseY; k1++) {
+            scanlines[k1] = new Scanline();
+        }
+    }
+
+    private static void polygonsQSort(Polygon[] polygons, int low, int high) {
+        if (low < high) {
+            int min = low - 1;
+            int max = high + 1;
+            int mid = (low + high) / 2;
+            Polygon tmp = polygons[mid];
+            polygons[mid] = polygons[low];
+            polygons[low] = tmp;
+            int j1 = tmp.depth;
+            while (min < max) {
+                do {
+                    max--;
+                } while (polygons[max].depth < j1);
+                do {
+                    min++;
+                } while (polygons[min].depth > j1);
+                if (min < max) {
+                    Polygon polygon = polygons[min];
+                    polygons[min] = polygons[max];
+                    polygons[max] = polygon;
+                }
+            }
+            polygonsQSort(polygons, low, max);
+            polygonsQSort(polygons, max + 1, high);
+        }
+    }
+
+    private void polygonsIntersectSort(int step, Polygon[] polygons, int count) {
+        for (int k = 0; k <= count; k++) {
+            polygons[k].skipSomething = false;
+            polygons[k].index = k;
+            polygons[k].index2 = -1;
+        }
+
+        int l = 0;
+        do {
+            while (polygons[l].skipSomething) {
+                l++;
+            }
+            if (l == count) {
+                return;
+            }
+            Polygon polygon = polygons[l];
+            polygon.skipSomething = true;
+            int i1 = l;
+            int j1 = l + step;
+            if (j1 >= count) {
+                j1 = count - 1;
+            }
+            for (int k1 = j1; k1 >= i1 + 1; k1--) {
+                Polygon other = polygons[k1];
+                if (polygon.minPlaneX < other.maxPlaneX && other.minPlaneX < polygon.maxPlaneX
+                        && polygon.minPlaneY < other.maxPlaneY && other.minPlaneY < polygon.maxPlaneY
+                        && polygon.index != other.index2 && !arePolygonsSeparate(polygon, other)
+                        && heuristicPolygon(other, polygon)) {
+                    polygonsOrder(polygons, i1, k1);
+                    if (polygons[k1] != other) {
+                        k1++;
+                    }
+                    i1 = newStart;
+                    other.index2 = polygon.index;
+                }
+            }
+
+        } while (true);
+    }
+
+    private boolean polygonsOrder(Polygon[] polygons, int start, int end) {
+        do {
+            Polygon polygon = polygons[start];
+            for (int k = start + 1; k <= end; k++) {
+                Polygon tmp = polygons[k];
+                if (!arePolygonsSeparate(tmp, polygon)) {
+                    break;
+                }
+                polygons[start] = tmp;
+                polygons[k] = polygon;
+                start = k;
+                if (start == end) {
+                    newStart = start;
+                    newEnd = start - 1;
+                    return true;
+                }
+            }
+
+            Polygon polygon2 = polygons[end];
+            for (int l = end - 1; l >= start; l--) {
+                Polygon entity_3 = polygons[l];
+                if (!arePolygonsSeparate(polygon2, entity_3)) {
+                    break;
+                }
+                polygons[end] = entity_3;
+                polygons[l] = polygon2;
+                end = l;
+                if (start == end) {
+                    newStart = end + 1;
+                    newEnd = end;
+                    return true;
+                }
+            }
+
+            if (start + 1 >= end) {
+                newStart = start;
+                newEnd = end;
+                return false;
+            }
+            if (!polygonsOrder(polygons, start + 1, end)) {
+                newStart = start;
+                return false;
+            }
+            end = newEnd;
+        } while (true);
     }
 
     private void generateScanlines(int i, int j, int k, int l, int plane, int planeX[], int planeY[], int vertexShade[],
@@ -930,7 +929,7 @@ public class SceneRenderer {
         }
     }
 
-    private void rasterize(int numFaces, int vertexX[], int vertexY[], int vertexZ[], int textureId, GameModel gameModel) {
+    private void rasterize(Canvas canvas, int numFaces, int vertexX[], int vertexY[], int vertexZ[], int textureId, GameModel gameModel) {
         
         if (textureId == -2) {
             // Transparent
@@ -1007,7 +1006,7 @@ public class SceneRenderer {
                                 int l17 = scene.clipX;
                                 k20 = l17 - scanlineStartX;
                             }
-                            gamePanel.textureTranslucentScanline(Resources.texturePixels[textureId], 0, 0, l9 + k14 * scanlineStartX, k11 + i15 * scanlineStartX,
+                            canvas.textureTranslucentScanline(Resources.texturePixels[textureId], 0, 0, l9 + k14 * scanlineStartX, k11 + i15 * scanlineStartX,
                                     i13 + k15 * scanlineStartX, k10, i12, k13, k20, i17 + scanlineStartX, i22, k23 << 2);
                             l9 += i11;
                             k11 += k12;
@@ -1046,7 +1045,7 @@ public class SceneRenderer {
                                 int j18 = scene.clipX;
                                 l20 = j18 - scanlineStartX;
                             }
-                            gamePanel.textureScanline(Resources.texturePixels[textureId], 0, 0, l9 + k14 * scanlineStartX, k11 + i15 * scanlineStartX,
+                            canvas.textureScanline(Resources.texturePixels[textureId], 0, 0, l9 + k14 * scanlineStartX, k11 + i15 * scanlineStartX,
                                     i13 + k15 * scanlineStartX, k10, i12, k13, l20, i17 + scanlineStartX, j22, l23 << 2);
                             l9 += i11;
                             k11 += k12;
@@ -1084,7 +1083,7 @@ public class SceneRenderer {
                             int l18 = scene.clipX;
                             i21 = l18 - scanlineStartX;
                         }
-                        gamePanel.textureBackTranslucentScanline(0, 0, 0, Resources.texturePixels[textureId], l9 + k14 * scanlineStartX,
+                        canvas.textureBackTranslucentScanline(0, 0, 0, Resources.texturePixels[textureId], l9 + k14 * scanlineStartX,
                                 k11 + i15 * scanlineStartX, i13 + k15 * scanlineStartX, k10, i12, k13, i21, i17 + scanlineStartX, k22, i24);
                         l9 += i11;
                         k11 += k12;
@@ -1146,7 +1145,7 @@ public class SceneRenderer {
                             int j19 = scene.clipX;
                             j21 = j19 - scanlineStartX;
                         }
-                        gamePanel.textureTranslucentScanline2(Resources.texturePixels[textureId], 0, 0, i10 + l14 * scanlineStartX, l11 + j15 * scanlineStartX,
+                        canvas.textureTranslucentScanline2(Resources.texturePixels[textureId], 0, 0, i10 + l14 * scanlineStartX, l11 + j15 * scanlineStartX,
                                 j13 + l15 * scanlineStartX, l10, j12, l13, j21, j17 + scanlineStartX, l22, j24);
                         i10 += j11;
                         l11 += l12;
@@ -1188,7 +1187,7 @@ public class SceneRenderer {
                         k21 = l19 - scanlineStartX;
                     }
                     
-                    gamePanel.textureScanline2(
+                    canvas.textureScanline2(
                             Resources.texturePixels[textureId],
                             0,
                             0,
@@ -1237,7 +1236,7 @@ public class SceneRenderer {
                         int j20 = scene.clipX;
                         l21 = j20 - scanlineStartX;
                     }
-                    gamePanel.textureBackTranslucentScanline2(0, 0, 0, Resources.texturePixels[textureId], i10 + l14 * scanlineStartX,
+                    canvas.textureBackTranslucentScanline2(0, 0, 0, Resources.texturePixels[textureId], i10 + l14 * scanlineStartX,
                             l11 + j15 * scanlineStartX, j13 + l15 * scanlineStartX, l10, j12, l13, l21, j17 + scanlineStartX, j23, l24);
                     i10 += j11;
                     l11 += l12;
@@ -1295,7 +1294,7 @@ public class SceneRenderer {
                         int l4 = scene.clipX;
                         k6 = l4 - scanlineStartX;
                     }
-                    gamePanel.textureGradientScanline(-k6, l2 + scanlineStartX, 0, currentGradientRamps, l7, i9);
+                    canvas.textureGradientScanline(-k6, l2 + scanlineStartX, 0, currentGradientRamps, l7, i9);
                     l2 += width;
                 }
             }
@@ -1322,7 +1321,7 @@ public class SceneRenderer {
                     i7 = l5 - scanlineStartX;
                 }
                 
-                gamePanel.gradientScanline2(-i7, l2 + scanlineStartX, 0, currentGradientRamps, j8, k9);
+                canvas.gradientScanline2(-i7, l2 + scanlineStartX, 0, currentGradientRamps, j8, k9);
                     
                 l2 += width;
             }
