@@ -63,7 +63,7 @@ public class Resources {
      */
     public static NpcDef[] npcs;
     public static ItemDef[] items;
-    public static TextureDef[] textures;
+    public static TextureDef[] textureDefs;
     public static AnimationDef[] animations;
     public static SpellDef[] spells;
     public static PrayerDef[] prayers;
@@ -75,16 +75,7 @@ public class Resources {
     /*
      * Texture data
      */
-    public static long texturesLoaded;
-    public static int textureCount;
-    public static byte textureColoursUsed[][];
-    public static int textureColourList[][];
-    public static int textureDimension[];
-    public static long textureLoadedNumber[];
-    public static int texturePixels[][];
-    public static boolean textureBackTransparent[];
-    public static int textureColours64[][];
-    public static int textureColours128[][];
+    public static Texture[] textures;
     
     static {
         // XStream aliases
@@ -190,110 +181,59 @@ public class Resources {
     }
 
     public static void initialiseArrays(int textureCount, int numTextureColours64, int numTextureColours128) {
-        Resources.textureCount = textureCount;
-        textureColoursUsed = new byte[textureCount][];
-        textureColourList = new int[textureCount][];
-        textureDimension = new int[textureCount];
-        textureLoadedNumber = new long[textureCount];
-        textureBackTransparent = new boolean[textureCount];
-        texturePixels = new int[textureCount][];
-        texturesLoaded = 0L;
-        textureColours64 = new int[numTextureColours64][]; // 64x64 rgba
-        textureColours128 = new int[numTextureColours128][]; // 128x128 rgba
+        textures = new Texture[textureCount];
     }
 
-    public static void defineTexture(int id, byte[] usedColours, int[] colours, int wide128) {
-        textureColoursUsed[id] = usedColours;
-        textureColourList[id] = colours;
-        textureDimension[id] = wide128; // is 1 if the texture is 128+ pixels wide, 0 if <128
-        textureLoadedNumber[id] = 0L;
-        textureBackTransparent[id] = false;
-        texturePixels[id] = null;
-        prepareTexture(id);
-    }
-
-    public static void prepareTexture(int i) {
-        if (i < 0) {
+    public static void prepareTexture(int id) {
+        
+        if (id < 0) {
             return;
         }
-        textureLoadedNumber[i] = texturesLoaded++;
-        if (texturePixels[i] != null) {
+        
+        Texture tex = textures[id];
+        
+        if (tex.pixels != null) {
+            // Texture already loaded
             return;
         }
-        if (textureDimension[i] == 0) {
-            for (int j = 0; j < textureColours64.length; j++) {
-                if (textureColours64[j] == null) {
-                    textureColours64[j] = new int[16384];
-                    texturePixels[i] = textureColours64[j];
-                    setTexturePixels(i);
-                    return;
+
+        int numPixels = tex.isLarge() ? 65536 : 16384;
+        tex.pixels = new int[numPixels];
+        int textureSize = !tex.isLarge() ? 64 : 128;
+        int pixelIndex = 0;
+        
+        // Produce texture by looking up colours in the palette
+        for (int y = 0; y < textureSize; y++) {
+            for (int x = 0; x < textureSize; x++) {
+                int colourIndex = tex.colourData[x + y * textureSize] & 0xff;
+                int texColour = tex.palette[colourIndex];
+                texColour &= 0xf8f8ff;
+                if (texColour == 0) {
+                    texColour = 1;
+                } else if (texColour == 0xf800ff) {
+                    texColour = 0;
+                    tex.setHasTransparency(true);
                 }
-            }
-
-            long l = 1L << 30;
-            int i1 = 0;
-            for (int k1 = 0; k1 < textureCount; k1++) {
-                if (k1 != i && textureDimension[k1] == 0 && texturePixels[k1] != null && textureLoadedNumber[k1] < l) {
-                    l = textureLoadedNumber[k1];
-                    i1 = k1;
-                }
-            }
-
-            texturePixels[i] = texturePixels[i1];
-            texturePixels[i1] = null;
-            setTexturePixels(i);
-            return;
-        }
-        for (int k = 0; k < textureColours128.length; k++) {
-            if (textureColours128[k] == null) {
-                textureColours128[k] = new int[0x10000];
-                texturePixels[i] = textureColours128[k];
-                setTexturePixels(i);
-                return;
+                tex.pixels[pixelIndex++] = texColour;
             }
         }
 
-        long l1 = 1L << 30;
-        int j1 = 0;
-        for (int i2 = 0; i2 < textureCount; i2++) {
-            if (i2 != i && textureDimension[i2] == 1 && texturePixels[i2] != null && textureLoadedNumber[i2] < l1) {
-                l1 = textureLoadedNumber[i2];
-                j1 = i2;
-            }
+        /*
+         * Produce 3 additional versions of the texture.
+         * 
+         * These seem to be darker versions, which seem to be drawn over the
+         * normal texture during rendering.
+         */
+        for (int i = 0; i < pixelIndex; i++) {
+            int colour = tex.pixels[i];
+            tex.pixels[pixelIndex + i] = colour - (colour >>> 3) & 0xf8f8ff;
+            tex.pixels[pixelIndex * 2 + i] = colour - (colour >>> 2) & 0xf8f8ff;
+            tex.pixels[pixelIndex * 3 + i] = colour - (colour >>> 2) - (colour >>> 3) & 0xf8f8ff;
         }
 
-        texturePixels[i] = texturePixels[j1];
-        texturePixels[j1] = null;
-        setTexturePixels(i);
-    }
-
-    private static void setTexturePixels(int i) {
-        int textureWidth = textureDimension[i] == 0 ? 64 : 128;
-        int colours[] = texturePixels[i];
-        int colourCount = 0;
-        for (int k = 0; k < textureWidth; k++) {
-            for (int l = 0; l < textureWidth; l++) {
-                int index = textureColoursUsed[i][l + k * textureWidth] & 0xff;
-                int j1 = textureColourList[i][index];
-                j1 &= 0xf8f8ff;
-                if (j1 == 0) {
-                    j1 = 1;
-                } else if (j1 == 0xf800ff) {
-                    j1 = 0;
-                    textureBackTransparent[i] = true;
-                }
-                colours[colourCount++] = j1;
-            }
-
-        }
-
-        for (int i1 = 0; i1 < colourCount; i1++) {
-            int colour = colours[i1];
-            colours[colourCount + i1] = colour - (colour >>> 3) & 0xf8f8ff;
-            colours[colourCount * 2 + i1] = colour - (colour >>> 2) & 0xf8f8ff;
-            colours[colourCount * 3 + i1] = colour - (colour >>> 2) - (colour >>> 3) & 0xf8f8ff;
-        }
-
+        // No longer needed
+        tex.palette = null;
+        tex.colourData = null;
     }
 
 }

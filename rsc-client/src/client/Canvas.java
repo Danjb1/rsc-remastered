@@ -5,6 +5,8 @@ import client.scene.Sprite;
 
 /**
  * Class responsible for storing and manipulating pixel data of a 2D image.
+ * 
+ * Here be dragons...
  */
 public class Canvas {
 
@@ -41,6 +43,13 @@ public class Canvas {
         return pixels;
     }
 
+    /**
+     * Draws the sprite with the given ID at the given position.
+     * 
+     * @param x
+     * @param y
+     * @param id
+     */
     public void drawSprite(int x, int y, int id) {
 
         Sprite sprite = Resources.getSprite(id);
@@ -145,7 +154,7 @@ public class Canvas {
         }
     }
 
-    public void spriteClip1(int x, int y, int width, int height, int id) {
+    public void spriteClip(int x, int y, int width, int height, int id) {
 
         Sprite sprite = Resources.getSprite(id);
         int j1 = sprite.getWidth();
@@ -196,10 +205,10 @@ public class Canvas {
             k3 += j4;
         }
         byte byte0 = 1;
-        plotSale1(sprite.getPixels(), 0, l1, i2, i3, k3, width, height, j2, k2, j1, byte0);
+        plotSale(sprite.getPixels(), 0, l1, i2, i3, k3, width, height, j2, k2, j1, byte0);
     }
 
-    private void plotSale1(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2,
+    private void plotSale(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2,
             int j2, int k2) {
         
         int l2 = j;
@@ -221,295 +230,411 @@ public class Canvas {
         }
     }
 
-    public void textureScanline(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1, int l1,
-            int i2, int j2, int k2, int l2) {
+    /**
+     * Draws a textured scanline.
+     * 
+     * Used for walls and roofs.
+     * 
+     * BLACK MAGIC - DO NOT TOUCH.
+     * 
+     * @param texturePixels
+     * @param i
+     * @param j
+     * @param paramA
+     * @param paramB
+     * @param paramC
+     * @param paramAModifier
+     * @param paramBModifier
+     * @param paramCModifier
+     * @param scanlineSize
+     * @param pxOffset
+     * @param paramD
+     * @param paramDModifier
+     */
+    public void renderScanline_LargeTexture(
+            int texturePixels[],
+            int i,
+            int j,
+            int paramA,
+            int paramB,
+            int paramC,
+            int paramAModifier,
+            int paramBModifier,
+            int paramCModifier,
+            int scanlineSize,
+            int pxOffset,
+            int paramD,
+            int paramDModifier) {
         
-        if (i2 <= 0) {
+        if (scanlineSize <= 0) {
             return;
         }
+        
         int i3 = 0;
         int j3 = 0;
-        int i4 = 0;
-        if (i1 != 0) {
-            i = k / i1 << 7;
-            j = l / i1 << 7;
+        int colourShift = 0;
+        
+        if (paramC != 0) {
+            i = paramA / paramC << 7;
+            j = paramB / paramC << 7;
         }
+
+        // Bounds checking
         if (i < 0) {
             i = 0;
         } else if (i > 16256) {
             i = 16256;
         }
-        k += j1;
-        l += k1;
-        i1 += l1;
-        if (i1 != 0) {
-            i3 = k / i1 << 7;
-            j3 = l / i1 << 7;
+        
+        paramA += paramAModifier;
+        paramB += paramBModifier;
+        paramC += paramCModifier;
+        
+        if (paramC != 0) {
+            i3 = paramA / paramC << 7;
+            j3 = paramB / paramC << 7;
         }
+
+        // Bounds checking
         if (i3 < 0) {
             i3 = 0;
         } else if (i3 > 16256) {
             i3 = 16256;
         }
+        
         int k3 = i3 - i >> 4;
         int l3 = j3 - j >> 4;
-        for (int j4 = i2 >> 4; j4 > 0; j4--) {
-            i += k2 & 0x600000;
-            i4 = k2 >> 23;
-            k2 += l2;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+
+        // Draw 16 pixels with each loop iteration
+        for (int j4 = 0; j4 < scanlineSize >> 4; j4++) {
+            
+            /*
+             * These next sections could be rolled up into 2 nested for-loops.
+             * Presumably this wasn't done for performance reasons.
+             */
+            
+            i += paramD & 0x600000;
+            colourShift = paramD >> 23;
+            paramD += paramDModifier;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
+
             i += k3;
             j += l3;
-            i = (i & 0x3fff) + (k2 & 0x600000);
-            i4 = k2 >> 23;
-            k2 += l2;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            i = (i & 0x3fff) + (paramD & 0x600000);
+            colourShift = paramD >> 23;
+            paramD += paramDModifier;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
+
             i += k3;
             j += l3;
-            i = (i & 0x3fff) + (k2 & 0x600000);
-            i4 = k2 >> 23;
-            k2 += l2;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            i = (i & 0x3fff) + (paramD & 0x600000);
+            colourShift = paramD >> 23;
+            paramD += paramDModifier;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
+
             i += k3;
             j += l3;
-            i = (i & 0x3fff) + (k2 & 0x600000);
-            i4 = k2 >> 23;
-            k2 += l2;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            i = (i & 0x3fff) + (paramD & 0x600000);
+            colourShift = paramD >> 23;
+            paramD += paramDModifier;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
+
             i = i3;
             j = j3;
-            k += j1;
-            l += k1;
-            i1 += l1;
-            if (i1 != 0) {
-                i3 = k / i1 << 7;
-                j3 = l / i1 << 7;
+            paramA += paramAModifier;
+            paramB += paramBModifier;
+            paramC += paramCModifier;
+            
+            if (paramC != 0) {
+                i3 = paramA / paramC << 7;
+                j3 = paramB / paramC << 7;
             }
+
+            // Bounds checking
             if (i3 < 0) {
                 i3 = 0;
             } else if (i3 > 16256) {
                 i3 = 16256;
             }
+            
             k3 = i3 - i >> 4;
             l3 = j3 - j >> 4;
         }
 
-        for (int k4 = 0; k4 < (i2 & 0xf); k4++) {
+        // Render the last part of the scanline
+        for (int k4 = 0; k4 < (scanlineSize & 0xf); k4++) {
             if ((k4 & 3) == 0) {
-                i = (i & 0x3fff) + (k2 & 0x600000);
-                i4 = k2 >> 23;
-                k2 += l2;
+                i = (i & 0x3fff) + (paramD & 0x600000);
+                colourShift = paramD >> 23;
+                paramD += paramDModifier;
             }
-            pixels[j2++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4;
+            pixels[pxOffset++] = texturePixels[(j & 0x3f80) + (i >> 7)] >>> colourShift;
             i += k3;
             j += l3;
         }
     }
 
-    public void textureTranslucentScanline(int texturePixels[], int i, int j, int k, int l, int i1, int j1,
-            int k1, int l1, int i2, int j2, int k2, int l2) {
+    public void renderScanline_LargeTranslucentTexture(
+            int texturePixels[],
+            int i,
+            int j,
+            int k,
+            int l,
+            int i1,
+            int j1,
+            int k1,
+            int l1,
+            int scanlineSize,
+            int pxOffset,
+            int k2,
+            int l2) {
 
-        if (i2 <= 0) {
+        if (scanlineSize <= 0) {
             return;
         }
+        
         int i3 = 0;
         int j3 = 0;
         int i4 = 0;
+        
         if (i1 != 0) {
             i = k / i1 << 7;
             j = l / i1 << 7;
         }
+        
         if (i < 0) {
             i = 0;
         } else if (i > 16256) {
             i = 16256;
         }
+        
         k += j1;
         l += k1;
         i1 += l1;
+        
         if (i1 != 0) {
             i3 = k / i1 << 7;
             j3 = l / i1 << 7;
         }
+        
         if (i3 < 0) {
             i3 = 0;
         } else if (i3 > 16256) {
             i3 = 16256;
         }
+        
         int k3 = i3 - i >> 4;
         int l3 = j3 - j >> 4;
-        for (int j4 = i2 >> 4; j4 > 0; j4--) {
+            
+        for (int j4 = scanlineSize >> 4; j4 > 0; j4--) {
+            
             i += k2 & 0x600000;
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
+            
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
+            
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
+            
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i = i3;
             j = j3;
+            
             k += j1;
             l += k1;
             i1 += l1;
+            
             if (i1 != 0) {
                 i3 = k / i1 << 7;
                 j3 = l / i1 << 7;
             }
+            
             if (i3 < 0) {
                 i3 = 0;
             } else if (i3 > 16256) {
                 i3 = 16256;
             }
+            
             k3 = i3 - i >> 4;
             l3 = j3 - j >> 4;
         }
 
-        for (int k4 = 0; k4 < (i2 & 0xf); k4++) {
+        // Render the last part of the scanline
+        for (int k4 = 0; k4 < (scanlineSize & 0xf); k4++) {
             if ((k4 & 3) == 0) {
                 i = (i & 0x3fff) + (k2 & 0x600000);
                 i4 = k2 >> 23;
                 k2 += l2;
             }
-            pixels[j2++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[j2] >> 1 & 0x7f7f7f);
+            pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
         }
-
     }
 
-    public void textureBackTranslucentScanline(int i, int j, int k, int texturePixels[], int l, int i1, int j1,
-            int k1, int l1, int i2, int j2, int k2, int l2, int i3) {
+    public void renderScanline_LargeTextureWithTransparency(
+            int i,
+            int j,
+            int k,
+            int texturePixels[],
+            int l,
+            int i1,
+            int j1,
+            int k1,
+            int l1,
+            int i2,
+            int scanlineSize,
+            int pxOffset,
+            int l2,
+            int i3) {
 
-        if (j2 <= 0) {
+        if (scanlineSize <= 0) {
             return;
         }
+        
         int j3 = 0;
         int k3 = 0;
         i3 <<= 2;
+        
         if (j1 != 0) {
             j3 = l / j1 << 7;
             k3 = i1 / j1 << 7;
         }
+        
         if (j3 < 0) {
             j3 = 0;
         } else if (j3 > 16256) {
             j3 = 16256;
         }
-        for (int j4 = j2; j4 > 0; j4 -= 16) {
+        
+        for (int j4 = scanlineSize; j4 > 0; j4 -= 16) {
+            
             l += k1;
             i1 += l1;
             j1 += i2;
             j = j3;
             k = k3;
+            
             if (j1 != 0) {
                 j3 = l / j1 << 7;
                 k3 = i1 / j1 << 7;
             }
+            
             if (j3 < 0) {
                 j3 = 0;
             } else if (j3 > 16256) {
                 j3 = 16256;
             }
+            
             int l3 = j3 - j >> 4;
             int i4 = k3 - k >> 4;
             int k4 = l2 >> 23;
+            
             j += l2 & 0x600000;
             l2 += i3;
+            
             if (j4 < 16) {
+                
+                // Render fewer than 16 pixels
+                
                 for (int l4 = 0; l4 < j4; l4++) {
+                    
                     if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                        pixels[k2] = i;
+                        pixels[pxOffset] = i;
                     }
-                    k2++;
+                    
+                    pxOffset++;
                     j += l3;
                     k += i4;
+                    
                     if ((l4 & 3) == 3) {
                         j = (j & 0x3fff) + (l2 & 0x600000);
                         k4 = l2 >> 23;
@@ -518,120 +643,144 @@ public class Canvas {
                 }
 
             } else {
+
+                // Render 16 pixels
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 j = (j & 0x3fff) + (l2 & 0x600000);
                 k4 = l2 >> 23;
                 l2 += i3;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 j = (j & 0x3fff) + (l2 & 0x600000);
                 k4 = l2 >> 23;
                 l2 += i3;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 j = (j & 0x3fff) + (l2 & 0x600000);
                 k4 = l2 >> 23;
                 l2 += i3;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
                 j += l3;
                 k += i4;
+                
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
-                    pixels[k2] = i;
+                    pixels[pxOffset] = i;
                 }
-                k2++;
+                pxOffset++;
             }
         }
-
     }
 
-    public void textureScanline2(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1,
+    /*
+     * Used for wooden floors!
+     */
+    public void renderScanline_SmallTexture(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1,
             int l1, int i2, int j2, int k2, int l2) {
 
         if (i2 <= 0) {
             return;
         }
+        
         int i3 = 0;
         int j3 = 0;
         l2 <<= 2;
@@ -737,7 +886,7 @@ public class Canvas {
 
     }
 
-    public void textureTranslucentScanline2(int texturePixels[], int i, int j, int k, int l, int i1, int j1,
+    public void renderScanline_SmallTranslucentTexture(int texturePixels[], int i, int j, int k, int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2) {
 
         if (i2 <= 0) {
@@ -848,7 +997,7 @@ public class Canvas {
 
     }
 
-    public void textureBackTranslucentScanline2(int i, int j, int k, int texturePixels[], int l, int i1, int j1,
+    public void renderScanline_SmallTextureWithTransparency(int i, int j, int k, int texturePixels[], int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2, int i3) {
         
         if (j2 <= 0) {
@@ -1010,7 +1159,7 @@ public class Canvas {
 
     }
 
-    public void textureGradientScanline(int i, int j, int k, int ai1[], int l, int i1) {
+    public void renderScanline_TranslucentGradient(int i, int j, int k, int ai1[], int l, int i1) {
         
         if (i >= 0) {
             return;
@@ -1058,7 +1207,10 @@ public class Canvas {
 
     }
 
-    public void gradientScanline2(int i, int j, int k, int currentGradientRamps[], int l, int i1) {
+    /*
+     * Used for grass!
+     */
+    public void renderScanline_Gradient(int i, int j, int k, int currentGradientRamps[], int l, int i1) {
         
         if (i >= 0) {
             return;

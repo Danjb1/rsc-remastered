@@ -130,8 +130,6 @@ public class GameRenderer {
         // Change camera angle
         Camera camera = scene.getCamera();
         int cameraHeight = game.getCameraHeight();
-        scene.clipFar3d = 2400 + (cameraHeight * 2);
-        scene.clipFar2d = 2400 + (cameraHeight * 2);
         scene.fogZFalloff = 1;
         scene.fogZDistance = 2300 + (cameraHeight * 2);
 

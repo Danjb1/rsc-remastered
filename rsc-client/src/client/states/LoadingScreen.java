@@ -24,6 +24,7 @@ import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
 import client.render.LoadingScreenRenderer;
 import client.res.Resources;
+import client.res.Texture;
 import client.scene.Sprite;
 import client.util.DataUtils;
 
@@ -135,7 +136,7 @@ public class LoadingScreen extends State {
     private void loadGameData() {
         Resources.npcs       = (NpcDef[])        Resources.loadData("NPCs.rscd");
         Resources.items      = (ItemDef[])       Resources.loadData("Items.rscd");
-        Resources.textures   = (TextureDef[])    Resources.loadData("Textures.rscd");
+        Resources.textureDefs   = (TextureDef[])    Resources.loadData("Textures.rscd");
         Resources.animations = (AnimationDef[])  Resources.loadData("Animations.rscd");
         Resources.spells     = (SpellDef[])      Resources.loadData("Spells.rscd");
         Resources.prayers    = (PrayerDef[])     Resources.loadData("Prayers.rscd");
@@ -225,8 +226,8 @@ public class LoadingScreen extends State {
     }
 
     private void loadTextures() {
-        Resources.initialiseArrays(Resources.textures.length, 7, 11);
-        for (int i = 0; i < Resources.textures.length; i++) {
+        Resources.initialiseArrays(Resources.textureDefs.length, 7, 11);
+        for (int i = 0; i < Resources.textureDefs.length; i++) {
             loadSprite(SPRITE_TEXTURE_START + i, "texture", 1);
             Sprite sprite = Resources.getSprite(SPRITE_TEXTURE_START + i);
 
@@ -283,7 +284,9 @@ public class LoadingScreen extends State {
                 }
                 indices[l1] = (byte) l2;
             }
-            Resources.defineTexture(i, indices, dictionary, sprite.getTextureWidth() / 64 - 1);
+            boolean large = (sprite.getTextureWidth() / 64 - 1) == 1;
+            Resources.textures[i] = new Texture(indices, dictionary, large);
+            Resources.prepareTexture(i);
         }
     }
 

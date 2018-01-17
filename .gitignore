@@ -2,3 +2,5 @@
 /rsc-client/.project
 /rsc-client/.settings/*.prefs
 /rsc-client/bin
+/rsc-client/res/data/extracted
+/rsc-client/res/data/server

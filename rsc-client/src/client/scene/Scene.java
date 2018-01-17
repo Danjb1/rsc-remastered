@@ -18,20 +18,6 @@ public class Scene {
     private int numSprites;
     private SpriteEntity spriteEntities[] = new SpriteEntity[MAX_SPRITES];
 
-    public int clipX;
-    public int clipY;
-    public int clipNear = 5;
-    
-    /**
-     * View distance for 3d models.
-     */
-    public int clipFar3d = 2200 + (Camera.DEFAULT_HEIGHT * 2);
-    
-    /**
-     * View distance for sprites.
-     */
-    public int clipFar2d = 2200 + (Camera.DEFAULT_HEIGHT * 2);
-    
     /**
      * Fog "density".
      */
