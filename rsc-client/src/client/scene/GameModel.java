@@ -413,24 +413,20 @@ public class GameModel {
     /**
      * Creates a Model and sets some flags.
      *
-     * @param i
-     * @param j
+     * @param maxVertices
+     * @param maxFaces
      * @param flag
      * @param flag1
      * @param flag2
-     * @param flag3
+     * @param unpickable
      * @param flag4
      */
-    public GameModel(int i, int j, boolean flag, boolean flag1, boolean flag2, boolean flag3, boolean flag4) {
+    public GameModel(int maxVertices, int maxFaces, boolean flag, boolean flag1, boolean flag2, boolean unpickable, boolean flag4) {
         transformState = 1;
         visible = true;
         textureTranslucent = false;
         transparent = false;
         entityId = -1;
-        aBoolean260 = false;
-        aBoolean261 = false;
-        aBoolean262 = false;
-        unpickable = false;
         aBoolean264 = false;
         anInt270 = 0xbc614e;
         anInt302 = 0xbc614e;
@@ -443,9 +439,9 @@ public class GameModel {
         aBoolean260 = flag;
         aBoolean261 = flag1;
         aBoolean262 = flag2;
-        unpickable = flag3;
+        this.unpickable = unpickable;
         aBoolean264 = flag4;
-        initialise(i, j);
+        initialise(maxVertices, maxFaces);
     }
 
     private void initialise(int maxVertices, int maxFaces) {
@@ -754,8 +750,8 @@ public class GameModel {
         }
     }
 
-    public void setByteAtIndexToValue(int i, int j) {
-        vertexAmbience[i] = (byte) j;
+    public void setVertexAmbience(int vertex, int ambience) {
+        vertexAmbience[vertex] = (byte) ambience;
     }
 
     public void modAndMaskVars(int i, int j, int k) {

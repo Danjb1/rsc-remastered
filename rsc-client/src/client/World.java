@@ -8,48 +8,122 @@ import client.util.DataUtils;
 
 public class World {
 
-    public static final int COLOUR_TRANSPARENT = 12345678;
+    /**
+     * Number of Sectors loaded in the x-axis.
+     */
+    private static final int SECTORS_X = 2;
 
+    /**
+     * Number of Sectors loaded in the y-axis.
+     */
+    private static final int SECTORS_Y = 2;
+    
+    /**
+     * Total number of Sectors loaded at a time.
+     */
+    private static final int NUM_SECTORS = SECTORS_X * SECTORS_Y;
+
+    /**
+     * The number of loaded Tiles in the x-axis.
+     */
+    private static final int NUM_TILES_X = SECTORS_X * Sector.WIDTH;
+    
+    /**
+     * The number of loaded Tiles in the y-axis.
+     */
+    private static final int NUM_TILES_Y = SECTORS_Y * Sector.HEIGHT;
+    
+    /**
+     * Number of faces present in the loaded terrain.
+     */
+    private static final int NUM_TERRAIN_FACES = NUM_SECTORS * Sector.NUM_FACES;
+    
+    /**
+     * Number of layers in the world.
+     */
+    private static final int NUM_LAYERS = 4;
+    
+    /**
+     * The Scene that should hold the loaded world models.
+     */
     private Scene scene;
     
-    private int[] selectedX;
-    private int[] selectedY;
-    private GameModel tmpModel;
+    /**
+     * Position to walk to when a tile is clicked in the terrain.
+     * 
+     * The index is given by the faceTag of the selected face.
+     */
+    private int[] selectedX = new int[NUM_TERRAIN_FACES];
+    private int[] selectedY = new int[NUM_TERRAIN_FACES];
+    
+    /**
+     * Model used when loading regions.
+     */
+    private GameModel tmpModel = new GameModel(
+            NUM_TERRAIN_FACES + 256,
+            NUM_TERRAIN_FACES + 256,
+            true,
+            true,
+            false,
+            false,
+            true);
+    
+    /**
+     * Whether to dispose of the scene during garbage collection.
+     */
     private boolean requiresClean;
 
-    private Sector[] sectors;
+    /**
+     * Currently-loaded Sectors.
+     * 
+     * When we load sector (x, y) we end up with the following:
+     * 
+     *  sectors[0] = (x - 1, y - 1)
+     *  sectors[1] = (x, y - 1)
+     *  sectors[2] = (x - 1, y)
+     *  sectors[3] = (x, y)
+     */
+    private Sector[] sectors = new Sector[NUM_SECTORS];
 
-    private int[] groundTextureArray;
-    private GameModel[] landscapeModels;
-    private GameModel[][] wallModels;
-    private GameModel[][] roofModels;
-    private int[][] anIntArrayArray581;
+    private int[] groundColours = new int[256];
+    
+    private GameModel[] landscapeModels = new GameModel[64];
+    
+    private GameModel[][] wallModels = new GameModel[NUM_LAYERS][64];
+    
+    private GameModel[][] roofModels = new GameModel[NUM_LAYERS][64];
+    
+    private int[][] elevation = new int[NUM_TILES_X][NUM_TILES_Y];
 
     public World(Scene scene) {
         this.scene = scene;
 
-        selectedX = new int[18432];
-        selectedY = new int[18432];
-
-        landscapeModels = new GameModel[64];
-        wallModels = new GameModel[4][64];
-        roofModels = new GameModel[4][64];
-        anIntArrayArray581 = new int[96][96];
-        requiresClean = true;
-        groundTextureArray = new int[256];
-        sectors = new Sector[4];
-
+        // Initialise ground colours
         for (int i = 0; i < 64; i++) {
-            groundTextureArray[i] = DataUtils.rgbToInt(255 - i * 4, 255 - (int) (i * 1.75D), 255 - i * 4);
-        }
-        for (int j = 0; j < 64; j++) {
-            groundTextureArray[j + 64] = DataUtils.rgbToInt(j * 3, 144, 0);
-        }
-        for (int k = 0; k < 64; k++) {
-            groundTextureArray[k + 128] = DataUtils.rgbToInt(192 - (int) (k * 1.5D), 144 - (int) (k * 1.5D), 0);
-        }
-        for (int l = 0; l < 64; l++) {
-            groundTextureArray[l + 192] = DataUtils.rgbToInt(96 - (int) (l * 1.5D), 48 + (int) (l * 1.5D), 0);
+            
+            // Pale Grass / Snow
+            groundColours[i] = DataUtils.rgbToInt(
+                    255 - i * 4,
+                    255 - (int) (i * 1.75),
+                    255 - i * 4);
+            
+            // Grass
+            groundColours[i + 64] = DataUtils.rgbToInt(
+                    i * 3,
+                    144,
+                    0);
+            
+            // Sand
+            groundColours[i + 128] = DataUtils.rgbToInt(
+                    192 - (int) (i * 1.5),
+                    144 - (int) (i * 1.5),
+                    0);
+            
+            // Dark Grass / Mud
+            groundColours[i + 192] = DataUtils.rgbToInt(
+                    96 - (int) (i * 1.5),
+                    48 + (int) (i * 1.5),
+                    0);
         }
     }
 
@@ -66,6 +140,13 @@ public class World {
         System.gc();
     }
 
+    /**
+     * Loads the given region.
+     * 
+     * @param x
+     * @param y
+     * @param layer
+     */
     public void loadRegion(int x, int y, int layer) {
         
         garbageCollect();
@@ -78,24 +159,27 @@ public class World {
         }
     }
 
-    private void loadRegion(int x, int y, int layer, boolean isCurrentLayer) {
+    /**
+     * Loads a single layer of the given region.
+     * 
+     * @param regionX
+     * @param regionY
+     * @param layer
+     * @param isCurrentLayer
+     */
+    private void loadRegion(int regionX, int regionY, int layer, boolean isCurrentLayer) {
 
         // Load Sectors
-        int l = (x + 24) / 48;
-        int i1 = (y + 24) / 48;
-        sectors[0] = Resources.loadSector(l - 1, i1 - 1, layer);
-        sectors[1] = Resources.loadSector(l, i1 - 1, layer);
-        sectors[2] = Resources.loadSector(l - 1, i1, layer);
-        sectors[3] = Resources.loadSector(l, i1, layer);
+        int sectorX = (regionX + 24) / 48;
+        int sectorY = (regionY + 24) / 48;
+        sectors[0] = Resources.loadSector(sectorX - 1, sectorY - 1, layer);
+        sectors[1] = Resources.loadSector(sectorX    , sectorY - 1, layer);
+        sectors[2] = Resources.loadSector(sectorX - 1, sectorY    , layer);
+        sectors[3] = Resources.loadSector(sectorX    , sectorY    , layer);
         
         setGroundTexturesOverlay();
         
-        if (tmpModel == null) {
-            tmpModel = new GameModel(18688, 18688, true, true, false, false, true);
-        }
-        
-        GameModel gameModel = tmpModel;
-        gameModel.clear();
+        tmpModel.clear();
 
         if (isCurrentLayer) {
             
@@ -103,36 +187,36 @@ public class World {
              * Load terrain 
              */
     
-            for (int j2 = 0; j2 < 96; j2++) {
-                for (int i3 = 0; i3 < 96; i3++) {
-                    int i4 = -getGroundElevation(j2, i3);
-                    if (getGroundTexturesOverlay(j2, i3) > 0
-                            && Resources.getTileDef(getGroundTexturesOverlay(j2, i3) - 1).getUnknown() == 4) {
+            for (int x = 0; x < NUM_TILES_X; x++) {
+                for (int y = 0; y < NUM_TILES_Y; y++) {
+                    int i4 = -getGroundElevation(x, y);
+                    if (getGroundTexturesOverlay(x, y) > 0
+                            && Resources.getTileDef(getGroundTexturesOverlay(x, y) - 1).getUnknown() == 4) {
                         i4 = 0;
                     }
-                    if (getGroundTexturesOverlay(j2 - 1, i3) > 0
-                            && Resources.getTileDef(getGroundTexturesOverlay(j2 - 1, i3) - 1).getUnknown() == 4) {
+                    if (getGroundTexturesOverlay(x - 1, y) > 0
+                            && Resources.getTileDef(getGroundTexturesOverlay(x - 1, y) - 1).getUnknown() == 4) {
                         i4 = 0;
                     }
-                    if (getGroundTexturesOverlay(j2, i3 - 1) > 0
-                            && Resources.getTileDef(getGroundTexturesOverlay(j2, i3 - 1) - 1).getUnknown() == 4) {
+                    if (getGroundTexturesOverlay(x, y - 1) > 0
+                            && Resources.getTileDef(getGroundTexturesOverlay(x, y - 1) - 1).getUnknown() == 4) {
                         i4 = 0;
                     }
-                    if (getGroundTexturesOverlay(j2 - 1, i3 - 1) > 0 && Resources
-                            .getTileDef(getGroundTexturesOverlay(j2 - 1, i3 - 1) - 1).getUnknown() == 4) {
+                    if (getGroundTexturesOverlay(x - 1, y - 1) > 0 && Resources
+                            .getTileDef(getGroundTexturesOverlay(x - 1, y - 1) - 1).getUnknown() == 4) {
                         i4 = 0;
                     }
-                    int j5 = gameModel.getSomeIndex(j2 * 128, i4, i3 * 128);
+                    int j5 = tmpModel.getSomeIndex(x * 128, i4, y * 128);
                     int j7 = (int) (Math.random() * 10D) - 5;
-                    gameModel.setByteAtIndexToValue(j5, j7);
+                    tmpModel.setVertexAmbience(j5, j7);
                 }
             }
 
-            for (int j3 = 0; j3 < 95; j3++) {
-                for (int j4 = 0; j4 < 95; j4++) {
+            for (int x = 0; x < NUM_TILES_X - 1; x++) {
+                for (int y = 0; y < NUM_TILES_Y - 1; y++) {
                     
-                    int k5 = getGroundTexture(j3, j4);
-                    int k7 = groundTextureArray[k5];
+                    int k5 = getGroundTexture(x, y);
+                    int k7 = groundColours[k5];
                     int i10 = k7;
                     int k12 = k7;
                     int l14 = 0;
@@ -143,10 +227,10 @@ public class World {
                         k12 = 0xbc614e;
                     }
                     
-                    if (getGroundTexturesOverlay(j3, j4) > 0) {
-                        int l16 = getGroundTexturesOverlay(j3, j4);
+                    if (getGroundTexturesOverlay(x, y) > 0) {
+                        int l16 = getGroundTexturesOverlay(x, y);
                         int l5 = Resources.getTileDef(l16 - 1).getUnknown();
-                        int i19 = getTileDef(j3, j4);
+                        int i19 = getTileDef(x, y);
                         k7 = i10 = Resources.getTileDef(l16 - 1).getColour();
                         if (l5 == 4) {
                             k7 = 1;
@@ -158,186 +242,186 @@ public class World {
                         }
     
                         if (l5 == 5) {
-                            if (getDiagonalWalls(j3, j4) > 0 && getDiagonalWalls(j3, j4) < 24000) {
-                                if (getOverlayIfRequired(j3 - 1, j4, k12) != 0xbc614e
-                                        && getOverlayIfRequired(j3, j4 - 1, k12) != 0xbc614e) {
-                                    k7 = getOverlayIfRequired(j3 - 1, j4, k12);
+                            if (getDiagonalWalls(x, y) > 0 && getDiagonalWalls(x, y) < 24000) {
+                                if (getOverlayIfRequired(x - 1, y, k12) != 0xbc614e
+                                        && getOverlayIfRequired(x, y - 1, k12) != 0xbc614e) {
+                                    k7 = getOverlayIfRequired(x - 1, y, k12);
                                     l14 = 0;
-                                } else if (getOverlayIfRequired(j3 + 1, j4, k12) != 0xbc614e
-                                        && getOverlayIfRequired(j3, j4 + 1, k12) != 0xbc614e) {
-                                    i10 = getOverlayIfRequired(j3 + 1, j4, k12);
+                                } else if (getOverlayIfRequired(x + 1, y, k12) != 0xbc614e
+                                        && getOverlayIfRequired(x, y + 1, k12) != 0xbc614e) {
+                                    i10 = getOverlayIfRequired(x + 1, y, k12);
                                     l14 = 0;
-                                } else if (getOverlayIfRequired(j3 + 1, j4, k12) != 0xbc614e
-                                        && getOverlayIfRequired(j3, j4 - 1, k12) != 0xbc614e) {
-                                    i10 = getOverlayIfRequired(j3 + 1, j4, k12);
+                                } else if (getOverlayIfRequired(x + 1, y, k12) != 0xbc614e
+                                        && getOverlayIfRequired(x, y - 1, k12) != 0xbc614e) {
+                                    i10 = getOverlayIfRequired(x + 1, y, k12);
                                     l14 = 1;
-                                } else if (getOverlayIfRequired(j3 - 1, j4, k12) != 0xbc614e
-                                        && getOverlayIfRequired(j3, j4 + 1, k12) != 0xbc614e) {
-                                    k7 = getOverlayIfRequired(j3 - 1, j4, k12);
+                                } else if (getOverlayIfRequired(x - 1, y, k12) != 0xbc614e
+                                        && getOverlayIfRequired(x, y + 1, k12) != 0xbc614e) {
+                                    k7 = getOverlayIfRequired(x - 1, y, k12);
                                     l14 = 1;
                                 }
                             }
-                        } else if (l5 != 2 || getDiagonalWalls(j3, j4) > 0 && getDiagonalWalls(j3, j4) < 24000) {
-                            if (getTileDef(j3 - 1, j4) != i19 && getTileDef(j3, j4 - 1) != i19) {
+                        } else if (l5 != 2 || getDiagonalWalls(x, y) > 0 && getDiagonalWalls(x, y) < 24000) {
+                            if (getTileDef(x - 1, y) != i19 && getTileDef(x, y - 1) != i19) {
                                 k7 = k12;
                                 l14 = 0;
-                            } else if (getTileDef(j3 + 1, j4) != i19 && getTileDef(j3, j4 + 1) != i19) {
+                            } else if (getTileDef(x + 1, y) != i19 && getTileDef(x, y + 1) != i19) {
                                 i10 = k12;
                                 l14 = 0;
-                            } else if (getTileDef(j3 + 1, j4) != i19 && getTileDef(j3, j4 - 1) != i19) {
+                            } else if (getTileDef(x + 1, y) != i19 && getTileDef(x, y - 1) != i19) {
                                 i10 = k12;
                                 l14 = 1;
-                            } else if (getTileDef(j3 - 1, j4) != i19 && getTileDef(j3, j4 + 1) != i19) {
+                            } else if (getTileDef(x - 1, y) != i19 && getTileDef(x, y + 1) != i19) {
                                 k7 = k12;
                                 l14 = 1;
                             }
                         }
                     }
                     
-                    int i17 = ((getGroundElevation(j3 + 1, j4 + 1) - getGroundElevation(j3 + 1, j4))
-                            + getGroundElevation(j3, j4 + 1)) - getGroundElevation(j3, j4);
+                    int i17 = ((getGroundElevation(x + 1, y + 1) - getGroundElevation(x + 1, y))
+                            + getGroundElevation(x, y + 1)) - getGroundElevation(x, y);
                     if (k7 != i10 || i17 != 0) {
                         int ai[] = new int[3];
                         int ai7[] = new int[3];
                         if (l14 == 0) {
                             if (k7 != 0xbc614e) {
-                                ai[0] = j4 + j3 * 96 + 96;
-                                ai[1] = j4 + j3 * 96;
-                                ai[2] = j4 + j3 * 96 + 1;
-                                int l21 = gameModel.createFace(3, ai, 0xbc614e, k7);
-                                selectedX[l21] = j3;
-                                selectedY[l21] = j4;
-                                gameModel.faceTag[l21] = 0x30d40 + l21;
+                                ai[0] = y + x * 96 + 96;
+                                ai[1] = y + x * 96;
+                                ai[2] = y + x * 96 + 1;
+                                int l21 = tmpModel.createFace(3, ai, 0xbc614e, k7);
+                                selectedX[l21] = x;
+                                selectedY[l21] = y;
+                                tmpModel.faceTag[l21] = 0x30d40 + l21;
                             }
                             if (i10 != 0xbc614e) {
-                                ai7[0] = j4 + j3 * 96 + 1;
-                                ai7[1] = j4 + j3 * 96 + 96 + 1;
-                                ai7[2] = j4 + j3 * 96 + 96;
-                                int i22 = gameModel.createFace(3, ai7, 0xbc614e, i10);
-                                selectedX[i22] = j3;
-                                selectedY[i22] = j4;
-                                gameModel.faceTag[i22] = 0x30d40 + i22;
+                                ai7[0] = y + x * 96 + 1;
+                                ai7[1] = y + x * 96 + 96 + 1;
+                                ai7[2] = y + x * 96 + 96;
+                                int i22 = tmpModel.createFace(3, ai7, 0xbc614e, i10);
+                                selectedX[i22] = x;
+                                selectedY[i22] = y;
+                                tmpModel.faceTag[i22] = 0x30d40 + i22;
                             }
                         } else {
                             if (k7 != 0xbc614e) {
-                                ai[0] = j4 + j3 * 96 + 1;
-                                ai[1] = j4 + j3 * 96 + 96 + 1;
-                                ai[2] = j4 + j3 * 96;
-                                int j22 = gameModel.createFace(3, ai, 0xbc614e, k7);
-                                selectedX[j22] = j3;
-                                selectedY[j22] = j4;
-                                gameModel.faceTag[j22] = 0x30d40 + j22;
+                                ai[0] = y + x * 96 + 1;
+                                ai[1] = y + x * 96 + 96 + 1;
+                                ai[2] = y + x * 96;
+                                int j22 = tmpModel.createFace(3, ai, 0xbc614e, k7);
+                                selectedX[j22] = x;
+                                selectedY[j22] = y;
+                                tmpModel.faceTag[j22] = 0x30d40 + j22;
                             }
                             if (i10 != 0xbc614e) {
-                                ai7[0] = j4 + j3 * 96 + 96;
-                                ai7[1] = j4 + j3 * 96;
-                                ai7[2] = j4 + j3 * 96 + 96 + 1;
-                                int k22 = gameModel.createFace(3, ai7, 0xbc614e, i10);
-                                selectedX[k22] = j3;
-                                selectedY[k22] = j4;
-                                gameModel.faceTag[k22] = 0x30d40 + k22;
+                                ai7[0] = y + x * 96 + 96;
+                                ai7[1] = y + x * 96;
+                                ai7[2] = y + x * 96 + 96 + 1;
+                                int k22 = tmpModel.createFace(3, ai7, 0xbc614e, i10);
+                                selectedX[k22] = x;
+                                selectedY[k22] = y;
+                                tmpModel.faceTag[k22] = 0x30d40 + k22;
                             }
                         }
                     } else if (k7 != 0xbc614e) {
                         int ai1[] = new int[4];
-                        ai1[0] = j4 + j3 * 96 + 96;
-                        ai1[1] = j4 + j3 * 96;
-                        ai1[2] = j4 + j3 * 96 + 1;
-                        ai1[3] = j4 + j3 * 96 + 96 + 1;
-                        int l19 = gameModel.createFace(4, ai1, 0xbc614e, k7);
-                        selectedX[l19] = j3;
-                        selectedY[l19] = j4;
-                        gameModel.faceTag[l19] = 0x30d40 + l19;
+                        ai1[0] = y + x * 96 + 96;
+                        ai1[1] = y + x * 96;
+                        ai1[2] = y + x * 96 + 1;
+                        ai1[3] = y + x * 96 + 96 + 1;
+                        int l19 = tmpModel.createFace(4, ai1, 0xbc614e, k7);
+                        selectedX[l19] = x;
+                        selectedY[l19] = y;
+                        tmpModel.faceTag[l19] = 0x30d40 + l19;
                     }
                 }
             }
 
-            for (int k4 = 1; k4 < 95; k4++) {
-                for (int i6 = 1; i6 < 95; i6++) {
-                    if (getGroundTexturesOverlay(k4, i6) > 0
-                            && Resources.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getUnknown() == 4) {
-                        int l7 = Resources.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getColour();
-                        int j10 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                        int l12 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                        int i15 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                (i6 + 1) * 128);
-                        int j17 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+            for (int x = 1; x < NUM_TILES_X - 1; x++) {
+                for (int y = 1; y < NUM_TILES_Y - 1; y++) {
+                    if (getGroundTexturesOverlay(x, y) > 0
+                            && Resources.getTileDef(getGroundTexturesOverlay(x, y) - 1).getUnknown() == 4) {
+                        int l7 = Resources.getTileDef(getGroundTexturesOverlay(x, y) - 1).getColour();
+                        int j10 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y), y * 128);
+                        int l12 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y), y * 128);
+                        int i15 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y + 1),
+                                (y + 1) * 128);
+                        int j17 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y + 1), (y + 1) * 128);
                         int ai2[] = { j10, l12, i15, j17 };
-                        int i20 = gameModel.createFace(4, ai2, l7, 0xbc614e);
-                        selectedX[i20] = k4;
-                        selectedY[i20] = i6;
-                        gameModel.faceTag[i20] = 0x30d40 + i20;
-                    } else if (getGroundTexturesOverlay(k4, i6) == 0
-                            || Resources.getTileDef(getGroundTexturesOverlay(k4, i6) - 1).getUnknown() != 3) {
-                        if (getGroundTexturesOverlay(k4, i6 + 1) > 0 && Resources
-                                .getTileDef(getGroundTexturesOverlay(k4, i6 + 1) - 1).getUnknown() == 4) {
-                            int i8 = Resources.getTileDef(getGroundTexturesOverlay(k4, i6 + 1) - 1).getColour();
-                            int k10 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int i13 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int j15 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                    (i6 + 1) * 128);
-                            int k17 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                        int i20 = tmpModel.createFace(4, ai2, l7, 0xbc614e);
+                        selectedX[i20] = x;
+                        selectedY[i20] = y;
+                        tmpModel.faceTag[i20] = 0x30d40 + i20;
+                    } else if (getGroundTexturesOverlay(x, y) == 0
+                            || Resources.getTileDef(getGroundTexturesOverlay(x, y) - 1).getUnknown() != 3) {
+                        if (getGroundTexturesOverlay(x, y + 1) > 0 && Resources
+                                .getTileDef(getGroundTexturesOverlay(x, y + 1) - 1).getUnknown() == 4) {
+                            int i8 = Resources.getTileDef(getGroundTexturesOverlay(x, y + 1) - 1).getColour();
+                            int k10 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y), y * 128);
+                            int i13 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y), y * 128);
+                            int j15 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y + 1),
+                                    (y + 1) * 128);
+                            int k17 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y + 1), (y + 1) * 128);
                             int ai3[] = { k10, i13, j15, k17 };
-                            int j20 = gameModel.createFace(4, ai3, i8, 0xbc614e);
-                            selectedX[j20] = k4;
-                            selectedY[j20] = i6;
-                            gameModel.faceTag[j20] = 0x30d40 + j20;
+                            int j20 = tmpModel.createFace(4, ai3, i8, 0xbc614e);
+                            selectedX[j20] = x;
+                            selectedY[j20] = y;
+                            tmpModel.faceTag[j20] = 0x30d40 + j20;
                         }
-                        if (getGroundTexturesOverlay(k4, i6 - 1) > 0 && Resources
-                                .getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getUnknown() == 4) {
-                            int j8 = Resources.getTileDef(getGroundTexturesOverlay(k4, i6 - 1) - 1).getColour();
-                            int l10 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int j13 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int k15 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                    (i6 + 1) * 128);
-                            int l17 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                        if (getGroundTexturesOverlay(x, y - 1) > 0 && Resources
+                                .getTileDef(getGroundTexturesOverlay(x, y - 1) - 1).getUnknown() == 4) {
+                            int j8 = Resources.getTileDef(getGroundTexturesOverlay(x, y - 1) - 1).getColour();
+                            int l10 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y), y * 128);
+                            int j13 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y), y * 128);
+                            int k15 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y + 1),
+                                    (y + 1) * 128);
+                            int l17 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y + 1), (y + 1) * 128);
                             int ai4[] = { l10, j13, k15, l17 };
-                            int k20 = gameModel.createFace(4, ai4, j8, 0xbc614e);
-                            selectedX[k20] = k4;
-                            selectedY[k20] = i6;
-                            gameModel.faceTag[k20] = 0x30d40 + k20;
+                            int k20 = tmpModel.createFace(4, ai4, j8, 0xbc614e);
+                            selectedX[k20] = x;
+                            selectedY[k20] = y;
+                            tmpModel.faceTag[k20] = 0x30d40 + k20;
                         }
-                        if (getGroundTexturesOverlay(k4 + 1, i6) > 0 && Resources
-                                .getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getUnknown() == 4) {
-                            int k8 = Resources.getTileDef(getGroundTexturesOverlay(k4 + 1, i6) - 1).getColour();
-                            int i11 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int k13 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int l15 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                    (i6 + 1) * 128);
-                            int i18 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                        if (getGroundTexturesOverlay(x + 1, y) > 0 && Resources
+                                .getTileDef(getGroundTexturesOverlay(x + 1, y) - 1).getUnknown() == 4) {
+                            int k8 = Resources.getTileDef(getGroundTexturesOverlay(x + 1, y) - 1).getColour();
+                            int i11 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y), y * 128);
+                            int k13 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y), y * 128);
+                            int l15 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y + 1),
+                                    (y + 1) * 128);
+                            int i18 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y + 1), (y + 1) * 128);
                             int ai5[] = { i11, k13, l15, i18 };
-                            int l20 = gameModel.createFace(4, ai5, k8, 0xbc614e);
-                            selectedX[l20] = k4;
-                            selectedY[l20] = i6;
-                            gameModel.faceTag[l20] = 0x30d40 + l20;
+                            int l20 = tmpModel.createFace(4, ai5, k8, 0xbc614e);
+                            selectedX[l20] = x;
+                            selectedY[l20] = y;
+                            tmpModel.faceTag[l20] = 0x30d40 + l20;
                         }
-                        if (getGroundTexturesOverlay(k4 - 1, i6) > 0 && Resources
-                                .getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getUnknown() == 4) {
-                            int l8 = Resources.getTileDef(getGroundTexturesOverlay(k4 - 1, i6) - 1).getColour();
-                            int j11 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6), i6 * 128);
-                            int l13 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6), i6 * 128);
-                            int i16 = gameModel.getSomeIndex((k4 + 1) * 128, -getGroundElevation(k4 + 1, i6 + 1),
-                                    (i6 + 1) * 128);
-                            int j18 = gameModel.getSomeIndex(k4 * 128, -getGroundElevation(k4, i6 + 1), (i6 + 1) * 128);
+                        if (getGroundTexturesOverlay(x - 1, y) > 0 && Resources
+                                .getTileDef(getGroundTexturesOverlay(x - 1, y) - 1).getUnknown() == 4) {
+                            int l8 = Resources.getTileDef(getGroundTexturesOverlay(x - 1, y) - 1).getColour();
+                            int j11 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y), y * 128);
+                            int l13 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y), y * 128);
+                            int i16 = tmpModel.getSomeIndex((x + 1) * 128, -getGroundElevation(x + 1, y + 1),
+                                    (y + 1) * 128);
+                            int j18 = tmpModel.getSomeIndex(x * 128, -getGroundElevation(x, y + 1), (y + 1) * 128);
                             int ai6[] = { j11, l13, i16, j18 };
-                            int i21 = gameModel.createFace(4, ai6, l8, 0xbc614e);
-                            selectedX[i21] = k4;
-                            selectedY[i21] = i6;
-                            gameModel.faceTag[i21] = 0x30d40 + i21;
+                            int i21 = tmpModel.createFace(4, ai6, l8, 0xbc614e);
+                            selectedX[i21] = x;
+                            selectedY[i21] = y;
+                            tmpModel.faceTag[i21] = 0x30d40 + i21;
                         }
                     }
                 }
             }
 
-            gameModel.getDistanceToSomething(true, 40, 48, -50, -10, -50);
+            tmpModel.getDistanceToSomething(true, 40, 48, -50, -10, -50);
             landscapeModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 233, false);
             for (int j6 = 0; j6 < 64; j6++) {
                 scene.addModel(landscapeModels[j6]);
             }
 
-            for (int i9 = 0; i9 < 96; i9++) {
-                for (int k11 = 0; k11 < 96; k11++) {
-                    anIntArrayArray581[i9][k11] = getGroundElevation(i9, k11);
+            for (int x = 0; x < NUM_TILES_X; x++) {
+                for (int y = 0; y < NUM_TILES_Y; y++) {
+                    elevation[x][y] = getGroundElevation(x, y);
                 }
             }
         }
@@ -348,22 +432,22 @@ public class World {
          * Load walls
          */
         
-        for (int i = 0; i < 95; i++) {
-            for (int k2 = 0; k2 < 95; k2++) {
-                int k3 = getVerticalWall(i, k2);
+        for (int x = 0; x < NUM_TILES_X - 1; x++) {
+            for (int y = 0; y < NUM_TILES_Y - 1; y++) {
+                int k3 = getVerticalWall(x, y);
                 if (k3 > 0 && Resources.getDoorDef(k3 - 1).getUnknown() == 0) {
-                    createWall(tmpModel, k3 - 1, i, k2, i + 1, k2);
+                    createWall(tmpModel, k3 - 1, x, y, x + 1, y);
                 }
-                k3 = getHorizontalWall(i, k2);
+                k3 = getHorizontalWall(x, y);
                 if (k3 > 0 && Resources.getDoorDef(k3 - 1).getUnknown() == 0) {
-                    createWall(tmpModel, k3 - 1, i, k2, i, k2 + 1);
+                    createWall(tmpModel, k3 - 1, x, y, x, y + 1);
                 }
-                k3 = getDiagonalWalls(i, k2);
+                k3 = getDiagonalWalls(x, y);
                 if (k3 > 0 && k3 < 12000 && Resources.getDoorDef(k3 - 1).getUnknown() == 0) {
-                    createWall(tmpModel, k3 - 1, i, k2, i + 1, k2 + 1);
+                    createWall(tmpModel, k3 - 1, x, y, x + 1, y + 1);
                 }
                 if (k3 > 12000 && k3 < 24000 && Resources.getDoorDef(k3 - 12001).getUnknown() == 0) {
-                    createWall(tmpModel, k3 - 12001, i + 1, k2, i, k2 + 1);
+                    createWall(tmpModel, k3 - 12001, x + 1, y, x, y + 1);
                 }
             }
         }
@@ -376,43 +460,43 @@ public class World {
         
 
         // Raise wall heights
-        for (int l3 = 0; l3 < 95; l3++) {
-            for (int l4 = 0; l4 < 95; l4++) {
-                int k6 = getVerticalWall(l3, l4);
+        for (int x = 0; x < NUM_TILES_X - 1; x++) {
+            for (int y = 0; y < NUM_TILES_Y - 1; y++) {
+                int k6 = getVerticalWall(x, y);
                 if (k6 > 0) {
-                    method403(k6 - 1, l3, l4, l3 + 1, l4);
+                    setDoorElevation(k6 - 1, x, y, x + 1, y);
                 }
-                k6 = getHorizontalWall(l3, l4);
+                k6 = getHorizontalWall(x, y);
                 if (k6 > 0) {
-                    method403(k6 - 1, l3, l4, l3, l4 + 1);
+                    setDoorElevation(k6 - 1, x, y, x, y + 1);
                 }
-                k6 = getDiagonalWalls(l3, l4);
+                k6 = getDiagonalWalls(x, y);
                 if (k6 > 0 && k6 < 12000) {
-                    method403(k6 - 1, l3, l4, l3 + 1, l4 + 1);
+                    setDoorElevation(k6 - 1, x, y, x + 1, y + 1);
                 }
                 if (k6 > 12000 && k6 < 24000) {
-                    method403(k6 - 12001, l3 + 1, l4, l3, l4 + 1);
+                    setDoorElevation(k6 - 12001, x + 1, y, x, y + 1);
                 }
             }
         }
 
-        for (int i5 = 1; i5 < 95; i5++) {
-            for (int l6 = 1; l6 < 95; l6++) {
-                int j9 = getRoofTexture(i5, l6);
+        for (int x = 1; x < NUM_TILES_X - 1; x++) {
+            for (int y = 1; y < NUM_TILES_Y - 1; y++) {
+                int j9 = getRoofTexture(x, y);
                 if (j9 > 0) {
-                    int l11 = i5;
-                    int i14 = l6;
-                    int j16 = i5 + 1;
-                    int k18 = l6;
-                    int j19 = i5 + 1;
-                    int j21 = l6 + 1;
-                    int l22 = i5;
-                    int j23 = l6 + 1;
+                    int l11 = x;
+                    int i14 = y;
+                    int j16 = x + 1;
+                    int k18 = y;
+                    int j19 = x + 1;
+                    int j21 = y + 1;
+                    int l22 = x;
+                    int j23 = y + 1;
                     int l23 = 0;
-                    int j24 = anIntArrayArray581[l11][i14];
-                    int l24 = anIntArrayArray581[j16][k18];
-                    int j25 = anIntArrayArray581[j19][j21];
-                    int l25 = anIntArrayArray581[l22][j23];
+                    int j24 = elevation[l11][i14];
+                    int l24 = elevation[j16][k18];
+                    int j25 = elevation[j19][j21];
+                    int l25 = elevation[l22][j23];
                     if (j24 > 0x13880) {
                         j24 -= 0x13880;
                     }
@@ -441,70 +525,70 @@ public class World {
                         l23 -= 0x13880;
                     }
                     if (j24 < 0x13880) {
-                        anIntArrayArray581[l11][i14] = l23;
+                        elevation[l11][i14] = l23;
                     } else {
-                        anIntArrayArray581[l11][i14] -= 0x13880;
+                        elevation[l11][i14] -= 0x13880;
                     }
                     if (l24 < 0x13880) {
-                        anIntArrayArray581[j16][k18] = l23;
+                        elevation[j16][k18] = l23;
                     } else {
-                        anIntArrayArray581[j16][k18] -= 0x13880;
+                        elevation[j16][k18] -= 0x13880;
                     }
                     if (j25 < 0x13880) {
-                        anIntArrayArray581[j19][j21] = l23;
+                        elevation[j19][j21] = l23;
                     } else {
-                        anIntArrayArray581[j19][j21] -= 0x13880;
+                        elevation[j19][j21] -= 0x13880;
                     }
                     if (l25 < 0x13880) {
-                        anIntArrayArray581[l22][j23] = l23;
+                        elevation[l22][j23] = l23;
                     } else {
-                        anIntArrayArray581[l22][j23] -= 0x13880;
+                        elevation[l22][j23] -= 0x13880;
                     }
                 }
             }
         }
 
         tmpModel.clear();
-        for (int i7 = 1; i7 < 95; i7++) {
-            for (int k9 = 1; k9 < 95; k9++) {
-                int i12 = getRoofTexture(i7, k9);
+        for (int x = 1; x < NUM_TILES_X - 1; x++) {
+            for (int y = 1; y < NUM_TILES_Y - 1; y++) {
+                int i12 = getRoofTexture(x, y);
                 if (i12 > 0) {
-                    int j14 = i7;
-                    int k16 = k9;
-                    int l18 = i7 + 1;
-                    int k19 = k9;
-                    int k21 = i7 + 1;
-                    int i23 = k9 + 1;
-                    int k23 = i7;
-                    int i24 = k9 + 1;
-                    int k24 = i7 * 128;
-                    int i25 = k9 * 128;
+                    int j14 = x;
+                    int k16 = y;
+                    int l18 = x + 1;
+                    int k19 = y;
+                    int k21 = x + 1;
+                    int i23 = y + 1;
+                    int k23 = x;
+                    int i24 = y + 1;
+                    int k24 = x * 128;
+                    int i25 = y * 128;
                     int k25 = k24 + 128;
                     int i26 = i25 + 128;
                     int j26 = k24;
                     int k26 = i25;
                     int l26 = k25;
                     int i27 = i26;
-                    int j27 = anIntArrayArray581[j14][k16];
-                    int k27 = anIntArrayArray581[l18][k19];
-                    int l27 = anIntArrayArray581[k21][i23];
-                    int i28 = anIntArrayArray581[k23][i24];
+                    int j27 = elevation[j14][k16];
+                    int k27 = elevation[l18][k19];
+                    int l27 = elevation[k21][i23];
+                    int i28 = elevation[k23][i24];
                     int j28 = Resources.getElevationDef(i12 - 1).getUnknown1();
                     if (isCentreRoof(j14, k16) && j27 < 0x13880) {
                         j27 += j28 + 0x13880;
-                        anIntArrayArray581[j14][k16] = j27;
+                        elevation[j14][k16] = j27;
                     }
                     if (isCentreRoof(l18, k19) && k27 < 0x13880) {
                         k27 += j28 + 0x13880;
-                        anIntArrayArray581[l18][k19] = k27;
+                        elevation[l18][k19] = k27;
                     }
                     if (isCentreRoof(k21, i23) && l27 < 0x13880) {
                         l27 += j28 + 0x13880;
-                        anIntArrayArray581[k21][i23] = l27;
+                        elevation[k21][i23] = l27;
                     }
                     if (isCentreRoof(k23, i24) && i28 < 0x13880) {
                         i28 += j28 + 0x13880;
-                        anIntArrayArray581[k23][i24] = i28;
+                        elevation[k23][i24] = i28;
                     }
                     if (j27 >= 0x13880) {
                         j27 -= 0x13880;
@@ -572,29 +656,29 @@ public class World {
                     k27 = -k27;
                     l27 = -l27;
                     i28 = -i28;
-                    if (getDiagonalWalls(i7, k9) > 12000 && getDiagonalWalls(i7, k9) < 24000
-                            && getRoofTexture(i7 - 1, k9 - 1) == 0) {
+                    if (getDiagonalWalls(x, y) > 12000 && getDiagonalWalls(x, y) < 24000
+                            && getRoofTexture(x - 1, y - 1) == 0) {
                         int ai8[] = new int[3];
                         ai8[0] = tmpModel.getSomeIndex(l26, l27, i26);
                         ai8[1] = tmpModel.getSomeIndex(j26, i28, i27);
                         ai8[2] = tmpModel.getSomeIndex(k25, k27, k26);
                         tmpModel.createFace(3, ai8, i12, 0xbc614e);
-                    } else if (getDiagonalWalls(i7, k9) > 12000 && getDiagonalWalls(i7, k9) < 24000
-                            && getRoofTexture(i7 + 1, k9 + 1) == 0) {
+                    } else if (getDiagonalWalls(x, y) > 12000 && getDiagonalWalls(x, y) < 24000
+                            && getRoofTexture(x + 1, y + 1) == 0) {
                         int ai9[] = new int[3];
                         ai9[0] = tmpModel.getSomeIndex(k24, j27, i25);
                         ai9[1] = tmpModel.getSomeIndex(k25, k27, k26);
                         ai9[2] = tmpModel.getSomeIndex(j26, i28, i27);
                         tmpModel.createFace(3, ai9, i12, 0xbc614e);
-                    } else if (getDiagonalWalls(i7, k9) > 0 && getDiagonalWalls(i7, k9) < 12000
-                            && getRoofTexture(i7 + 1, k9 - 1) == 0) {
+                    } else if (getDiagonalWalls(x, y) > 0 && getDiagonalWalls(x, y) < 12000
+                            && getRoofTexture(x + 1, y - 1) == 0) {
                         int ai10[] = new int[3];
                         ai10[0] = tmpModel.getSomeIndex(j26, i28, i27);
                         ai10[1] = tmpModel.getSomeIndex(k24, j27, i25);
                         ai10[2] = tmpModel.getSomeIndex(l26, l27, i26);
                         tmpModel.createFace(3, ai10, i12, 0xbc614e);
-                    } else if (getDiagonalWalls(i7, k9) > 0 && getDiagonalWalls(i7, k9) < 12000
-                            && getRoofTexture(i7 - 1, k9 + 1) == 0) {
+                    } else if (getDiagonalWalls(x, y) > 0 && getDiagonalWalls(x, y) < 12000
+                            && getRoofTexture(x - 1, y + 1) == 0) {
                         int ai11[] = new int[3];
                         ai11[0] = tmpModel.getSomeIndex(k25, k27, k26);
                         ai11[1] = tmpModel.getSomeIndex(l26, l27, i26);
@@ -616,10 +700,10 @@ public class World {
                         tmpModel.createFace(4, ai13, i12, 0xbc614e);
                     } else {
                         boolean flag1 = true;
-                        if (getRoofTexture(i7 - 1, k9 - 1) > 0) {
+                        if (getRoofTexture(x - 1, y - 1) > 0) {
                             flag1 = false;
                         }
-                        if (getRoofTexture(i7 + 1, k9 + 1) > 0) {
+                        if (getRoofTexture(x + 1, y + 1) > 0) {
                             flag1 = false;
                         }
                         if (!flag1) {
@@ -659,49 +743,52 @@ public class World {
             throw new RuntimeException("null roof!");
         }
         
-        // Raise roof heights
-        for (int j12 = 0; j12 < 96; j12++) {
-            for (int k14 = 0; k14 < 96; k14++) {
-                if (anIntArrayArray581[j12][k14] >= 0x13880) {
-                    anIntArrayArray581[j12][k14] -= 0x13880;
+        // Raise heights of upper storeys?
+        for (int x = 0; x < NUM_TILES_X; x++) {
+            for (int y = 0; y < NUM_TILES_Y; y++) {
+                if (elevation[x][y] >= 0x13880) {
+                    elevation[x][y] -= 0x13880;
                 }
             }
         }
     }
 
-    public int getRoofTexture(int i, int j) {
-        if (i < 0 || i >= 96 || j < 0 || j >= 96) {
+    public int getRoofTexture(int x, int y) {
+        
+        if (x < 0 || x >= NUM_TILES_X || y < 0 || y >= NUM_TILES_Y) {
             return 0;
         }
+        
         byte byte0 = 0;
-        if (i >= 48 && j < 48) {
+        if (x >= 48 && y < 48) {
             byte0 = 1;
-            i -= 48;
-        } else if (i < 48 && j >= 48) {
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
             byte0 = 2;
-            j -= 48;
-        } else if (i >= 48 && j >= 48) {
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
             byte0 = 3;
-            i -= 48;
-            j -= 48;
+            x -= 48;
+            y -= 48;
         }
-        return sectors[byte0].getTile(i, j).roofTexture;
+        
+        return sectors[byte0].getTile(x, y).roofTexture;
     }
 
-    private void createWall(GameModel gameModel, int i, int j, int k, int l, int i1) {
-        method419(j, k, 40);
-        method419(l, i1, 40);
+    private void createWall(GameModel gameModel, int i, int x1, int y1, int x2, int y2) {
+        setAmbientLighting(x1, y1, 40);
+        setAmbientLighting(x2, y2, 40);
         int j1 = Resources.getDoorDef(i).getModelVar1();
         int k1 = Resources.getDoorDef(i).getModelVar2();
         int l1 = Resources.getDoorDef(i).getModelVar3();
-        int i2 = j * 128;
-        int j2 = k * 128;
-        int k2 = l * 128;
-        int l2 = i1 * 128;
-        int i3 = gameModel.getSomeIndex(i2, -anIntArrayArray581[j][k], j2);
-        int j3 = gameModel.getSomeIndex(i2, -anIntArrayArray581[j][k] - j1, j2);
-        int k3 = gameModel.getSomeIndex(k2, -anIntArrayArray581[l][i1] - j1, l2);
-        int l3 = gameModel.getSomeIndex(k2, -anIntArrayArray581[l][i1], l2);
+        int i2 = x1 * 128;
+        int j2 = y1 * 128;
+        int k2 = x2 * 128;
+        int l2 = y2 * 128;
+        int i3 = gameModel.getSomeIndex(i2, -elevation[x1][y1], j2);
+        int j3 = gameModel.getSomeIndex(i2, -elevation[x1][y1] - j1, j2);
+        int k3 = gameModel.getSomeIndex(k2, -elevation[x2][y2] - j1, l2);
+        int l3 = gameModel.getSomeIndex(k2, -elevation[x2][y2], l2);
         int i4 = gameModel.createFace(4, new int[] { i3, j3, k3, l3 }, k1, l1);
         if (Resources.getDoorDef(i).getUnknown() == 5) {
             gameModel.faceTag[i4] = 30000 + i;
@@ -710,88 +797,97 @@ public class World {
         }
     }
 
-    private void method419(int i, int j, int k) {
-        int l = i / 12;
-        int i1 = j / 12;
-        int j1 = (i - 1) / 12;
-        int k1 = (j - 1) / 12;
-        method402(l, i1, i, j, k);
-        if (l != j1) {
-            method402(j1, i1, i, j, k);
+    private void setAmbientLighting(int x, int y, int height) {
+        int modelIndex1 = x / 12;
+        int modelIndex2 = y / 12;
+        int otherModelIndex1 = (x - 1) / 12;
+        int otherModelIndex2 = (y - 1) / 12;
+        setAmbientLighting(modelIndex1, modelIndex2, x, y, height);
+        if (modelIndex1 != otherModelIndex1) {
+            setAmbientLighting(otherModelIndex1, modelIndex2, x, y, height);
         }
-        if (i1 != k1) {
-            method402(l, k1, i, j, k);
+        if (modelIndex2 != otherModelIndex2) {
+            setAmbientLighting(modelIndex1, otherModelIndex2, x, y, height);
         }
-        if (l != j1 && i1 != k1) {
-            method402(j1, k1, i, j, k);
+        if (modelIndex1 != otherModelIndex1 && modelIndex2 != otherModelIndex2) {
+            setAmbientLighting(otherModelIndex1, otherModelIndex2, x, y, height);
         }
     }
 
-    private void method402(int i, int j, int k, int l, int i1) {
-        GameModel gameModel = landscapeModels[i + j * 8];
-        for (int j1 = 0; j1 < gameModel.someCount; j1++) {
-            if (gameModel.vertexX[j1] == k * 128 && gameModel.vertexY[j1] == l * 128) {
-                gameModel.setByteAtIndexToValue(j1, i1);
+    private void setAmbientLighting(int modelIndex1, int modelIndex2, int x, int y, int ambience) {
+        GameModel gameModel = landscapeModels[modelIndex1 + modelIndex2 * 8];
+        for (int vertex = 0; vertex < gameModel.someCount; vertex++) {
+            if (gameModel.vertexX[vertex] == x * 128 && gameModel.vertexY[vertex] == y * 128) {
+                gameModel.setVertexAmbience(vertex, ambience);
                 return;
             }
         }
     }
 
-    private int getVerticalWall(int i, int j) {
-        if (i < 0 || i >= 96 || j < 0 || j >= 96) {
+    private int getVerticalWall(int x, int y) {
+        
+        if (x < 0 || x >= NUM_TILES_X || y < 0 || y >= NUM_TILES_Y) {
             return 0;
         }
-        byte byte0 = 0;
-        if (i >= 48 && j < 48) {
-            byte0 = 1;
-            i -= 48;
-        } else if (i < 48 && j >= 48) {
-            byte0 = 2;
-            j -= 48;
-        } else if (i >= 48 && j >= 48) {
-            byte0 = 3;
-            i -= 48;
-            j -= 48;
+        
+        byte layer = 0;
+        if (x >= 48 && y < 48) {
+            layer = 1;
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
+            layer = 2;
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
+            layer = 3;
+            x -= 48;
+            y -= 48;
         }
-        return sectors[byte0].getTile(i, j).verticalWall & 0xff;
+        
+        return sectors[layer].getTile(x, y).verticalWall & 0xff;
     }
 
-    private int getHorizontalWall(int i, int j) {
-        if (i < 0 || i >= 96 || j < 0 || j >= 96) {
+    private int getHorizontalWall(int x, int y) {
+        
+        if (x < 0 || x >= NUM_TILES_X || y < 0 || y >= NUM_TILES_Y) {
             return 0;
         }
-        byte byte0 = 0;
-        if (i >= 48 && j < 48) {
-            byte0 = 1;
-            i -= 48;
-        } else if (i < 48 && j >= 48) {
-            byte0 = 2;
-            j -= 48;
-        } else if (i >= 48 && j >= 48) {
-            byte0 = 3;
-            i -= 48;
-            j -= 48;
+        
+        byte layer = 0;
+        if (x >= 48 && y < 48) {
+            layer = 1;
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
+            layer = 2;
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
+            layer = 3;
+            x -= 48;
+            y -= 48;
         }
-        return sectors[byte0].getTile(i, j).horizontalWall & 0xff;
+        
+        return sectors[layer].getTile(x, y).horizontalWall & 0xff;
     }
 
-    private int getDiagonalWalls(int i, int j) {
-        if (i < 0 || i >= 96 || j < 0 || j >= 96) {
+    private int getDiagonalWalls(int x, int y) {
+        
+        if (x < 0 || x >= NUM_TILES_X || y < 0 || y >= NUM_TILES_Y) {
             return 0;
         }
-        byte byte0 = 0;
-        if (i >= 48 && j < 48) {
-            byte0 = 1;
-            i -= 48;
-        } else if (i < 48 && j >= 48) {
-            byte0 = 2;
-            j -= 48;
-        } else if (i >= 48 && j >= 48) {
-            byte0 = 3;
-            i -= 48;
-            j -= 48;
+        
+        byte layer = 0;
+        if (x >= 48 && y < 48) {
+            layer = 1;
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
+            layer = 2;
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
+            layer = 3;
+            x -= 48;
+            y -= 48;
         }
-        return sectors[byte0].getTile(i, j).diagonalWalls;
+        
+        return sectors[layer].getTile(x, y).diagonalWalls;
     }
 
     private int getTileDef(int x, int y) {
@@ -810,23 +906,26 @@ public class World {
         return Resources.getTileDef(texture - 1).getColour();
     }
 
-    private int getGroundTexture(int i, int j) {
-        if (i < 0 || i >= 96 || j < 0 || j >= 96) {
+    private int getGroundTexture(int x, int y) {
+        
+        if (x < 0 || x >= NUM_TILES_X || y < 0 || y >= NUM_TILES_Y) {
             return 0;
         }
-        byte byte0 = 0;
-        if (i >= 48 && j < 48) {
-            byte0 = 1;
-            i -= 48;
-        } else if (i < 48 && j >= 48) {
-            byte0 = 2;
-            j -= 48;
-        } else if (i >= 48 && j >= 48) {
-            byte0 = 3;
-            i -= 48;
-            j -= 48;
+        
+        byte layer = 0;
+        if (x >= 48 && y < 48) {
+            layer = 1;
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
+            layer = 2;
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
+            layer = 3;
+            x -= 48;
+            y -= 48;
         }
-        return sectors[byte0].getTile(i, j).groundTexture & 0xFF;
+        
+        return sectors[layer].getTile(x, y).groundTexture & 0xFF;
     }
 
     public boolean isCentreRoof(int x, int y) {
@@ -843,110 +942,119 @@ public class World {
                 getRoofTexture(x, y - 1) > 0;
     }
 
-    private int getGroundElevation(int i, int j) {
-        if (i < 0 || i >= 96 || j < 0 || j >= 96) {
+    private int getGroundElevation(int x, int y) {
+        if (x < 0 || x >= 96 || y < 0 || y >= 96) {
             return 0;
         }
         byte byte0 = 0;
-        if (i >= 48 && j < 48) {
+        if (x >= 48 && y < 48) {
             byte0 = 1;
-            i -= 48;
-        } else if (i < 48 && j >= 48) {
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
             byte0 = 2;
-            j -= 48;
-        } else if (i >= 48 && j >= 48) {
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
             byte0 = 3;
-            i -= 48;
-            j -= 48;
+            x -= 48;
+            y -= 48;
         }
-        return (sectors[byte0].getTile(i, j).groundElevation & 0xff) * 3;
+        return (sectors[byte0].getTile(x, y).groundElevation & 0xff) * 3;
     }
 
-    public void method403(int i, int j, int k, int l, int i1) {
-        int j1 = Resources.getDoorDef(i).getModelVar1();
-        if (anIntArrayArray581[j][k] < 0x13880) {
-            anIntArrayArray581[j][k] += 0x13880 + j1;
+    public void setDoorElevation(int doorIndex, int x1, int y1, int x2, int y2) {
+        int j1 = Resources.getDoorDef(doorIndex).getModelVar1();
+        if (elevation[x1][y1] < 0x13880) {
+            elevation[x1][y1] += 0x13880 + j1;
         }
-        if (anIntArrayArray581[l][i1] < 0x13880) {
-            anIntArrayArray581[l][i1] += 0x13880 + j1;
+        if (elevation[x2][y2] < 0x13880) {
+            elevation[x2][y2] += 0x13880 + j1;
         }
     }
 
     private void setGroundTexturesOverlay() {
-        for (int i = 0; i < 96; i++) {
-            for (int j = 0; j < 96; j++) {
-                if (getGroundTexturesOverlay(i, j) == 250) {
-                    if (i == 47 && getGroundTexturesOverlay(i + 1, j) != 250
-                            && getGroundTexturesOverlay(i + 1, j) != 2) {
-                        setGroundTexturesOverlay(i, j, 9);
-                    } else if (j == 47 && getGroundTexturesOverlay(i, j + 1) != 250
-                            && getGroundTexturesOverlay(i, j + 1) != 2) {
-                        setGroundTexturesOverlay(i, j, 9);
-                    } else {
-                        setGroundTexturesOverlay(i, j, 2);
-                    }
+        for (int x = 0; x < NUM_TILES_X; x++) {
+            for (int y = 0; y < NUM_TILES_Y; y++) {
+                
+                if (getGroundTexturesOverlay(x, y) != 250) {
+                    continue;
+                }
+                
+                if (x == 47 && getGroundTexturesOverlay(x + 1, y) != 250
+                        && getGroundTexturesOverlay(x + 1, y) != 2) {
+                    setGroundTexturesOverlay(x, y, 9);
+                } else if (y == 47 && getGroundTexturesOverlay(x, y + 1) != 250
+                        && getGroundTexturesOverlay(x, y + 1) != 2) {
+                    setGroundTexturesOverlay(x, y, 9);
+                } else {
+                    setGroundTexturesOverlay(x, y, 2);
                 }
             }
         }
     }
 
-    private void setGroundTexturesOverlay(int i, int j, int k) {
-        if (i < 0 || i >= 96 || j < 0 || j >= 96) {
+    private void setGroundTexturesOverlay(int x, int y, int groundOverlay) {
+        
+        if (x < 0 || x >= NUM_TILES_X || y < 0 || y >= NUM_TILES_Y) {
             return;
         }
-        byte byte0 = 0;
-        if (i >= 48 && j < 48) {
-            byte0 = 1;
-            i -= 48;
-        } else if (i < 48 && j >= 48) {
-            byte0 = 2;
-            j -= 48;
-        } else if (i >= 48 && j >= 48) {
-            byte0 = 3;
-            i -= 48;
-            j -= 48;
+        
+        byte layer = 0;
+        if (x >= 48 && y < 48) {
+            layer = 1;
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
+            layer = 2;
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
+            layer = 3;
+            x -= 48;
+            y -= 48;
         }
-        sectors[byte0].getTile(i, j).groundOverlay = (byte) k;
+        
+        sectors[layer].getTile(x, y).groundOverlay = (byte) groundOverlay;
     }
 
-    private int getGroundTexturesOverlay(int i, int j) {
-        if (i < 0 || i >= 96 || j < 0 || j >= 96) {
+    private int getGroundTexturesOverlay(int x, int y) {
+        
+        if (x < 0 || x >= NUM_TILES_X || y < 0 || y >= NUM_TILES_Y) {
             return 0;
         }
-        byte byte0 = 0;
-        if (i >= 48 && j < 48) {
-            byte0 = 1;
-            i -= 48;
-        } else if (i < 48 && j >= 48) {
-            byte0 = 2;
-            j -= 48;
-        } else if (i >= 48 && j >= 48) {
-            byte0 = 3;
-            i -= 48;
-            j -= 48;
+        
+        byte layer = 0;
+        if (x >= 48 && y < 48) {
+            layer = 1;
+            x -= 48;
+        } else if (x < 48 && y >= 48) {
+            layer = 2;
+            y -= 48;
+        } else if (x >= 48 && y >= 48) {
+            layer = 3;
+            x -= 48;
+            y -= 48;
         }
-        return sectors[byte0].getTile(i, j).groundOverlay & 0xff;
+        
+        return sectors[layer].getTile(x, y).groundOverlay & 0xff;
     }
 
-    public int getAveragedElevation(int i, int j) {
-        int k = i >> 7;
-        int l = j >> 7;
-        int i1 = i & 0x7f;
-        int j1 = j & 0x7f;
-        if (k < 0 || l < 0 || k >= 95 || l >= 95) {
+    public int getAveragedElevation(int tileX, int tileY) {
+        int x = tileX >> 7;
+        int y = tileY >> 7;
+        int i1 = tileX & 0x7f;
+        int j1 = tileY & 0x7f;
+        if (x < 0 || y < 0 || x >= NUM_TILES_X - 1 || y >= NUM_TILES_Y - 1) {
             return 0;
         }
         int k1;
         int l1;
         int i2;
         if (i1 <= 128 - j1) {
-            k1 = getGroundElevation(k, l);
-            l1 = getGroundElevation(k + 1, l) - k1;
-            i2 = getGroundElevation(k, l + 1) - k1;
+            k1 = getGroundElevation(x, y);
+            l1 = getGroundElevation(x + 1, y) - k1;
+            i2 = getGroundElevation(x, y + 1) - k1;
         } else {
-            k1 = getGroundElevation(k + 1, l + 1);
-            l1 = getGroundElevation(k, l + 1) - k1;
-            i2 = getGroundElevation(k + 1, l) - k1;
+            k1 = getGroundElevation(x + 1, y + 1);
+            l1 = getGroundElevation(x, y + 1) - k1;
+            i2 = getGroundElevation(x + 1, y) - k1;
             i1 = 128 - i1;
             j1 = 128 - j1;
         }

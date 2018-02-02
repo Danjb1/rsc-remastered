@@ -1,7 +1,6 @@
 package client.render;
 
 import client.Canvas;
-import client.World;
 import client.res.Resources;
 import client.res.Texture;
 import client.scene.Camera;
@@ -18,6 +17,8 @@ import client.scene.SpriteEntity;
  * by porting to OpenGL instead.
  */
 public class SceneRenderer {
+
+    public static final int COLOUR_TRANSPARENT = 12345678;
 
     private static final int MAX_POLYGONS = 15000;
     
@@ -152,7 +153,7 @@ public class SceneRenderer {
                                 } else {
                                     faceFill = gameModel.faceFillBack[face];
                                 }
-                                if (faceFill != World.COLOUR_TRANSPARENT) {
+                                if (faceFill != COLOUR_TRANSPARENT) {
                                     int j2 = 0;
                                     for (int vertex = 0; vertex < numVertices; vertex++) {
                                         j2 += gameModel.projectVertexZ[vertices[vertex]];
@@ -220,7 +221,7 @@ public class SceneRenderer {
                 int light = 0;
                 int numFaces = polygonModel.faceNumVertices[polyFace];
                 int faceVerts[] = polygonModel.faceVertices[polyFace];
-                if (polygonModel.faceIntensity[polyFace] != World.COLOUR_TRANSPARENT) {
+                if (polygonModel.faceIntensity[polyFace] != COLOUR_TRANSPARENT) {
                     if (polygon.visibility < 0) {
                         light = polygonModel.lightAmbience - polygonModel.faceIntensity[polyFace];
                     } else {
@@ -232,7 +233,7 @@ public class SceneRenderer {
                     vertexX[face] = polygonModel.projectVertexX[vert];
                     vertexY[face] = polygonModel.projectVertexY[vert];
                     vertexZ[face] = polygonModel.projectVertexZ[vert];
-                    if (polygonModel.faceIntensity[polyFace] == World.COLOUR_TRANSPARENT) {
+                    if (polygonModel.faceIntensity[polyFace] == COLOUR_TRANSPARENT) {
                         if (polygon.visibility < 0) {
                             light = (polygonModel.lightAmbience - polygonModel.vertexIntensity[vert])
                                     + polygonModel.vertexAmbience[vert];
@@ -458,7 +459,7 @@ public class SceneRenderer {
             int j13 = 0;
             int l13 = 0;
             int j14 = 0;
-            int l14 = World.COLOUR_TRANSPARENT;
+            int l14 = COLOUR_TRANSPARENT;
             int j15 = 0xff439eb2;
             if (k3 != k1) {
                 j13 = (j7 - k4 << 8) / (k3 - k1);
@@ -487,7 +488,7 @@ public class SceneRenderer {
             int j16 = 0;
             int l16 = 0;
             int j17 = 0;
-            int l17 = World.COLOUR_TRANSPARENT;
+            int l17 = COLOUR_TRANSPARENT;
             int j18 = 0xff439eb2;
             if (k2 != k1) {
                 j16 = (l5 - k4 << 8) / (k2 - k1);
@@ -516,7 +517,7 @@ public class SceneRenderer {
             int j19 = 0;
             int l19 = 0;
             int j20 = 0;
-            int l20 = World.COLOUR_TRANSPARENT;
+            int l20 = COLOUR_TRANSPARENT;
             int j21 = 0xff439eb2;
             if (k3 != k2) {
                 j19 = (j7 - l5 << 8) / (k3 - k2);
@@ -618,7 +619,7 @@ public class SceneRenderer {
             int i15 = 0;
             int k15 = 0;
             int i16 = 0;
-            int k16 = World.COLOUR_TRANSPARENT;
+            int k16 = COLOUR_TRANSPARENT;
             int i17 = 0xff439eb2;
             if (l4 != l1) {
                 i15 = (k10 - i6 << 8) / (l4 - l1);
@@ -647,7 +648,7 @@ public class SceneRenderer {
             int i18 = 0;
             int k18 = 0;
             int i19 = 0;
-            int k19 = World.COLOUR_TRANSPARENT;
+            int k19 = COLOUR_TRANSPARENT;
             int i20 = 0xff439eb2;
             if (l2 != l1) {
                 i18 = (k7 - i6 << 8) / (l2 - l1);
@@ -676,7 +677,7 @@ public class SceneRenderer {
             int i21 = 0;
             int k21 = 0;
             int i22 = 0;
-            int j22 = World.COLOUR_TRANSPARENT;
+            int j22 = COLOUR_TRANSPARENT;
             int k22 = 0xff439eb2;
             if (l3 != l2) {
                 i21 = (i9 - k7 << 8) / (l3 - l2);
@@ -705,7 +706,7 @@ public class SceneRenderer {
             int i23 = 0;
             int j23 = 0;
             int k23 = 0;
-            int l23 = World.COLOUR_TRANSPARENT;
+            int l23 = COLOUR_TRANSPARENT;
             int i24 = 0xff439eb2;
             if (l4 != l3) {
                 i23 = (k10 - i9 << 8) / (l4 - l3);
