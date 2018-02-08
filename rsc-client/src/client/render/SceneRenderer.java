@@ -15,6 +15,8 @@ import client.scene.SpriteEntity;
  * 
  * This is essentially a 3d software renderer; we could save a lot of complexity
  * by porting to OpenGL instead.
+ * 
+ * Here be dragons...
  */
 public class SceneRenderer {
 

@@ -16,7 +16,10 @@ public class GameObjectDef extends EntityDef {
     public int height;
     
     /**
-     * Z-position of items placed atop this object.
+     * Height of items placed atop this object.
+     * 
+     * This should be renamed in the game data, since it actually refers to the
+     * y-axis.
      */
     public int groundItemZ;
 
@@ -48,7 +51,7 @@ public class GameObjectDef extends EntityDef {
         return height;
     }
 
-    public int getGroundItemZ() {
+    public int getGroundItemHeight() {
         return groundItemZ;
     }
     

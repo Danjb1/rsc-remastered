@@ -32,24 +32,24 @@ public class Game extends State {
     private int screenRotationY;
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
     private int lastAutoCameraRotatePlayerX;
-    private int lastAutoCameraRotatePlayerY;
+    private int lastAutoCameraRotatePlayerZ;
     
     private int regionX;
-    private int regionY;
+    private int regionZ;
     private int layer = 0;
     
     private int planeWidth = 2304;
-    private int planeHeight = 1776;
+    private int planeDepth = 1776;
     private int planeIndex = 0;
     
     private int mapBoundaryX1;
-    private int mapBoundaryY1;
+    private int mapBoundaryZ1;
     private int mapBoundaryX2;
-    private int mapBoundaryY2;
+    private int mapBoundaryZ2;
 
     private int objectCount;
     private int objectX[] = new int[1500];
-    private int objectY[] = new int[1500];
+    private int objectZ[] = new int[1500];
     private int objectTypes[] = new int[1500];
     private int objectID[] = new int[1500];
     private GameModel objectModels[] = new GameModel[1500];
@@ -57,7 +57,7 @@ public class Game extends State {
 
     private int wallObjectCount;
     private int wallObjectX[] = new int[500];
-    private int wallObjectY[] = new int[500];
+    private int wallObjectZ[] = new int[500];
     private int wallObjectDirection[] = new int[500];
     private int wallObjectId[] = new int[500];
     private GameModel wallObjectModels[] = new GameModel[500];
@@ -65,7 +65,7 @@ public class Game extends State {
     public Game() {
         player = new Mob();
         player.currentX = 8512;
-        player.currentY = 4160;
+        player.currentZ = 4160;
         scene = new Scene();
         sceneRenderer = new SceneRenderer(scene,
                 RsLauncher.WINDOW_WIDTH,
@@ -80,17 +80,17 @@ public class Game extends State {
         // Rotate camera
         if (lastAutoCameraRotatePlayerX - player.currentX < -500
                 || lastAutoCameraRotatePlayerX - player.currentX > 500
-                || lastAutoCameraRotatePlayerY - player.currentY < -500
-                || lastAutoCameraRotatePlayerY - player.currentY > 500) {
+                || lastAutoCameraRotatePlayerZ - player.currentZ < -500
+                || lastAutoCameraRotatePlayerZ - player.currentZ > 500) {
             lastAutoCameraRotatePlayerX = player.currentX;
-            lastAutoCameraRotatePlayerY = player.currentY;
+            lastAutoCameraRotatePlayerZ = player.currentZ;
         }
         if (lastAutoCameraRotatePlayerX != player.currentX) {
             lastAutoCameraRotatePlayerX += (player.currentX - lastAutoCameraRotatePlayerX)
                     / (16 + (cameraHeight - 500) / 15);
         }
-        if (lastAutoCameraRotatePlayerY != player.currentY) {
-            lastAutoCameraRotatePlayerY += (player.currentY - lastAutoCameraRotatePlayerY)
+        if (lastAutoCameraRotatePlayerZ != player.currentZ) {
+            lastAutoCameraRotatePlayerZ += (player.currentZ - lastAutoCameraRotatePlayerZ)
                     / (16 + (cameraHeight - 500) / 15);
         }
     }
@@ -107,10 +107,10 @@ public class Game extends State {
             player.currentX -= 200;
             break;
         case KeyEvent.VK_UP:
-            player.currentY -= 200;
+            player.currentZ -= 200;
             break;
         case KeyEvent.VK_DOWN:
-            player.currentY += 200;
+            player.currentZ += 200;
             break;
         }
     }
@@ -123,45 +123,45 @@ public class Game extends State {
         return loginScreen;
     }
 
-    private boolean loadNextRegion(int x, int y) {
+    private boolean loadNextRegion(int x, int z) {
         
         x += planeWidth;
-        y += planeHeight;
+        z += planeDepth;
         
         if (layer == planeIndex &&
                 x > mapBoundaryX1 && x < mapBoundaryX2 &&
-                y > mapBoundaryY1 && y < mapBoundaryY2) {
+                z > mapBoundaryZ1 && z < mapBoundaryZ2) {
             // No need to load region if already loaded
             return false;
         }
         
         int k = regionX;
-        int l = regionY;
+        int l = regionZ;
         int i1 = (x + 24) / 48;
-        int j1 = (y + 24) / 48;
+        int j1 = (z + 24) / 48;
         layer = planeIndex;
         regionX = i1 * 48 - 48;
-        regionY = j1 * 48 - 48;
+        regionZ = j1 * 48 - 48;
         
         // Set map boundary around the loaded region
         mapBoundaryX1 = i1 * 48 - 32;
-        mapBoundaryY1 = j1 * 48 - 32;
+        mapBoundaryZ1 = j1 * 48 - 32;
         mapBoundaryX2 = i1 * 48 + 32;
-        mapBoundaryY2 = j1 * 48 + 32;
+        mapBoundaryZ2 = j1 * 48 + 32;
         
-        world.loadRegion(x, y, layer);
+        world.loadRegion(x, z, layer);
         
         regionX -= planeWidth;
-        regionY -= planeHeight;
+        regionZ -= planeDepth;
         int k1 = regionX - k;
-        int l1 = regionY - l;
+        int l1 = regionZ - l;
         
         // Add object models to scene
         for (int i2 = 0; i2 < objectCount; i2++) {
             objectX[i2] -= k1;
-            objectY[i2] -= l1;
+            objectZ[i2] -= l1;
             int j2 = objectX[i2];
-            int l2 = objectY[i2];
+            int l2 = objectZ[i2];
             int k3 = objectTypes[i2];
             GameModel gameModel = objectModels[i2];
             try {
@@ -194,9 +194,9 @@ public class Game extends State {
         // Create wall models
         for (int k2 = 0; k2 < wallObjectCount; k2++) {
             wallObjectX[k2] -= k1;
-            wallObjectY[k2] -= l1;
+            wallObjectZ[k2] -= l1;
             int i3 = wallObjectX[k2];
-            int l3 = wallObjectY[k2];
+            int l3 = wallObjectZ[k2];
             int j4 = wallObjectId[k2];
             int i5 = wallObjectDirection[k2];
             try {
@@ -231,41 +231,41 @@ public class Game extends State {
         return player;
     }
 
-    private GameModel createModel(int x, int y, int k, int l, int i1) {
-        int modelX = x;
-        int modelY = y;
+    private GameModel createModel(int x, int z, int k, int l, int i1) {
         int modelX1 = x;
-        int modelX2 = y;
+        int modelZ1 = z;
+        int modelX2 = x;
+        int modelZ2 = z;
         int j2 = Resources.getDoorDef(l).getModelVar2();
         int k2 = Resources.getDoorDef(l).getModelVar3();
         int l2 = Resources.getDoorDef(l).getModelVar1();
         GameModel gameModel = new GameModel(4, 1);
         if (k == 0) {
-            modelX1 = x + 1;
+            modelX2 = x + 1;
         }
         if (k == 1) {
-            modelX2 = y + 1;
+            modelZ2 = z + 1;
         }
         if (k == 2) {
-            modelX = x + 1;
-            modelX2 = y + 1;
+            modelX1 = x + 1;
+            modelZ2 = z + 1;
         }
         if (k == 3) {
-            modelX1 = x + 1;
-            modelX2 = y + 1;
+            modelX2 = x + 1;
+            modelZ2 = z + 1;
         }
-        modelX *= magicLoc;
-        modelY *= magicLoc;
         modelX1 *= magicLoc;
+        modelZ1 *= magicLoc;
         modelX2 *= magicLoc;
-        int i3 = gameModel.getSomeIndex(modelX, -world.getAveragedElevation(modelX, modelY), modelY);
-        int j3 = gameModel.getSomeIndex(modelX, -world.getAveragedElevation(modelX, modelY) - l2, modelY);
-        int k3 = gameModel.getSomeIndex(modelX1, -world.getAveragedElevation(modelX1, modelX2) - l2, modelX2);
-        int l3 = gameModel.getSomeIndex(modelX1, -world.getAveragedElevation(modelX1, modelX2), modelX2);
+        modelZ2 *= magicLoc;
+        int i3 = gameModel.createVertexWithoutDuplication(modelX1, -world.getAveragedElevation(modelX1, modelZ1), modelZ1);
+        int j3 = gameModel.createVertexWithoutDuplication(modelX1, -world.getAveragedElevation(modelX1, modelZ1) - l2, modelZ1);
+        int k3 = gameModel.createVertexWithoutDuplication(modelX2, -world.getAveragedElevation(modelX2, modelZ2) - l2, modelZ2);
+        int l3 = gameModel.createVertexWithoutDuplication(modelX2, -world.getAveragedElevation(modelX2, modelZ2), modelZ2);
         int ai[] = { i3, j3, k3, l3 };
         gameModel.createFace(4, ai, j2, k2);
         gameModel.getDistanceToSomething(false, 60, 24, -50, -10, -50);
-        if (x >= 0 && y >= 0 && x < 96 && y < 96) {
+        if (x >= 0 && z >= 0 && x < 96 && z < 96) {
             scene.addModel(gameModel);
         }
         gameModel.entityId = i1 + MIN_DOOR_ID;
@@ -284,15 +284,15 @@ public class Game extends State {
         return lastAutoCameraRotatePlayerX;
     }
     
-    public int getLastAutoCameraRotatePlayerY() {
-        return lastAutoCameraRotatePlayerY;
+    public int getLastAutoCameraRotatePlayerZ() {
+        return lastAutoCameraRotatePlayerZ;
     }
     
     public int getScreenRotationX() {
         return screenRotationX;
     }
     
-    public int getScreenRotationY() {
+    public int getScreenRotationZ() {
         return screenRotationY;
     }
 
@@ -305,9 +305,9 @@ public class Game extends State {
         this.lastAutoCameraRotatePlayerX = lastAutoCameraRotatePlayerX;
     }
     
-    public void setLastAutoCameraRotatePlayerY(
-            int lastAutoCameraRotatePlayerY) {
-        this.lastAutoCameraRotatePlayerY = lastAutoCameraRotatePlayerY;
+    public void setLastAutoCameraRotatePlayerZ(
+            int lastAutoCameraRotatePlayerZ) {
+        this.lastAutoCameraRotatePlayerZ = lastAutoCameraRotatePlayerZ;
     }
 
     @Override

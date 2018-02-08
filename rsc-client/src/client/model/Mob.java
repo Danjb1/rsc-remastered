@@ -8,7 +8,7 @@ public class Mob {
     public int serverIndex;
     public int mobIntUnknown;
     public int currentX;
-    public int currentY;
+    public int currentZ;
     public int type;
     public int stepCount;
     public int currentSprite;
@@ -16,7 +16,7 @@ public class Mob {
     public int movingStep;
     public int waypointCurrent;
     public int waypointsX[] = new int[10];
-    public int waypointsY[] = new int[10];
+    public int waypointsZ[] = new int[10];
     public int animationCount[] = new int[12];
     public String lastMessage;
     public int lastMessageTimeout;

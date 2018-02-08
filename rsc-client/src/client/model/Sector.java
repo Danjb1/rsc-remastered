@@ -14,14 +14,14 @@ public class Sector {
     public static final int WIDTH = 48;
 
     /**
-     * The height of a Sector.
+     * The depth of a Sector.
      */
-    public static final int HEIGHT = 48;
+    public static final int DEPTH = 48;
 
     /**
      * Total number of Tiles within a Sector.
      */
-    public static final int NUM_TILES = WIDTH * HEIGHT;
+    public static final int NUM_TILES = WIDTH * DEPTH;
 
     /**
      * Total number of faces within a Sector.
@@ -46,8 +46,8 @@ public class Sector {
     /**
      * Sets the the Tile at the given coords.
      */
-    public void setTile(int x, int y, Tile t) {
-        setTile(x * Sector.WIDTH + y, t);
+    public void setTile(int x, int z, Tile t) {
+        setTile(x * Sector.WIDTH + z, t);
     }
 
     /**
@@ -60,8 +60,8 @@ public class Sector {
     /**
      * Gets the Tile at the given coords.
      */
-    public Tile getTile(int x, int y) {
-        return getTile(x * Sector.WIDTH + y);
+    public Tile getTile(int x, int z) {
+        return getTile(x * Sector.WIDTH + z);
     }
 
     /**

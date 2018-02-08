@@ -7,7 +7,7 @@ import client.util.DataUtils;
 
 public class GameModel {
 
-    public int someCount;
+    public int vertexIndex;
     public int projectVertexX[];
     public int projectVertexY[];
     public int projectVertexZ[];
@@ -49,10 +49,10 @@ public class GameModel {
     private static byte someConstantRanges[];
     private static int someConstantsRanges2[];
     private int anInt270;
-    public int count1;
+    public int maxVertices;
     public int vertexX[];
-    public int vertexZ[];
     public int vertexY[];
+    public int vertexZ[];
     public int xPosition[];
     public int yPosition[];
     public int zPosition[];
@@ -174,16 +174,16 @@ public class GameModel {
         }
 
         for (int i1 = 0; i1 < j; i1++) {
-            vertexZ[i1] = DataUtils.getSigned2Bytes(abyte0, i);
+            vertexY[i1] = DataUtils.getSigned2Bytes(abyte0, i);
             i += 2;
         }
 
         for (int j1 = 0; j1 < j; j1++) {
-            vertexY[j1] = DataUtils.getSigned2Bytes(abyte0, i);
+            vertexZ[j1] = DataUtils.getSigned2Bytes(abyte0, i);
             i += 2;
         }
 
-        someCount = j;
+        vertexIndex = j;
         for (int k1 = 0; k1 < k; k1++) {
             faceNumVertices[k1] = abyte0[i++] & 0xff;
         }
@@ -271,7 +271,7 @@ public class GameModel {
             }
             datainputstream.close();
         } catch (IOException _ex) {
-            someCount = 0;
+            vertexIndex = 0;
             numFaces = 0;
             return;
         }
@@ -283,7 +283,7 @@ public class GameModel {
             int j1 = readIntFromByteArray(abyte0);
             int k1 = readIntFromByteArray(abyte0);
             int l1 = readIntFromByteArray(abyte0);
-            getSomeIndex(j1, k1, l1);
+            createVertexWithoutDuplication(j1, k1, l1);
         }
 
         for (int k3 = 0; k3 < someCount; k3++) {
@@ -446,8 +446,8 @@ public class GameModel {
 
     private void initialise(int maxVertices, int maxFaces) {
         vertexX = new int[maxVertices];
-        vertexZ = new int[maxVertices];
         vertexY = new int[maxVertices];
+        vertexZ = new int[maxVertices];
         vertexIntensity = new int[maxVertices];
         vertexAmbience = new byte[maxVertices];
         faceNumVertices = new int[maxFaces];
@@ -469,8 +469,8 @@ public class GameModel {
         }
         if (aBoolean260) {
             xPosition = vertexX;
-            yPosition = vertexZ;
-            zPosition = vertexY;
+            yPosition = vertexY;
+            zPosition = vertexZ;
         } else {
             xPosition = new int[maxVertices];
             yPosition = new int[maxVertices];
@@ -490,8 +490,8 @@ public class GameModel {
             anIntArray285 = new int[maxFaces];
         }
         numFaces = 0;
-        someCount = 0;
-        this.count1 = maxVertices;
+        vertexIndex = 0;
+        this.maxVertices = maxVertices;
         this.count2 = maxFaces;
         xSpeed = ySpeed = zSpeed = 0;
         somethingX = somethingY = somethingZ = 0;
@@ -501,16 +501,16 @@ public class GameModel {
     }
 
     public void resetSomeArrays() {
-        projectVertexX = new int[someCount];
-        projectVertexY = new int[someCount];
-        projectVertexZ = new int[someCount];
-        vertexViewX = new int[someCount];
-        vertexViewY = new int[someCount];
+        projectVertexX = new int[vertexIndex];
+        projectVertexY = new int[vertexIndex];
+        projectVertexZ = new int[vertexIndex];
+        vertexViewX = new int[vertexIndex];
+        vertexViewY = new int[vertexIndex];
     }
 
     public void clear() {
         numFaces = 0;
-        someCount = 0;
+        vertexIndex = 0;
     }
 
     public void reduceCounters(int i, int j) {
@@ -518,9 +518,9 @@ public class GameModel {
         if (numFaces < 0) {
             numFaces = 0;
         }
-        someCount -= j;
-        if (someCount < 0) {
-            someCount = 0;
+        vertexIndex -= j;
+        if (vertexIndex < 0) {
+            vertexIndex = 0;
         }
     }
 
@@ -536,7 +536,7 @@ public class GameModel {
         int k = 0;
         for (int l = 0; l < i; l++) {
             j += models[l].numFaces;
-            k += models[l].someCount;
+            k += models[l].vertexIndex;
         }
 
         initialise(k, j);
@@ -556,8 +556,8 @@ public class GameModel {
                 int ai[] = new int[gameModel.faceNumVertices[j1]];
                 int ai1[] = gameModel.faceVertices[j1];
                 for (int k1 = 0; k1 < gameModel.faceNumVertices[j1]; k1++) {
-                    ai[k1] = getSomeIndex(gameModel.vertexX[ai1[k1]], gameModel.vertexZ[ai1[k1]],
-                            gameModel.vertexY[ai1[k1]]);
+                    ai[k1] = createVertexWithoutDuplication(gameModel.vertexX[ai1[k1]], gameModel.vertexY[ai1[k1]],
+                            gameModel.vertexZ[ai1[k1]]);
                 }
 
                 int l1 = createFace(gameModel.faceNumVertices[j1], ai, gameModel.faceFillFront[j1],
@@ -588,45 +588,70 @@ public class GameModel {
         transformState = 1;
     }
 
-    public int getSomeIndex(int i, int j, int k) {
-        for (int l = 0; l < someCount; l++) {
-            if (vertexX[l] == i && vertexZ[l] == j && vertexY[l] == k) {
+    /**
+     * Adds the given vertex, and returns its index.
+     * 
+     * If the vertex already exists, simply returns its index.
+     * 
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
+    public int createVertexWithoutDuplication(int x, int y, int z) {
+        
+        // Check if vertex has already been added
+        for (int l = 0; l < vertexIndex; l++) {
+            if (vertexX[l] == x && vertexY[l] == y && vertexZ[l] == z) {
                 return l;
             }
         }
 
-        if (someCount >= count1) {
+        if (vertexIndex >= maxVertices) {
             return -1;
-        } else {
-            vertexX[someCount] = i;
-            vertexZ[someCount] = j;
-            vertexY[someCount] = k;
-            return someCount++;
         }
+        
+        vertexX[vertexIndex] = x;
+        vertexY[vertexIndex] = y;
+        vertexZ[vertexIndex] = z;
+        
+        return vertexIndex++;
     }
 
+    /**
+     * Adds the given vertex, and returns its index.
+     * 
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
     public int createVertex(int x, int z, int y) {
-        if (someCount >= count1) {
+        
+        if (vertexIndex >= maxVertices) {
             return -1;
-        } else {
-            vertexX[someCount] = x;
-            vertexZ[someCount] = z;
-            vertexY[someCount] = y;
-            return someCount++;
         }
+        
+        vertexX[vertexIndex] = x;
+        vertexY[vertexIndex] = z;
+        vertexZ[vertexIndex] = y;
+        
+        return vertexIndex++;
     }
 
     public int createFace(int i, int ai[], int j, int k) {
+        
         if (numFaces >= count2) {
             return -1;
-        } else {
-            faceNumVertices[numFaces] = i;
-            faceVertices[numFaces] = ai;
-            faceFillFront[numFaces] = j;
-            faceFillBack[numFaces] = k;
-            transformState = 1;
-            return numFaces++;
         }
+        
+        faceNumVertices[numFaces] = i;
+        faceVertices[numFaces] = ai;
+        faceFillFront[numFaces] = j;
+        faceFillBack[numFaces] = k;
+        transformState = 1;
+        
+        return numFaces++;
     }
 
     public GameModel[] createModelArray(int i, int j, int k, int l, int i1, int count, int k1, boolean flag) {
@@ -645,7 +670,7 @@ public class GameModel {
             int ai2[] = faceVertices[i2];
             for (int i4 = 0; i4 < i3; i4++) {
                 j2 += vertexX[ai2[i4]];
-                k2 += vertexY[ai2[i4]];
+                k2 += vertexZ[ai2[i4]];
             }
 
             int k4 = j2 / (i3 * k) + (k2 / (i3 * l)) * i1;
@@ -670,7 +695,7 @@ public class GameModel {
             int ai3[] = faceVertices[j3];
             for (int i5 = 0; i5 < l4; i5++) {
                 k3 += vertexX[ai3[i5]];
-                j4 += vertexY[ai3[i5]];
+                j4 += vertexZ[ai3[i5]];
             }
 
             int j5 = k3 / (l4 * k) + (j4 / (l4 * l)) * i1;
@@ -687,7 +712,7 @@ public class GameModel {
     public void copySomeDataIntoTheNextIndex(GameModel gameModel, int ai[], int count, int index) {
         int ai1[] = new int[count];
         for (int k = 0; k < count; k++) {
-            int l = ai1[k] = gameModel.getSomeIndex(vertexX[ai[k]], vertexZ[ai[k]], vertexY[ai[k]]);
+            int l = ai1[k] = gameModel.createVertexWithoutDuplication(vertexX[ai[k]], vertexY[ai[k]], vertexZ[ai[k]]);
             gameModel.vertexIntensity[l] = vertexIntensity[ai[k]];
             gameModel.vertexAmbience[l] = vertexAmbience[ai[k]];
         }
@@ -810,7 +835,7 @@ public class GameModel {
     }
 
     private void move(int i, int j, int k) {
-        for (int l = 0; l < someCount; l++) {
+        for (int l = 0; l < vertexIndex; l++) {
             xPosition[l] += i;
             yPosition[l] += j;
             zPosition[l] += k;
@@ -819,7 +844,7 @@ public class GameModel {
     }
 
     private void doSomeNastyMath(int i, int j, int k) {
-        for (int i3 = 0; i3 < someCount; i3++) {
+        for (int i3 = 0; i3 < vertexIndex; i3++) {
             if (k != 0) {
                 int l = trigValues1[k];
                 int k1 = trigValues1[k + 256];
@@ -846,7 +871,7 @@ public class GameModel {
     }
 
     private void doStuffIfParametersAreNonZero(int i, int j, int k, int l, int i1, int j1) {
-        for (int k1 = 0; k1 < someCount; k1++) {
+        for (int k1 = 0; k1 < vertexIndex; k1++) {
             if (i != 0) {
                 xPosition[k1] += yPosition[k1] * i >> 8;
             }
@@ -870,7 +895,7 @@ public class GameModel {
     }
 
     private void modifySomeValues(int i, int j, int k) {
-        for (int l = 0; l < someCount; l++) {
+        for (int l = 0; l < vertexIndex; l++) {
             xPosition[l] = xPosition[l] * i >> 8;
             yPosition[l] = yPosition[l] * j >> 8;
             zPosition[l] = zPosition[l] * k >> 8;
@@ -961,11 +986,11 @@ public class GameModel {
             }
         }
 
-        int ai[] = new int[someCount];
-        int ai1[] = new int[someCount];
-        int ai2[] = new int[someCount];
-        int ai3[] = new int[someCount];
-        for (int k = 0; k < someCount; k++) {
+        int ai[] = new int[vertexIndex];
+        int ai1[] = new int[vertexIndex];
+        int ai2[] = new int[vertexIndex];
+        int ai3[] = new int[vertexIndex];
+        for (int k = 0; k < vertexIndex; k++) {
             ai[k] = 0;
             ai1[k] = 0;
             ai2[k] = 0;
@@ -985,7 +1010,7 @@ public class GameModel {
             }
         }
 
-        for (int j1 = 0; j1 < someCount; j1++) {
+        for (int j1 = 0; j1 < vertexIndex; j1++) {
             if (ai3[j1] > 0) {
                 vertexIntensity[j1] = (ai[j1] * distX + ai1[j1] * distY + ai2[j1] * distZ) / (i * ai3[j1]);
             }
@@ -1037,10 +1062,10 @@ public class GameModel {
     private void doStuffBasedOnState() {
         if (transformState == 2) {
             transformState = 0;
-            for (int i = 0; i < someCount; i++) {
+            for (int i = 0; i < vertexIndex; i++) {
                 xPosition[i] = vertexX[i];
-                yPosition[i] = vertexZ[i];
-                zPosition[i] = vertexY[i];
+                yPosition[i] = vertexY[i];
+                zPosition[i] = vertexZ[i];
             }
 
             anInt248 = anInt250 = anInt252 = 0xff676981;
@@ -1049,10 +1074,10 @@ public class GameModel {
         }
         if (transformState == 1) {
             transformState = 0;
-            for (int j = 0; j < someCount; j++) {
+            for (int j = 0; j < vertexIndex; j++) {
                 xPosition[j] = vertexX[j];
-                yPosition[j] = vertexZ[j];
-                zPosition[j] = vertexY[j];
+                yPosition[j] = vertexY[j];
+                zPosition[j] = vertexZ[j];
             }
 
             if (state >= 2) {
@@ -1103,7 +1128,7 @@ public class GameModel {
             j3 = trigValues2[camera.getYaw()];
             k3 = trigValues2[camera.getYaw() + 1024];
         }
-        for (int index = 0; index < someCount; index++) {
+        for (int index = 0; index < vertexIndex; index++) {
             int k4 = xPosition[index] - camera.getX();
             int l4 = yPosition[index] - camera.getY();
             int i5 = zPosition[index] - camera.getZ();
@@ -1141,10 +1166,10 @@ public class GameModel {
 
     public void resetSomeData() {
         doStuffBasedOnState();
-        for (int i = 0; i < someCount; i++) {
+        for (int i = 0; i < vertexIndex; i++) {
             vertexX[i] = xPosition[i];
-            vertexZ[i] = yPosition[i];
-            vertexY[i] = zPosition[i];
+            vertexY[i] = yPosition[i];
+            vertexZ[i] = zPosition[i];
         }
 
         xSpeed = ySpeed = zSpeed = 0;

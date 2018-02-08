@@ -134,7 +134,7 @@ public class GameRenderer {
         scene.fogZDistance = 2300 + (cameraHeight * 2);
 
         int l5 = game.getLastAutoCameraRotatePlayerX() + game.getScreenRotationX();
-        int i8 = game.getLastAutoCameraRotatePlayerY() + game.getScreenRotationY();
+        int i8 = game.getLastAutoCameraRotatePlayerZ() + game.getScreenRotationZ();
         camera.setCamera(l5, -world.getAveragedElevation(l5, i8), i8, 912, game.getCameraRotation() * 4, 0,
                 cameraHeight * 2);
 

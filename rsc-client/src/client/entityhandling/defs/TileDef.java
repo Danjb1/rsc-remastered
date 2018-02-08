@@ -5,6 +5,8 @@ package client.entityhandling.defs;
  */
 public class TileDef {
     
+    public static final int TYPE_BRIDGE = 4;
+    
     public int colour;
     public int unknown;
     public int objectType;
@@ -13,7 +15,7 @@ public class TileDef {
         return colour;
     }
 
-    public int getUnknown() {
+    public int getType() {
         return unknown;
     }
 

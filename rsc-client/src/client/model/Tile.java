@@ -16,7 +16,7 @@ public class Tile {
     /**
      * The texture ID of this tile.
      */
-    public byte groundTexture;
+    public byte texture;
 
     /**
      * The texture ID of the roof of this tile.
@@ -50,7 +50,7 @@ public class Tile {
         ByteBuffer out = ByteBuffer.allocate(10);
 
         out.put(groundElevation);
-        out.put(groundTexture);
+        out.put(texture);
         out.put(groundOverlay);
         out.put(roofTexture);
 
@@ -74,7 +74,7 @@ public class Tile {
         Tile tile = new Tile();
 
         tile.groundElevation = in.get();
-        tile.groundTexture = in.get();
+        tile.texture = in.get();
         tile.groundOverlay = in.get();
         tile.roofTexture = in.get();
         tile.horizontalWall = in.get();
