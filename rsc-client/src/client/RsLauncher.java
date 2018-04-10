@@ -9,6 +9,13 @@ import client.states.Game;
 import client.states.LoadingScreen;
 import client.states.LoginScreen;
 
+/**
+ * Class responsible for setting up and running the game.
+ * 
+ * <p><i>Based on <code>GameShell.java</code> from other RSC sources.</i>
+ * 
+ * @author Dan Bryce
+ */
 public class RsLauncher {
 
     public static final int WINDOW_WIDTH = 1280;

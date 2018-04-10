@@ -8,6 +8,11 @@ import java.awt.Graphics;
 import client.Canvas;
 import client.states.LoadingScreen;
 
+/**
+ * Class responsible for rendering the loading screen.
+ * 
+ * @author Dan Bryce
+ */
 public class LoadingScreenRenderer {
 
     private static final Color BAR_COLOUR = new Color(144, 192, 64);

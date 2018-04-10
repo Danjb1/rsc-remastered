@@ -13,10 +13,12 @@ import client.scene.SpriteEntity;
 /**
  * Class capable of rendering a scene.
  * 
- * This is essentially a 3d software renderer; we could save a lot of complexity
- * by porting to OpenGL instead.
+ * <p>This is essentially a 3d software renderer; we could save a lot of
+ * complexity by porting to OpenGL instead.
  * 
- * Here be dragons...
+ * <p>Here be dragons...
+ * 
+ * <p><i>Based on <code>client.Scene</code> from EasyRSC.</i>
  */
 public class SceneRenderer {
 

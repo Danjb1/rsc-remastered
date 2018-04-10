@@ -6,6 +6,11 @@ import client.scene.Camera;
 import client.scene.Scene;
 import client.states.Game;
 
+/**
+ * Class responsible for rendering the game state.
+ * 
+ * @author Dan Bryce
+ */
 public class GameRenderer {
 
     public static void render(Game game, Canvas canvas) {
@@ -24,11 +29,12 @@ public class GameRenderer {
                 scene.removeModel(world.getRoofModel(1, i));
                 scene.removeModel(world.getWallModel(2, i));
                 scene.removeModel(world.getRoofModel(2, i));
-            }
-            
-            scene.addModel(world.getRoofModel(layer, i));
-            if (layer == 0) {
-                // Add roofs to upper storeys
+
+                // Add roof of current layer
+                // TODO: Don't add roofs or upper storeys if player is indoors!
+                scene.addModel(world.getRoofModel(layer, i));
+                
+                // Add upper storeys
                 scene.addModel(world.getWallModel(1, i));
                 scene.addModel(world.getRoofModel(1, i));
                 scene.addModel(world.getWallModel(2, i));

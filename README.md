@@ -2,7 +2,7 @@
 
 An open-source re-implementation of RuneScape Classic for private use.
 
-See **[about.md](docs/about.md)** for more information.
+See **[ABOUT.md](docs/ABOUT.md)** for more information.
 
 ## :chart_with_upwards_trend: Progress
 

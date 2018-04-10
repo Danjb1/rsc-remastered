@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import client.res.Resources;
 
 public class Sprite {
+
     private static final int TRANSPARENT = Color.BLACK.getRGB();
 
     private int[] pixels;

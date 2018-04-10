@@ -6,7 +6,11 @@ import client.scene.Sprite;
 /**
  * Class responsible for storing and manipulating pixel data of a 2D image.
  * 
- * Here be dragons...
+ * <p>Here be dragons...
+ * 
+ * <p><i>Based on <code>Surface.java</code> from other RSC sources.</i>
+ * 
+ * @author Dan Bryce
  */
 public class Canvas {
 

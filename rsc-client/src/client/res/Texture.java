@@ -1,5 +1,10 @@
 package client.res;
 
+/**
+ * Class representing a texture that can be used in rendering.
+ * 
+ * @author Dan Bryce
+ */
 public class Texture {
 
     /**

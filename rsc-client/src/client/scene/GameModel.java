@@ -5,6 +5,11 @@ import java.io.IOException;
 
 import client.util.DataUtils;
 
+/**
+ * Class respresenting a 3d model.
+ * 
+ * @author Dan Bryce
+ */
 public class GameModel {
 
     public int vertexIndex;
@@ -639,16 +644,16 @@ public class GameModel {
         return vertexIndex++;
     }
 
-    public int createFace(int i, int ai[], int j, int k) {
+    public int createFace(int numVertices, int vertices[], int fillFront, int fillBack) {
         
         if (numFaces >= count2) {
             return -1;
         }
         
-        faceNumVertices[numFaces] = i;
-        faceVertices[numFaces] = ai;
-        faceFillFront[numFaces] = j;
-        faceFillBack[numFaces] = k;
+        faceNumVertices[numFaces] = numVertices;
+        faceVertices[numFaces] = vertices;
+        faceFillFront[numFaces] = fillFront;
+        faceFillBack[numFaces] = fillBack;
         transformState = 1;
         
         return numFaces++;
@@ -726,7 +731,7 @@ public class GameModel {
         gameModel.normalMagnitude[nextIndex] = normalMagnitude[index];
     }
 
-    public void getDistanceToSomething(boolean flag, int i, int j, int distX, int distY, int distZ) {
+    public void recalculateLighting(boolean flag, int i, int j, int distX, int distY, int distZ) {
         lightAmbience = 256 - i * 4;
         anInt307 = (64 - j) * 16 + 128;
         if (aBoolean262) {
@@ -744,7 +749,7 @@ public class GameModel {
         this.distY = distY;
         this.distZ = distZ;
         distance = (int) Math.sqrt(distX * distX + distY * distY + distZ * distZ);
-        gotDistance();
+        recalculateFaceLighting();
     }
 
     public void setLight(int i, int j, int distX, int distY, int distZ) {
@@ -757,7 +762,7 @@ public class GameModel {
             this.distY = distY;
             this.distZ = distZ;
             distance = (int) Math.sqrt(distX * distX + distY * distY + distZ * distZ);
-            gotDistance();
+            recalculateFaceLighting();
             return;
         }
     }
@@ -770,7 +775,7 @@ public class GameModel {
             this.distY = distY;
             this.distZ = distZ;
             distance = (int) Math.sqrt(distX * distX + distY * distY + distZ * distZ);
-            gotDistance();
+            recalculateFaceLighting();
             return;
         }
     }
@@ -975,7 +980,7 @@ public class GameModel {
 
     }
 
-    public void gotDistance() {
+    public void recalculateFaceLighting() {
         if (aBoolean262) {
             return;
         }
@@ -1015,7 +1020,6 @@ public class GameModel {
                 vertexIntensity[j1] = (ai[j1] * distX + ai1[j1] * distY + ai2[j1] * distZ) / (i * ai3[j1]);
             }
         }
-
     }
 
     public void doSomeDistanceCalculations() {
@@ -1056,7 +1060,7 @@ public class GameModel {
             normalScale[i] = -1;
         }
 
-        gotDistance();
+        recalculateFaceLighting();
     }
 
     private void doStuffBasedOnState() {

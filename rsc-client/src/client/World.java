@@ -12,6 +12,8 @@ import client.util.DataUtils;
  * 
  * The x- and z-axes are on the horizontal plane, and the y-axis is the
  * elevation.
+ * 
+ * @author Dan Bryce
  */
 public class World {
 
@@ -170,9 +172,13 @@ public class World {
         loadRegion(x, z, layer, true);
 
         if (layer == 0) {
+
             // Load upper storeys (they should be visible from the ground floor)
             loadRegion(x, z, 1, false);
             loadRegion(x, z, 2, false);
+
+            // Set the active sectors back to the current layer
+            loadSectors(x, z, layer);
         }
     }
 
@@ -186,15 +192,7 @@ public class World {
      */
     private void loadRegion(int regionX, int regionZ, int layer, boolean isCurrentLayer) {
 
-        // Load Sectors
-        int sectorX = (regionX + 24) / 48;
-        int sectorZ = (regionZ + 24) / 48;
-        sectors[0] = Resources.loadSector(sectorX - 1, sectorZ - 1, layer);
-        sectors[1] = Resources.loadSector(sectorX, sectorZ - 1, layer);
-        sectors[2] = Resources.loadSector(sectorX - 1, sectorZ, layer);
-        sectors[3] = Resources.loadSector(sectorX, sectorZ, layer);
-        
-        setGroundTexturesOverlay();
+        loadSectors(regionX, regionZ, layer);
         
         tmpModel.clear();
 
@@ -244,7 +242,9 @@ public class World {
                     int groundColour = groundColours[groundTexture];
                     int groundColour1 = groundColour;
                     int groundColour2 = groundColour;
-                    int l14 = 0;
+                    
+                    // Each Tile is made of 2 triangles
+                    int triangleIndex = 0;
                     
                     // Tiles in upper layers are black
                     if (layer == 1 || layer == 2) {
@@ -274,19 +274,19 @@ public class World {
                                 if (getOverlayIfRequired(x - 1, z, groundColour2) != 0xbc614e
                                         && getOverlayIfRequired(x, z - 1, groundColour2) != 0xbc614e) {
                                     groundColour = getOverlayIfRequired(x - 1, z, groundColour2);
-                                    l14 = 0;
+                                    triangleIndex = 0;
                                 } else if (getOverlayIfRequired(x + 1, z, groundColour2) != 0xbc614e
                                         && getOverlayIfRequired(x, z + 1, groundColour2) != 0xbc614e) {
                                     groundColour1 = getOverlayIfRequired(x + 1, z, groundColour2);
-                                    l14 = 0;
+                                    triangleIndex = 0;
                                 } else if (getOverlayIfRequired(x + 1, z, groundColour2) != 0xbc614e
                                         && getOverlayIfRequired(x, z - 1, groundColour2) != 0xbc614e) {
                                     groundColour1 = getOverlayIfRequired(x + 1, z, groundColour2);
-                                    l14 = 1;
+                                    triangleIndex = 1;
                                 } else if (getOverlayIfRequired(x - 1, z, groundColour2) != 0xbc614e
                                         && getOverlayIfRequired(x, z + 1, groundColour2) != 0xbc614e) {
                                     groundColour = getOverlayIfRequired(x - 1, z, groundColour2);
-                                    l14 = 1;
+                                    triangleIndex = 1;
                                 }
                             }
                             
@@ -294,16 +294,16 @@ public class World {
                         } else if (tileType1 != 2 || getDiagonalWalls(x, z) > 0 && getDiagonalWalls(x, z) < 24000) {
                             if (getTileType(x - 1, z) != tileType2 && getTileType(x, z - 1) != tileType2) {
                                 groundColour = groundColour2;
-                                l14 = 0;
+                                triangleIndex = 0;
                             } else if (getTileType(x + 1, z) != tileType2 && getTileType(x, z + 1) != tileType2) {
                                 groundColour1 = groundColour2;
-                                l14 = 0;
+                                triangleIndex = 0;
                             } else if (getTileType(x + 1, z) != tileType2 && getTileType(x, z - 1) != tileType2) {
                                 groundColour1 = groundColour2;
-                                l14 = 1;
+                                triangleIndex = 1;
                             } else if (getTileType(x - 1, z) != tileType2 && getTileType(x, z + 1) != tileType2) {
                                 groundColour = groundColour2;
-                                l14 = 1;
+                                triangleIndex = 1;
                             }
                         }
                     }
@@ -313,7 +313,7 @@ public class World {
                     if (groundColour != groundColour1 || i17 != 0) {
                         int ai[] = new int[3];
                         int ai7[] = new int[3];
-                        if (l14 == 0) {
+                        if (triangleIndex == 0) {
                             if (groundColour != 0xbc614e) {
                                 ai[0] = z + x * 96 + 96;
                                 ai[1] = z + x * 96;
@@ -449,7 +449,7 @@ public class World {
                 }
             }
 
-            tmpModel.getDistanceToSomething(true, 40, 48, -50, -10, -50);
+            tmpModel.recalculateLighting(true, 40, 48, -50, -10, -50);
             landscapeModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 233, false);
             for (int j6 = 0; j6 < 64; j6++) {
                 scene.addModel(landscapeModels[j6]);
@@ -488,12 +488,11 @@ public class World {
             }
         }
 
-        tmpModel.getDistanceToSomething(false, 60, 24, -50, -10, -50);
+        tmpModel.recalculateLighting(false, 60, 24, -50, -10, -50);
         wallModels[layer] = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 338, true);
         for (int l2 = 0; l2 < 64; l2++) {
             scene.addModel(wallModels[layer][l2]);
         }
-        
 
         // Raise wall heights
         for (int x = 0; x < NUM_TILES_X - 1; x++) {
@@ -770,7 +769,7 @@ public class World {
             }
         }
         
-        tmpModel.getDistanceToSomething(true, 50, 50, -50, -10, -50);
+        tmpModel.recalculateLighting(true, 50, 50, -50, -10, -50);
         roofModels[layer] = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 169, true);
         for (int l9 = 0; l9 < 64; l9++) {
             scene.addModel(roofModels[layer][l9]);
@@ -787,6 +786,19 @@ public class World {
                 }
             }
         }
+    }
+
+    private void loadSectors(int regionX, int regionZ, int layer) {
+        
+        int sectorX = (regionX + 24) / 48;
+        int sectorZ = (regionZ + 24) / 48;
+        
+        sectors[0] = Resources.loadSector(sectorX - 1, sectorZ - 1, layer);
+        sectors[1] = Resources.loadSector(sectorX, sectorZ - 1, layer);
+        sectors[2] = Resources.loadSector(sectorX - 1, sectorZ, layer);
+        sectors[3] = Resources.loadSector(sectorX, sectorZ, layer);
+        
+        setGroundTexturesOverlay();
     }
 
     public int getRoofTexture(int x, int z) {
@@ -811,23 +823,24 @@ public class World {
         return sectors[byte0].getTile(x, z).roofTexture;
     }
 
-    private void createWall(GameModel gameModel, int i, int x1, int z1, int x2, int z2) {
+    private void createWall(GameModel gameModel, int wallIndex, int x1, int z1, int x2, int z2) {
         setAmbientLighting(x1, z1, 40);
         setAmbientLighting(x2, z2, 40);
-        int j1 = Resources.getDoorDef(i).getModelVar1();
-        int k1 = Resources.getDoorDef(i).getModelVar2();
-        int l1 = Resources.getDoorDef(i).getModelVar3();
+        int height = Resources.getDoorDef(wallIndex).getModelVar1();
+        int frontTexture = Resources.getDoorDef(wallIndex).getModelVar2();
+        int backTexture = Resources.getDoorDef(wallIndex).getModelVar3();
         int i2 = x1 * 128;
         int j2 = z1 * 128;
         int k2 = x2 * 128;
         int l2 = z2 * 128;
         int i3 = gameModel.createVertexWithoutDuplication(i2, -elevation[x1][z1], j2);
-        int j3 = gameModel.createVertexWithoutDuplication(i2, -elevation[x1][z1] - j1, j2);
-        int k3 = gameModel.createVertexWithoutDuplication(k2, -elevation[x2][z2] - j1, l2);
+        int j3 = gameModel.createVertexWithoutDuplication(i2, -elevation[x1][z1] - height, j2);
+        int k3 = gameModel.createVertexWithoutDuplication(k2, -elevation[x2][z2] - height, l2);
         int l3 = gameModel.createVertexWithoutDuplication(k2, -elevation[x2][z2], l2);
-        int i4 = gameModel.createFace(4, new int[] { i3, j3, k3, l3 }, k1, l1);
-        if (Resources.getDoorDef(i).getUnknown() == 5) {
-            gameModel.faceTag[i4] = 30000 + i;
+        
+        int i4 = gameModel.createFace(4, new int[] { i3, j3, k3, l3 }, frontTexture, backTexture);
+        if (Resources.getDoorDef(wallIndex).getUnknown() == 5) {
+            gameModel.faceTag[i4] = 30000 + wallIndex;
         } else {
             gameModel.faceTag[i4] = 0;
         }
@@ -982,28 +995,28 @@ public class World {
         if (x < 0 || x >= 96 || z < 0 || z >= 96) {
             return 0;
         }
-        byte byte0 = 0;
+        byte layer = 0;
         if (x >= 48 && z < 48) {
-            byte0 = 1;
+            layer = 1;
             x -= 48;
         } else if (x < 48 && z >= 48) {
-            byte0 = 2;
+            layer = 2;
             z -= 48;
         } else if (x >= 48 && z >= 48) {
-            byte0 = 3;
+            layer = 3;
             x -= 48;
             z -= 48;
         }
-        return (sectors[byte0].getTile(x, z).groundElevation & 0xff) * 3;
+        return (sectors[layer].getTile(x, z).groundElevation & 0xff) * 3;
     }
 
     public void setDoorElevation(int doorIndex, int x1, int z1, int x2, int z2) {
-        int j1 = Resources.getDoorDef(doorIndex).getModelVar1();
+        int heightIncrement = Resources.getDoorDef(doorIndex).getModelVar1();
         if (elevation[x1][z1] < 0x13880) {
-            elevation[x1][z1] += 0x13880 + j1;
+            elevation[x1][z1] += 0x13880 + heightIncrement;
         }
         if (elevation[x2][z2] < 0x13880) {
-            elevation[x2][z2] += 0x13880 + j1;
+            elevation[x2][z2] += 0x13880 + heightIncrement;
         }
     }
 

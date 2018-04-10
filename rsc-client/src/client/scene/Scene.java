@@ -40,6 +40,7 @@ public class Scene {
     public void addModel(GameModel gameModel) {
         if (gameModel == null) {
             System.out.println("Warning tried to add null object!");
+            return;
         }
         if (numModels < MAX_MODELS) {
             models[numModels] = gameModel;

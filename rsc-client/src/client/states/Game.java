@@ -15,6 +15,13 @@ import client.scene.Camera;
 import client.scene.GameModel;
 import client.scene.Scene;
 
+/**
+ * State responsible for running the game.
+ * 
+ * <p><i>Based on <code>mudclient.java</code> from other RSC sources.</i>
+ * 
+ * @author Dan Bryce
+ */
 public class Game extends State {
 
     private static final int MIN_DOOR_ID = 10000;
@@ -262,9 +269,9 @@ public class Game extends State {
         int j3 = gameModel.createVertexWithoutDuplication(modelX1, -world.getAveragedElevation(modelX1, modelZ1) - l2, modelZ1);
         int k3 = gameModel.createVertexWithoutDuplication(modelX2, -world.getAveragedElevation(modelX2, modelZ2) - l2, modelZ2);
         int l3 = gameModel.createVertexWithoutDuplication(modelX2, -world.getAveragedElevation(modelX2, modelZ2), modelZ2);
-        int ai[] = { i3, j3, k3, l3 };
-        gameModel.createFace(4, ai, j2, k2);
-        gameModel.getDistanceToSomething(false, 60, 24, -50, -10, -50);
+        int vertices[] = { i3, j3, k3, l3 };
+        gameModel.createFace(4, vertices, j2, k2);
+        gameModel.recalculateLighting(false, 60, 24, -50, -10, -50);
         if (x >= 0 && z >= 0 && x < 96 && z < 96) {
             scene.addModel(gameModel);
         }

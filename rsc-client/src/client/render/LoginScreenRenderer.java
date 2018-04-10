@@ -5,6 +5,11 @@ import java.awt.Graphics;
 import client.Canvas;
 import client.states.LoginScreen;
 
+/**
+ * Class responsible for rendering the login screen.
+ * 
+ * @author Dan Bryce
+ */
 public class LoginScreenRenderer {
 
     public static final int SPRITE_ID_LOGO = 2010;

@@ -1,5 +1,10 @@
 package client.scene;
 
+/**
+ * Class representing the camera within the game world.
+ * 
+ * @author Dan Bryce
+ */
 public class Camera {
 
     public static final int DEFAULT_HEIGHT = 550;

@@ -28,6 +28,13 @@ import client.model.Sector;
 import client.scene.Sprite;
 import client.util.DataUtils;
 
+/**
+ * Class responsible for reading and storing resources required by the game.
+ * 
+ * <p><i>Based on <code>EntityHandler.java</code> from other RSC sources.</i>
+ * 
+ * @author Dan Bryce
+ */
 public class Resources {
 
     /*
