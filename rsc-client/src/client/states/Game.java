@@ -1,7 +1,6 @@
 package client.states;
 
 import java.awt.Graphics;
-import java.awt.event.KeyEvent;
 
 import client.Canvas;
 import client.RsLauncher;
@@ -68,19 +67,62 @@ public class Game extends State {
     private int wallObjectDirection[] = new int[500];
     private int wallObjectId[] = new int[500];
     private GameModel wallObjectModels[] = new GameModel[500];
-    
+
     public Game() {
         player = new Mob();
         player.currentX = 8512;
         player.currentZ = 4160;
         scene = new Scene();
-        sceneRenderer = new SceneRenderer(scene,
+        sceneRenderer = new SceneRenderer(
+                scene,
                 RsLauncher.WINDOW_WIDTH,
                 RsLauncher.WINDOW_HEIGHT);
         world = new World(scene);
         loadNextRegion(114, 656);
     }
     
+    @Override
+    public void pollInput() {
+
+        // Get mouse-picked models / faces from the rendered scene
+        int mousePickedCount = sceneRenderer.getMousePickedCount();
+        GameModel mousePickedModels[] = sceneRenderer.getMousePickedModels();
+        int mousePickedFaces[] = sceneRenderer.getMousePickedFaces();
+        
+        int selectedGroundFaceId = -1;
+        
+        for (int i = 0; i < mousePickedCount; i++) {
+            int faceId = mousePickedFaces[i];
+            GameModel gameModel = mousePickedModels[i];
+
+            if (faceId >= 0) {
+                faceId = gameModel.faceTag[faceId] - 200000;
+            }
+            
+            if (faceId >= 0) {
+                selectedGroundFaceId = faceId;
+            }
+        }
+
+        if (selectedGroundFaceId != -1) {
+            int tileX = world.getTileXForFace(selectedGroundFaceId);
+            int tileZ = world.getTileZForFace(selectedGroundFaceId);
+            groundTileSelected(tileX, tileZ);
+        }
+
+        // Update mouse picking position for the next frame
+        sceneRenderer.setMousePos(mouseX, mouseY);
+    }
+    
+    private void groundTileSelected(int tileX, int tileZ) {
+        if (wasLeftClickReleased()) {
+            // TMP: Not sure why +10 is required.
+            // Seems like the player is way off to the left.
+            player.currentX = (tileX + 10) * World.TILE_WIDTH;
+            player.currentZ = tileZ * World.TILE_DEPTH;
+        }
+    }
+
     @Override
     public void tick() {
 
@@ -99,26 +141,6 @@ public class Game extends State {
         if (lastAutoCameraRotatePlayerZ != player.currentZ) {
             lastAutoCameraRotatePlayerZ += (player.currentZ - lastAutoCameraRotatePlayerZ)
                     / (16 + (cameraHeight - 500) / 15);
-        }
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        
-        // Explore the world with the keyboard
-        switch (e.getKeyCode()) {
-        case KeyEvent.VK_LEFT:
-            player.currentX += 200;
-            break;
-        case KeyEvent.VK_RIGHT:
-            player.currentX -= 200;
-            break;
-        case KeyEvent.VK_UP:
-            player.currentZ -= 200;
-            break;
-        case KeyEvent.VK_DOWN:
-            player.currentZ += 200;
-            break;
         }
     }
 

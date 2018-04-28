@@ -13,16 +13,6 @@ import client.util.DataUtils;
 public class WorldLoader {
 
     /**
-     * Width of 1 Tile, in world units.
-     */
-    private static final int TILE_WIDTH = 128;
-
-    /**
-     * Depth of 1 Tile, in world units.
-     */
-    private static final int TILE_DEPTH = 128;
-    
-    /**
      * Model used when loading regions.
      */
     private GameModel tmpModel = new GameModel(
@@ -114,9 +104,9 @@ public class WorldLoader {
                     }
 
                     int vertexId = tmpModel.createVertexWithoutDuplication(
-                            x * TILE_WIDTH,
+                            x * World.TILE_WIDTH,
                             elevation,
-                            z * TILE_DEPTH);
+                            z * World.TILE_DEPTH);
                     
                     // Randomise vertex ambience
                     int ambience = (int) (Math.random() * 10D) - 5;

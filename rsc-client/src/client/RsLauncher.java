@@ -1,9 +1,12 @@
 package client;
 
 import java.awt.Dimension;
+import java.awt.MouseInfo;
+import java.awt.Point;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import client.states.Game;
 import client.states.LoadingScreen;
@@ -132,12 +135,12 @@ public class RsLauncher {
             // Process the game continually until we are due to render
             int timeSinceLastRender = 0;
             while (timeSinceLastRender < 256) {
-                state.tick();
+                pollInput();
+                tick();
                 timeSinceLastRender += timeSinceLastFrame;
             }
 
-            // Render
-            gamePanel.repaint();
+            render();
         }
     }
 
@@ -148,7 +151,7 @@ public class RsLauncher {
         
         while (!loadingScreen.isLoaded()){
             loadingScreen.continueLoading();
-            gamePanel.repaint();
+            render();
             try {
                 // Precise framerate is not important here, just so long as we
                 // don't hog the thread.
@@ -166,18 +169,32 @@ public class RsLauncher {
         changeState(new Game());
     }
     
+    private void pollInput() {
+        Point mouseLoc = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(mouseLoc, gamePanel);
+        state.setMousePos(mouseLoc.x, mouseLoc.y);
+        state.pollInput();
+        state.discardUnusedInput();
+    }
+
+    private void tick() {
+        state.tick();
+    }
+
+    private void render() {
+        gamePanel.repaint();
+    }
+
     public void changeState(State newState) {
         
         // Remove listeners from previous state
         gamePanel.removeMouseListener(state);
-        gamePanel.removeMouseMotionListener(state);
         frame.removeKeyListener(state);
         
         state = newState;
 
         // Add listeners to new state
         gamePanel.addMouseListener(state);
-        gamePanel.addMouseMotionListener(state);
         frame.addKeyListener(state);
     }
     

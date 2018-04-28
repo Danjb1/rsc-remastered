@@ -15,6 +15,16 @@ import client.scene.Scene;
 public class World {
 
     /**
+     * Width of 1 Tile, in world units.
+     */
+    public static final int TILE_WIDTH = 128;
+
+    /**
+     * Depth of 1 Tile, in world units.
+     */
+    public static final int TILE_DEPTH = 128;
+    
+    /**
      * Number of Sectors loaded in the x-axis.
      */
     private static final int SECTORS_X = 2;
@@ -69,8 +79,8 @@ public class World {
      * 
      * <p>The index is given by the faceTag of the selected face.
      */
-    private int[] tilePosForFaceX = new int[NUM_TERRAIN_FACES];
-    private int[] tilePosForFaceZ = new int[NUM_TERRAIN_FACES];
+    private int[] tileXForFace = new int[NUM_TERRAIN_FACES];
+    private int[] tileZForFace = new int[NUM_TERRAIN_FACES];
 
     /**
      * Currently-loaded Sectors.
@@ -136,9 +146,17 @@ public class World {
         System.gc();
     }
 
-    public void setTilePosForFace(int faceTag, int x, int z) {
-        this.tilePosForFaceX[faceTag] = x;
-        this.tilePosForFaceZ[faceTag] = z;
+    public void setTilePosForFace(int faceId, int x, int z) {
+        this.tileXForFace[faceId] = x;
+        this.tileZForFace[faceId] = z;
+    }
+    
+    public int getTileXForFace(int faceId) {
+        return tileXForFace[faceId];
+    }
+
+    public int getTileZForFace(int faceId) {
+        return tileZForFace[faceId];
     }
 
     public void setLandscapeModels(GameModel[] landscapeModels) {

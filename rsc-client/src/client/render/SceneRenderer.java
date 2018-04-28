@@ -27,12 +27,20 @@ public class SceneRenderer {
     private static final int MAX_POLYGONS = 15000;
     
     private static final int VIEW_DISTANCE = 9;
+
+    private static final int MAX_MOUSE_PICKS = 100;
     
     private Scene scene;
     private Camera camera;
     private int visiblePolygonCount;
     private Polygon visiblePolygons[] = new Polygon[MAX_POLYGONS];
-
+    
+    private int mouseX;
+    private int mouseY;
+    private int mousePickedCount;
+    private GameModel mousePickedModels[] = new GameModel[MAX_MOUSE_PICKS];
+    private int mousePickedFaces[] = new int[MAX_MOUSE_PICKS];
+    
     private int rampCount = 50;
     private int gradientBase[] = new int[rampCount];
     private int gradientRamps[][] = new int[rampCount][256];
@@ -94,12 +102,15 @@ public class SceneRenderer {
         camera.prepareForRendering(clipX, clipY, clipFar3d, clipXModified, clipYModified);
         scene.getModels()[scene.getNumModels()] = scene.getView();
         scene.getView().transformState = 2;
+        
         for (int i = 0; i < scene.getNumModels(); i++) {
             scene.getModels()[i].project(camera, viewDistance, clipNear);
         }
-        scene.getModels()[scene.getNumModels()].project(camera, viewDistance,
-                clipNear);
+        
+        scene.getModels()[scene.getNumModels()]
+                .project(camera, viewDistance, clipNear);
         visiblePolygonCount = 0;
+        
         for (int i = 0; i < scene.getNumModels(); i++) {
             GameModel gameModel = scene.getModels()[i];
             if (gameModel.visible) {
@@ -199,11 +210,14 @@ public class SceneRenderer {
             }
 
         }
+        
         if (visiblePolygonCount == 0) {
             return;
         }
+        
         polygonsQSort(visiblePolygons, 0, visiblePolygonCount - 1);
         polygonsIntersectSort(100, visiblePolygons, visiblePolygonCount);
+        
         for (int polygonIndex = 0; polygonIndex < visiblePolygonCount; polygonIndex++) {
             Polygon polygon = visiblePolygons[polygonIndex];
             GameModel polygonModel = polygon.gameModel;
@@ -312,6 +326,7 @@ public class SceneRenderer {
                 }
 
                 generateScanlines(0, 0, 0, 0, plane, planeX, planeY, vertexShade, polygonModel, polyFace);
+
                 if (maxY > minY) {
                     rasterize(canvas, numFaces, vertexX, vertexY, vertexZ, polygon.faceFill, polygonModel);
                 }
@@ -446,9 +461,20 @@ public class SceneRenderer {
         } while (true);
     }
 
-    private void generateScanlines(int i, int j, int k, int l, int plane, int planeX[], int planeY[], int vertexShade[],
-            GameModel gameModel, int pid) {
+    private void generateScanlines(
+            int i,
+            int j,
+            int k,
+            int l,
+            int plane,
+            int planeX[],
+            int planeY[],
+            int vertexShade[],
+            GameModel gameModel,
+            int faceId) {
+        
         if (plane == 3) {
+            
             int k1 = planeY[0] + baseY;
             int k2 = planeY[1] + baseY;
             int k3 = planeY[2] + baseY;
@@ -465,9 +491,12 @@ public class SceneRenderer {
             int j14 = 0;
             int l14 = COLOUR_TRANSPARENT;
             int j15 = 0xff439eb2;
+            
             if (k3 != k1) {
+                
                 j13 = (j7 - k4 << 8) / (k3 - k1);
                 j14 = (j11 - l8 << 8) / (k3 - k1);
+                
                 if (k1 < k3) {
                     l12 = k4 << 8;
                     l13 = l8 << 8;
@@ -479,24 +508,30 @@ public class SceneRenderer {
                     l14 = k3;
                     j15 = k1;
                 }
+                
                 if (l14 < 0) {
                     l12 -= j13 * l14;
                     l13 -= j14 * l14;
                     l14 = 0;
                 }
+                
                 if (j15 > j12) {
                     j15 = j12;
                 }
             }
+            
             int l15 = 0;
             int j16 = 0;
             int l16 = 0;
             int j17 = 0;
             int l17 = COLOUR_TRANSPARENT;
             int j18 = 0xff439eb2;
+            
             if (k2 != k1) {
+                
                 j16 = (l5 - k4 << 8) / (k2 - k1);
                 j17 = (j10 - l8 << 8) / (k2 - k1);
+                
                 if (k1 < k2) {
                     l15 = k4 << 8;
                     l16 = l8 << 8;
@@ -508,24 +543,30 @@ public class SceneRenderer {
                     l17 = k2;
                     j18 = k1;
                 }
+                
                 if (l17 < 0) {
                     l15 -= j16 * l17;
                     l16 -= j17 * l17;
                     l17 = 0;
                 }
+                
                 if (j18 > j12) {
                     j18 = j12;
                 }
             }
+            
             int l18 = 0;
             int j19 = 0;
             int l19 = 0;
             int j20 = 0;
             int l20 = COLOUR_TRANSPARENT;
             int j21 = 0xff439eb2;
+            
             if (k3 != k2) {
+                
                 j19 = (j7 - l5 << 8) / (k3 - k2);
                 j20 = (j11 - j10 << 8) / (k3 - k2);
+                
                 if (k2 < k3) {
                     l18 = l5 << 8;
                     l19 = j10 << 8;
@@ -537,15 +578,18 @@ public class SceneRenderer {
                     l20 = k3;
                     j21 = k2;
                 }
+                
                 if (l20 < 0) {
                     l18 -= j19 * l20;
                     l19 -= j20 * l20;
                     l20 = 0;
                 }
+                
                 if (j21 > j12) {
                     j21 = j12;
                 }
             }
+            
             minY = l14;
             if (l17 < minY) {
                 minY = l17;
@@ -553,6 +597,7 @@ public class SceneRenderer {
             if (l20 < minY) {
                 minY = l20;
             }
+            
             maxY = j15;
             if (j18 > maxY) {
                 maxY = j18;
@@ -560,8 +605,11 @@ public class SceneRenderer {
             if (j21 > maxY) {
                 maxY = j21;
             }
+            
             int l21 = 0;
+            
             for (k = minY; k < maxY; k++) {
+                
                 if (k >= l14 && k < j15) {
                     i = j = l12;
                     l = l21 = l13;
@@ -571,6 +619,7 @@ public class SceneRenderer {
                     i = 0xa0000;
                     j = 0xfff60000;
                 }
+                
                 if (k >= l17 && k < j18) {
                     if (l15 < i) {
                         i = l15;
@@ -583,6 +632,7 @@ public class SceneRenderer {
                     l15 += j16;
                     l16 += j17;
                 }
+                
                 if (k >= l20 && k < j21) {
                     if (l18 < i) {
                         i = l18;
@@ -595,6 +645,7 @@ public class SceneRenderer {
                     l18 += j19;
                     l19 += j20;
                 }
+                
                 Scanline cameraVariables_6 = scanlines[k];
                 cameraVariables_6.startX = i;
                 cameraVariables_6.endX = j;
@@ -605,7 +656,9 @@ public class SceneRenderer {
             if (minY < baseY - clipY) {
                 minY = baseY - clipY;
             }
+            
         } else if (plane == 4) {
+            
             int l1 = planeY[0] + baseY;
             int l2 = planeY[1] + baseY;
             int l3 = planeY[2] + baseY;
@@ -626,8 +679,10 @@ public class SceneRenderer {
             int k16 = COLOUR_TRANSPARENT;
             int i17 = 0xff439eb2;
             if (l4 != l1) {
+                
                 i15 = (k10 - i6 << 8) / (l4 - l1);
                 i16 = (k13 - k11 << 8) / (l4 - l1);
+                
                 if (l1 < l4) {
                     k14 = i6 << 8;
                     k15 = k11 << 8;
@@ -639,11 +694,13 @@ public class SceneRenderer {
                     k16 = l4;
                     i17 = l1;
                 }
+                
                 if (k16 < 0) {
                     k14 -= i15 * k16;
                     k15 -= i16 * k16;
                     k16 = 0;
                 }
+                
                 if (i17 > i14) {
                     i17 = i14;
                 }
@@ -655,8 +712,10 @@ public class SceneRenderer {
             int k19 = COLOUR_TRANSPARENT;
             int i20 = 0xff439eb2;
             if (l2 != l1) {
+                
                 i18 = (k7 - i6 << 8) / (l2 - l1);
                 i19 = (k12 - k11 << 8) / (l2 - l1);
+                
                 if (l1 < l2) {
                     k17 = i6 << 8;
                     k18 = k11 << 8;
@@ -668,11 +727,13 @@ public class SceneRenderer {
                     k19 = l2;
                     i20 = l1;
                 }
+                
                 if (k19 < 0) {
                     k17 -= i18 * k19;
                     k18 -= i19 * k19;
                     k19 = 0;
                 }
+                
                 if (i20 > i14) {
                     i20 = i14;
                 }
@@ -683,9 +744,12 @@ public class SceneRenderer {
             int i22 = 0;
             int j22 = COLOUR_TRANSPARENT;
             int k22 = 0xff439eb2;
+            
             if (l3 != l2) {
+                
                 i21 = (i9 - k7 << 8) / (l3 - l2);
                 i22 = (i13 - k12 << 8) / (l3 - l2);
+                
                 if (l2 < l3) {
                     k20 = k7 << 8;
                     k21 = k12 << 8;
@@ -697,11 +761,13 @@ public class SceneRenderer {
                     j22 = l3;
                     k22 = l2;
                 }
+                
                 if (j22 < 0) {
                     k20 -= i21 * j22;
                     k21 -= i22 * j22;
                     j22 = 0;
                 }
+                
                 if (k22 > i14) {
                     k22 = i14;
                 }
@@ -712,9 +778,12 @@ public class SceneRenderer {
             int k23 = 0;
             int l23 = COLOUR_TRANSPARENT;
             int i24 = 0xff439eb2;
+            
             if (l4 != l3) {
+                
                 i23 = (k10 - i9 << 8) / (l4 - l3);
                 k23 = (k13 - i13 << 8) / (l4 - l3);
+                
                 if (l3 < l4) {
                     l22 = i9 << 8;
                     j23 = i13 << 8;
@@ -726,15 +795,18 @@ public class SceneRenderer {
                     l23 = l4;
                     i24 = l3;
                 }
+                
                 if (l23 < 0) {
                     l22 -= i23 * l23;
                     j23 -= k23 * l23;
                     l23 = 0;
                 }
+                
                 if (i24 > i14) {
                     i24 = i14;
                 }
             }
+            
             minY = k16;
             if (k19 < minY) {
                 minY = k19;
@@ -745,6 +817,7 @@ public class SceneRenderer {
             if (l23 < minY) {
                 minY = l23;
             }
+            
             maxY = i17;
             if (i20 > maxY) {
                 maxY = i20;
@@ -755,8 +828,11 @@ public class SceneRenderer {
             if (i24 > maxY) {
                 maxY = i24;
             }
+            
             int j24 = 0;
+            
             for (k = minY; k < maxY; k++) {
+                
                 if (k >= k16 && k < i17) {
                     i = j = k14;
                     l = j24 = k15;
@@ -766,6 +842,7 @@ public class SceneRenderer {
                     i = 0xa0000;
                     j = 0xfff60000;
                 }
+                
                 if (k >= k19 && k < i20) {
                     if (k17 < i) {
                         i = k17;
@@ -778,6 +855,7 @@ public class SceneRenderer {
                     k17 += i18;
                     k18 += i19;
                 }
+                
                 if (k >= j22 && k < k22) {
                     if (k20 < i) {
                         i = k20;
@@ -790,6 +868,7 @@ public class SceneRenderer {
                     k20 += i21;
                     k21 += i22;
                 }
+                
                 if (k >= l23 && k < i24) {
                     if (l22 < i) {
                         i = l22;
@@ -802,6 +881,7 @@ public class SceneRenderer {
                     l22 += i23;
                     j23 += k23;
                 }
+                
                 Scanline cameraVariables_7 = scanlines[k];
                 cameraVariables_7.startX = i;
                 cameraVariables_7.endX = j;
@@ -812,7 +892,9 @@ public class SceneRenderer {
             if (minY < baseY - clipY) {
                 minY = baseY - clipY;
             }
+            
         } else {
+            
             maxY = minY = planeY[0] += baseY;
             for (k = 1; k < plane; k++) {
                 int i2;
@@ -826,12 +908,15 @@ public class SceneRenderer {
             if (minY < baseY - clipY) {
                 minY = baseY - clipY;
             }
+            
             if (maxY >= baseY + clipY) {
                 maxY = (baseY + clipY) - 1;
             }
+            
             if (minY >= maxY) {
                 return;
             }
+            
             for (k = minY; k < maxY; k++) {
                 Scanline scanline = scanlines[k];
                 scanline.startX = 0xa0000;
@@ -841,19 +926,24 @@ public class SceneRenderer {
             int j2 = plane - 1;
             int i3 = planeY[0];
             int i4 = planeY[j2];
+            
             if (i3 < i4) {
+                
                 int i5 = planeX[0] << 8;
                 int j6 = (planeX[j2] - planeX[0] << 8) / (i4 - i3);
                 int l7 = vertexShade[0] << 8;
                 int j9 = (vertexShade[j2] - vertexShade[0] << 8) / (i4 - i3);
+                
                 if (i3 < 0) {
                     i5 -= j6 * i3;
                     l7 -= j9 * i3;
                     i3 = 0;
                 }
+                
                 if (i4 > maxY) {
                     i4 = maxY;
                 }
+                
                 for (k = i3; k <= i4; k++) {
                     Scanline cameraVariables_2 = scanlines[k];
                     cameraVariables_2.startX = cameraVariables_2.endX = i5;
@@ -863,18 +953,22 @@ public class SceneRenderer {
                 }
 
             } else if (i3 > i4) {
+                
                 int j5 = planeX[j2] << 8;
                 int k6 = (planeX[0] - planeX[j2] << 8) / (i3 - i4);
                 int i8 = vertexShade[j2] << 8;
                 int k9 = (vertexShade[0] - vertexShade[j2] << 8) / (i3 - i4);
+                
                 if (i4 < 0) {
                     j5 -= k6 * i4;
                     i8 -= k9 * i4;
                     i4 = 0;
                 }
+                
                 if (i3 > maxY) {
                     i3 = maxY;
                 }
+                
                 for (k = i4; k <= i3; k++) {
                     Scanline cameraVariables_3 = scanlines[k];
                     cameraVariables_3.startX = cameraVariables_3.endX = j5;
@@ -882,71 +976,100 @@ public class SceneRenderer {
                     j5 += k6;
                     i8 += k9;
                 }
-
             }
+            
             for (k = 0; k < j2; k++) {
+                
                 int k5 = k + 1;
                 int j3 = planeY[k];
                 int j4 = planeY[k5];
+                
                 if (j3 < j4) {
+                    
                     int l6 = planeX[k] << 8;
                     int j8 = (planeX[k5] - planeX[k] << 8) / (j4 - j3);
                     int l9 = vertexShade[k] << 8;
                     int l10 = (vertexShade[k5] - vertexShade[k] << 8) / (j4 - j3);
+                    
                     if (j3 < 0) {
                         l6 -= j8 * j3;
                         l9 -= l10 * j3;
                         j3 = 0;
                     }
+                    
                     if (j4 > maxY) {
                         j4 = maxY;
                     }
+                    
                     for (int l11 = j3; l11 <= j4; l11++) {
+                        
                         Scanline cameraVariables_4 = scanlines[l11];
                         if (l6 < cameraVariables_4.startX) {
                             cameraVariables_4.startX = l6;
                             cameraVariables_4.startS = l9;
                         }
+                        
                         if (l6 > cameraVariables_4.endX) {
                             cameraVariables_4.endX = l6;
                             cameraVariables_4.endS = l9;
                         }
+                        
                         l6 += j8;
                         l9 += l10;
                     }
 
                 } else if (j3 > j4) {
+                    
                     int i7 = planeX[k5] << 8;
                     int k8 = (planeX[k] - planeX[k5] << 8) / (j3 - j4);
                     int i10 = vertexShade[k5] << 8;
                     int i11 = (vertexShade[k] - vertexShade[k5] << 8) / (j3 - j4);
+                    
                     if (j4 < 0) {
                         i7 -= k8 * j4;
                         i10 -= i11 * j4;
                         j4 = 0;
                     }
+                    
                     if (j3 > maxY) {
                         j3 = maxY;
                     }
+                    
                     for (int i12 = j4; i12 <= j3; i12++) {
+                        
                         Scanline cameraVariables_5 = scanlines[i12];
+                        
                         if (i7 < cameraVariables_5.startX) {
                             cameraVariables_5.startX = i7;
                             cameraVariables_5.startS = i10;
                         }
+                        
                         if (i7 > cameraVariables_5.endX) {
                             cameraVariables_5.endX = i7;
                             cameraVariables_5.endS = i10;
                         }
+                        
                         i7 += k8;
                         i10 += i11;
                     }
-
                 }
             }
 
             if (minY < baseY - clipY) {
                 minY = baseY - clipY;
+            }
+        }
+
+        if (mouseY >= minY && mouseY < maxY) {
+            Scanline scanline = scanlines[mouseY];
+            // Determine if the mouse is over a Model
+            if (mouseX >= scanline.startX >> 8 &&
+                    mouseX <= scanline.endX >> 8 &&
+                    scanline.startX <= scanline.endX &&
+                    !gameModel.unpickable) {
+                mousePickedModels[mousePickedCount] = gameModel;
+                mousePickedFaces[mousePickedCount] = faceId;
+                mousePickedCount++;
             }
         }
     }
@@ -1997,4 +2120,22 @@ public class SceneRenderer {
         return method308(j6, k10, k15, flag);
     }
 
+    public void setMousePos(int mouseX, int mouseY) {
+        this.mouseX = mouseX;
+        this.mouseY = mouseY;
+        mousePickedCount = 0;
+    }
+
+    public int getMousePickedCount() {
+        return mousePickedCount;
+    }
+    
+    public GameModel[] getMousePickedModels() {
+        return mousePickedModels;
+    }
+    
+    public int[] getMousePickedFaces() {
+        return mousePickedFaces;
+    }
+    
 }
