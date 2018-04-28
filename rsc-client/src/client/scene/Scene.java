@@ -118,7 +118,7 @@ public class Scene {
 
     }
 
-    public GameModel getView() {
+    public GameModel getSpriteFaces() {
         return spriteFaces;
     }
     

@@ -37,8 +37,6 @@ public class Game extends State {
     private int screenRotationX;
     private int screenRotationY;
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
-    private int lastAutoCameraRotatePlayerX;
-    private int lastAutoCameraRotatePlayerZ;
     
     private int regionX;
     private int regionZ;
@@ -70,8 +68,8 @@ public class Game extends State {
 
     public Game() {
         player = new Mob();
-        player.currentX = 8512;
-        player.currentZ = 4160;
+        player.x = 8512;
+        player.z = 4160;
         scene = new Scene();
         sceneRenderer = new SceneRenderer(
                 scene,
@@ -90,7 +88,7 @@ public class Game extends State {
         int mousePickedFaces[] = sceneRenderer.getMousePickedFaces();
         
         int selectedGroundFaceId = -1;
-        
+
         for (int i = 0; i < mousePickedCount; i++) {
             int faceId = mousePickedFaces[i];
             GameModel gameModel = mousePickedModels[i];
@@ -116,32 +114,14 @@ public class Game extends State {
     
     private void groundTileSelected(int tileX, int tileZ) {
         if (wasLeftClickReleased()) {
-            // TMP: Not sure why +10 is required.
-            // Seems like the player is way off to the left.
-            player.currentX = (tileX + 10) * World.TILE_WIDTH;
-            player.currentZ = tileZ * World.TILE_DEPTH;
+            System.out.println("clicked on tile: " + tileX + ", " + tileZ);
+            player.x = tileX * World.TILE_WIDTH;
+            player.z = tileZ * World.TILE_DEPTH;
         }
     }
 
     @Override
     public void tick() {
-
-        // Rotate camera
-        if (lastAutoCameraRotatePlayerX - player.currentX < -500
-                || lastAutoCameraRotatePlayerX - player.currentX > 500
-                || lastAutoCameraRotatePlayerZ - player.currentZ < -500
-                || lastAutoCameraRotatePlayerZ - player.currentZ > 500) {
-            lastAutoCameraRotatePlayerX = player.currentX;
-            lastAutoCameraRotatePlayerZ = player.currentZ;
-        }
-        if (lastAutoCameraRotatePlayerX != player.currentX) {
-            lastAutoCameraRotatePlayerX += (player.currentX - lastAutoCameraRotatePlayerX)
-                    / (16 + (cameraHeight - 500) / 15);
-        }
-        if (lastAutoCameraRotatePlayerZ != player.currentZ) {
-            lastAutoCameraRotatePlayerZ += (player.currentZ - lastAutoCameraRotatePlayerZ)
-                    / (16 + (cameraHeight - 500) / 15);
-        }
     }
 
     public LoadingScreen getLoadingScreen() {
@@ -309,14 +289,6 @@ public class Game extends State {
         return cameraRotation;
     }
     
-    public int getLastAutoCameraRotatePlayerX() {
-        return lastAutoCameraRotatePlayerX;
-    }
-    
-    public int getLastAutoCameraRotatePlayerZ() {
-        return lastAutoCameraRotatePlayerZ;
-    }
-    
     public int getScreenRotationX() {
         return screenRotationX;
     }
@@ -329,16 +301,6 @@ public class Game extends State {
         this.cameraRotation = cameraRotation;
     }
     
-    public void setLastAutoCameraRotatePlayerX(
-            int lastAutoCameraRotatePlayerX) {
-        this.lastAutoCameraRotatePlayerX = lastAutoCameraRotatePlayerX;
-    }
-    
-    public void setLastAutoCameraRotatePlayerZ(
-            int lastAutoCameraRotatePlayerZ) {
-        this.lastAutoCameraRotatePlayerZ = lastAutoCameraRotatePlayerZ;
-    }
-
     @Override
     public void render(Canvas canvas, Graphics g) {
         GameRenderer.render(this, canvas);

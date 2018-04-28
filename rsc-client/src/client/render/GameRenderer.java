@@ -133,18 +133,29 @@ public class GameRenderer {
         game.setObjectsProcessed(objectsProcessed);
         */
 
-        // Change camera angle
-        Camera camera = scene.getCamera();
-        int cameraHeight = game.getCameraHeight();
-        scene.fogZFalloff = 1;
-        scene.fogZDistance = 2300 + (cameraHeight * 2);
+        updateCameraPosition(game, world, scene);
 
-        int l5 = game.getLastAutoCameraRotatePlayerX() + game.getScreenRotationX();
-        int i8 = game.getLastAutoCameraRotatePlayerZ() + game.getScreenRotationZ();
-        camera.setCamera(l5, -world.getAveragedElevation(l5, i8), i8, 912, game.getCameraRotation() * 4, 0,
-                cameraHeight * 2);
+        scene.fogZFalloff = 1;
+        scene.fogZDistance = 2300 + (game.getCameraHeight() * 2);
 
         game.getSceneRenderer().render(canvas);
+    }
+
+    private static void updateCameraPosition(Game game, World world, Scene scene) {
+
+        Camera camera = scene.getCamera();
+        
+        int x = game.getCurrentPlayer().x + game.getScreenRotationX();
+        int z = game.getCurrentPlayer().z + game.getScreenRotationZ();
+        int y = -world.getAveragedElevation(x, z);
+        
+        int pitch = 912;
+        int yaw = game.getCameraRotation() * 4;
+        int roll = 0;
+        int height = game.getCameraHeight() * 2;
+        
+        camera.setCamera(x, y, z, pitch, yaw, roll, height);
+        
     }
 
 }

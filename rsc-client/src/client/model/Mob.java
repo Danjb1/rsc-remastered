@@ -7,8 +7,8 @@ public class Mob {
     public String name;
     public int serverIndex;
     public int mobIntUnknown;
-    public int currentX;
-    public int currentZ;
+    public int x;
+    public int z;
     public int type;
     public int stepCount;
     public int currentSprite;

@@ -100,8 +100,8 @@ public class SceneRenderer {
         int clipXModified = clipX * clipFar3d >> viewDistance;
         int clipYModified = clipY * clipFar3d >> viewDistance;
         camera.prepareForRendering(clipX, clipY, clipFar3d, clipXModified, clipYModified);
-        scene.getModels()[scene.getNumModels()] = scene.getView();
-        scene.getView().transformState = 2;
+        scene.getModels()[scene.getNumModels()] = scene.getSpriteFaces();
+        scene.getSpriteFaces().transformState = 2;
         
         for (int i = 0; i < scene.getNumModels(); i++) {
             scene.getModels()[i].project(camera, viewDistance, clipNear);
@@ -111,99 +111,121 @@ public class SceneRenderer {
                 .project(camera, viewDistance, clipNear);
         visiblePolygonCount = 0;
         
+        // Draw each model in the scene
         for (int i = 0; i < scene.getNumModels(); i++) {
+            
             GameModel gameModel = scene.getModels()[i];
-            if (gameModel.visible) {
-                for (int face = 0; face < gameModel.numFaces; face++) {
-                    int numVertices = gameModel.faceNumVertices[face];
-                    int vertices[] = gameModel.faceVertices[face];
-                    boolean visible = false;
-                    for (int vertex = 0; vertex < numVertices; vertex++) {
-                        int i1 = gameModel.projectVertexZ[vertices[vertex]];
-                        if (i1 <= clipNear || i1 >= clipFar3d) {
-                            continue;
-                        }
-                        visible = true;
-                        break;
+            
+            if (!gameModel.visible) {
+                // Model is not visible
+                continue;
+            }
+            
+            // Iterate over every face in the model
+            for (int face = 0; face < gameModel.numFaces; face++) {
+                
+                int numVertices = gameModel.faceNumVertices[face];
+                int vertices[] = gameModel.faceVertices[face];
+                
+                // Determine if any vertices are visible
+                boolean visible = false;
+                for (int vertex = 0; vertex < numVertices; vertex++) {
+                    int i1 = gameModel.projectVertexZ[vertices[vertex]];
+                    if (i1 <= clipNear || i1 >= clipFar3d) {
+                        continue;
                     }
-
-                    if (visible) {
-                        int viewXCount = 0;
-                        for (int vertex = 0; vertex < numVertices; vertex++) {
-                            int j1 = gameModel.vertexViewX[vertices[vertex]];
-                            if (j1 > -clipX) {
-                                viewXCount |= 1;
-                            }
-                            if (j1 < clipX) {
-                                viewXCount |= 2;
-                            }
-                            if (viewXCount == 3) {
-                                break;
-                            }
-                        }
-
-                        if (viewXCount == 3) {
-                            int viewYCount = 0;
-                            for (int vertex = 0; vertex < numVertices; vertex++) {
-                                int k1 = gameModel.vertexViewY[vertices[vertex]];
-                                if (k1 > -clipY) {
-                                    viewYCount |= 1;
-                                }
-                                if (k1 < clipY) {
-                                    viewYCount |= 2;
-                                }
-                                if (viewYCount == 3) {
-                                    break;
-                                }
-                            }
-
-                            if (viewYCount == 3) {
-                                Polygon polygon1 = visiblePolygons[visiblePolygonCount];
-                                polygon1.gameModel = gameModel;
-                                polygon1.face = face;
-                                initialisePolygon3d(visiblePolygonCount);
-                                int faceFill;
-                                if (polygon1.visibility < 0) {
-                                    faceFill = gameModel.faceFillFront[face];
-                                } else {
-                                    faceFill = gameModel.faceFillBack[face];
-                                }
-                                if (faceFill != COLOUR_TRANSPARENT) {
-                                    int j2 = 0;
-                                    for (int vertex = 0; vertex < numVertices; vertex++) {
-                                        j2 += gameModel.projectVertexZ[vertices[vertex]];
-                                    }
-
-                                    polygon1.depth = j2 / numVertices + gameModel.anInt245;
-                                    polygon1.faceFill = faceFill;
-                                    visiblePolygonCount++;
-                                }
-                            }
-                        }
-                    }
+                    visible = true;
+                    break;
                 }
 
+                if (!visible) {
+                    // No visible vertices
+                    continue;
+                }
+                
+                // Verify visibility in x-axis?
+                int viewXCount = 0;
+                for (int vertex = 0; vertex < numVertices; vertex++) {
+                    int j1 = gameModel.vertexViewX[vertices[vertex]];
+                    if (j1 > -clipX) {
+                        viewXCount |= 1;
+                    }
+                    if (j1 < clipX) {
+                        viewXCount |= 2;
+                    }
+                    if (viewXCount == 3) {
+                        break;
+                    }
+                }
+                if (viewXCount != 3) {
+                    continue;
+                }
+
+                // Verify visibility in y-axis?
+                int viewYCount = 0;
+                for (int vertex = 0; vertex < numVertices; vertex++) {
+                    int k1 = gameModel.vertexViewY[vertices[vertex]];
+                    if (k1 > -clipY) {
+                        viewYCount |= 1;
+                    }
+                    if (k1 < clipY) {
+                        viewYCount |= 2;
+                    }
+                    if (viewYCount == 3) {
+                        break;
+                    }
+                }
+                if (viewYCount != 3) {
+                    continue;
+                }
+                
+                Polygon polygon1 = visiblePolygons[visiblePolygonCount];
+                polygon1.gameModel = gameModel;
+                polygon1.face = face;
+                initialisePolygon3d(visiblePolygonCount);
+                int faceFill;
+                
+                if (polygon1.visibility < 0) {
+                    faceFill = gameModel.faceFillFront[face];
+                } else {
+                    faceFill = gameModel.faceFillBack[face];
+                }
+                
+                if (faceFill == COLOUR_TRANSPARENT) {
+                    // Face is transparent
+                    continue;
+                }
+                
+                int j2 = 0;
+                for (int vertex = 0; vertex < numVertices; vertex++) {
+                    j2 += gameModel.projectVertexZ[vertices[vertex]];
+                }
+
+                polygon1.depth = j2 / numVertices + gameModel.anInt245;
+                polygon1.faceFill = faceFill;
+                visiblePolygonCount++;
             }
         }
 
-        GameModel model2d = scene.getView();
-        if (model2d.visible) {
-            for (int face = 0; face < model2d.numFaces; face++) {
-                int faceVertices[] = model2d.faceVertices[face];
+        // Render 2d models (sprites)
+        GameModel spriteFaces = scene.getSpriteFaces();
+        if (spriteFaces.visible) {
+            for (int face = 0; face < spriteFaces.numFaces; face++) {
+                int faceVertices[] = spriteFaces.faceVertices[face];
                 int vertex0 = faceVertices[0];
-                int vx = model2d.vertexViewX[vertex0];
-                int vy = model2d.vertexViewY[vertex0];
-                int vz = model2d.projectVertexZ[vertex0];
+                int vx = spriteFaces.vertexViewX[vertex0];
+                int vy = spriteFaces.vertexViewY[vertex0];
+                int vz = spriteFaces.projectVertexZ[vertex0];
                 if (vz > clipNear && vz < clipFar2d) {
                     SpriteEntity spriteEntity = scene.getSpriteEntities()[face];
                     int vw = (spriteEntity.getWidth() << viewDistance) / vz;
                     int vh = (spriteEntity.getHeight() << viewDistance) / vz;
                     if (vx - vw / 2 <= clipX && vx + vw / 2 >= -clipX && vy - vh <= clipY && vy >= -clipY) {
                         Polygon polygon2 = visiblePolygons[visiblePolygonCount];
-                        polygon2.gameModel = model2d;
+                        polygon2.gameModel = spriteFaces;
                         polygon2.face = face;
                         initialisePolygon2d(visiblePolygonCount);
-                        polygon2.depth = (vz + model2d.projectVertexZ[faceVertices[1]]) / 2;
+                        polygon2.depth = (vz + spriteFaces.projectVertexZ[faceVertices[1]]) / 2;
                         visiblePolygonCount++;
                     }
                 }
@@ -212,126 +234,156 @@ public class SceneRenderer {
         }
         
         if (visiblePolygonCount == 0) {
+            // Nothing to render!
             return;
         }
         
+        // Sort polygons
         polygonsQSort(visiblePolygons, 0, visiblePolygonCount - 1);
         polygonsIntersectSort(100, visiblePolygons, visiblePolygonCount);
         
+        // Render our polygons!
         for (int polygonIndex = 0; polygonIndex < visiblePolygonCount; polygonIndex++) {
+            
             Polygon polygon = visiblePolygons[polygonIndex];
             GameModel polygonModel = polygon.gameModel;
             int polyFace = polygon.face;
-            if (polygonModel == scene.getView()) {
-                SpriteEntity spriteEntity = scene.getSpriteEntities()[polyFace];
-                int faceverts[] = polygonModel.faceVertices[polyFace];
-                int face0 = faceverts[0];
-                int vx = polygonModel.vertexViewX[face0];
-                int vy = polygonModel.vertexViewY[face0];
-                int vz = polygonModel.projectVertexZ[face0];
-                int w = (spriteEntity.getWidth() << viewDistance) / vz;
-                int h = (spriteEntity.getHeight() << viewDistance) / vz;
-                int x = vx - w / 2;
-                int y = (baseY + vy) - h;
-                canvas.spriteClip(x + baseX, y, w, h, spriteEntity.getId());
-            } else {
-                int plane = 0;
-                int light = 0;
-                int numFaces = polygonModel.faceNumVertices[polyFace];
-                int faceVerts[] = polygonModel.faceVertices[polyFace];
-                if (polygonModel.faceIntensity[polyFace] != COLOUR_TRANSPARENT) {
-                    if (polygon.visibility < 0) {
-                        light = polygonModel.lightAmbience - polygonModel.faceIntensity[polyFace];
-                    } else {
-                        light = polygonModel.lightAmbience + polygonModel.faceIntensity[polyFace];
-                    }
-                }
-                for (int face = 0; face < numFaces; face++) {
-                    int vert = faceVerts[face];
-                    vertexX[face] = polygonModel.projectVertexX[vert];
-                    vertexY[face] = polygonModel.projectVertexY[vert];
-                    vertexZ[face] = polygonModel.projectVertexZ[vert];
-                    if (polygonModel.faceIntensity[polyFace] == COLOUR_TRANSPARENT) {
-                        if (polygon.visibility < 0) {
-                            light = (polygonModel.lightAmbience - polygonModel.vertexIntensity[vert])
-                                    + polygonModel.vertexAmbience[vert];
-                        } else {
-                            light = polygonModel.lightAmbience + polygonModel.vertexIntensity[vert]
-                                    + polygonModel.vertexAmbience[vert];
-                        }
-                    }
-                    if (polygonModel.projectVertexZ[vert] >= clipNear) {
-                        planeX[plane] = polygonModel.vertexViewX[vert];
-                        planeY[plane] = polygonModel.vertexViewY[vert];
-                        vertexShade[plane] = light;
-                        if (polygonModel.projectVertexZ[vert] > scene.fogZDistance) {
-                            vertexShade[plane] += (polygonModel.projectVertexZ[vert] - scene.fogZDistance) / scene.fogZFalloff;
-                        }
-                        plane++;
-                    } else {
-                        int vertEnd;
-                        if (face == 0) {
-                            vertEnd = faceVerts[numFaces - 1];
-                        } else {
-                            vertEnd = faceVerts[face - 1];
-                        }
-                        if (polygonModel.projectVertexZ[vertEnd] >= clipNear) {
-                            int k7 = polygonModel.projectVertexZ[vert] - polygonModel.projectVertexZ[vertEnd];
-                            int i5 = polygonModel.projectVertexX[vert]
-                                    - ((polygonModel.projectVertexX[vert] - polygonModel.projectVertexX[vertEnd])
-                                            * (polygonModel.projectVertexZ[vert] - clipNear)) / k7;
-                            int j6 = polygonModel.projectVertexY[vert]
-                                    - ((polygonModel.projectVertexY[vert] - polygonModel.projectVertexY[vertEnd])
-                                            * (polygonModel.projectVertexZ[vert] - clipNear)) / k7;
-                            planeX[plane] = (i5 << viewDistance) / clipNear;
-                            planeY[plane] = (j6 << viewDistance) / clipNear;
-                            vertexShade[plane] = light;
-                            plane++;
-                        }
-                        if (face == numFaces - 1) {
-                            vertEnd = faceVerts[0];
-                        } else {
-                            vertEnd = faceVerts[face + 1];
-                        }
-                        if (polygonModel.projectVertexZ[vertEnd] >= clipNear) {
-                            int l7 = polygonModel.projectVertexZ[vert] - polygonModel.projectVertexZ[vertEnd];
-                            int j5 = polygonModel.projectVertexX[vert]
-                                    - ((polygonModel.projectVertexX[vert] - polygonModel.projectVertexX[vertEnd])
-                                            * (polygonModel.projectVertexZ[vert] - clipNear)) / l7;
-                            int k6 = polygonModel.projectVertexY[vert]
-                                    - ((polygonModel.projectVertexY[vert] - polygonModel.projectVertexY[vertEnd])
-                                            * (polygonModel.projectVertexZ[vert] - clipNear)) / l7;
-                            planeX[plane] = (j5 << viewDistance) / clipNear;
-                            planeY[plane] = (k6 << viewDistance) / clipNear;
-                            vertexShade[plane] = light;
-                            plane++;
-                        }
-                    }
-                }
-
-                for (int face = 0; face < numFaces; face++) {
-                    if (vertexShade[face] < 0) {
-                        vertexShade[face] = 0;
-                    } else if (vertexShade[face] > 255) {
-                        vertexShade[face] = 255;
-                    }
-                    if (polygon.faceFill >= 0) {
-                        Texture tex = Resources.textures[polygon.faceFill];
-                        if (tex.isLarge()) {
-                            vertexShade[face] <<= 9;
-                        } else {
-                            vertexShade[face] <<= 6;
-                        }
-                    }
-                }
-
-                generateScanlines(0, 0, 0, 0, plane, planeX, planeY, vertexShade, polygonModel, polyFace);
-
-                if (maxY > minY) {
-                    rasterize(canvas, numFaces, vertexX, vertexY, vertexZ, polygon.faceFill, polygonModel);
+            
+            // Is polygon a sprite?
+            if (polygonModel == scene.getSpriteFaces()) {
+                renderSprite(polygonModel, polyFace, canvas);
+                continue;
+            }
+                
+            int plane = 0;
+            int light = 0;
+            int numVertices = polygonModel.faceNumVertices[polyFace];
+            int faceVerts[] = polygonModel.faceVertices[polyFace];
+            
+            // Calculate face lighting
+            if (polygonModel.faceIntensity[polyFace] != COLOUR_TRANSPARENT) {
+                if (polygon.visibility < 0) {
+                    light = polygonModel.lightAmbience - polygonModel.faceIntensity[polyFace];
+                } else {
+                    light = polygonModel.lightAmbience + polygonModel.faceIntensity[polyFace];
                 }
             }
+            
+            // Render all vertices
+            for (int vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
+                
+                int vertexIndexInModel = faceVerts[vertexIndex];
+                vertexX[vertexIndex] = polygonModel.projectVertexX[vertexIndexInModel];
+                vertexY[vertexIndex] = polygonModel.projectVertexY[vertexIndexInModel];
+                vertexZ[vertexIndex] = polygonModel.projectVertexZ[vertexIndexInModel];
+                
+                // Calculate vertex lighting for transparent faces
+                if (polygonModel.faceIntensity[polyFace] == COLOUR_TRANSPARENT) {
+                    if (polygon.visibility < 0) {
+                        light = (polygonModel.lightAmbience - polygonModel.vertexIntensity[vertexIndexInModel])
+                                + polygonModel.vertexAmbience[vertexIndexInModel];
+                    } else {
+                        light = polygonModel.lightAmbience + polygonModel.vertexIntensity[vertexIndexInModel]
+                                + polygonModel.vertexAmbience[vertexIndexInModel];
+                    }
+                }
+                
+                
+                if (polygonModel.projectVertexZ[vertexIndexInModel] >= clipNear) {
+                    
+                    planeX[plane] = polygonModel.vertexViewX[vertexIndexInModel];
+                    planeY[plane] = polygonModel.vertexViewY[vertexIndexInModel];
+                    vertexShade[plane] = light;
+                    
+                    if (polygonModel.projectVertexZ[vertexIndexInModel] > scene.fogZDistance) {
+                        vertexShade[plane] += (polygonModel.projectVertexZ[vertexIndexInModel] - scene.fogZDistance) / scene.fogZFalloff;
+                    }
+                    plane++;
+                    
+                } else {
+                    
+                    int vertEnd;
+                    
+                    if (vertexIndex == 0) {
+                        vertEnd = faceVerts[numVertices - 1];
+                    } else {
+                        vertEnd = faceVerts[vertexIndex - 1];
+                    }
+                    
+                    if (polygonModel.projectVertexZ[vertEnd] >= clipNear) {
+                        int k7 = polygonModel.projectVertexZ[vertexIndexInModel] - polygonModel.projectVertexZ[vertEnd];
+                        int i5 = polygonModel.projectVertexX[vertexIndexInModel]
+                                - ((polygonModel.projectVertexX[vertexIndexInModel] - polygonModel.projectVertexX[vertEnd])
+                                        * (polygonModel.projectVertexZ[vertexIndexInModel] - clipNear)) / k7;
+                        int j6 = polygonModel.projectVertexY[vertexIndexInModel]
+                                - ((polygonModel.projectVertexY[vertexIndexInModel] - polygonModel.projectVertexY[vertEnd])
+                                        * (polygonModel.projectVertexZ[vertexIndexInModel] - clipNear)) / k7;
+                        planeX[plane] = (i5 << viewDistance) / clipNear;
+                        planeY[plane] = (j6 << viewDistance) / clipNear;
+                        vertexShade[plane] = light;
+                        plane++;
+                    }
+                    
+                    if (vertexIndex == numVertices - 1) {
+                        vertEnd = faceVerts[0];
+                    } else {
+                        vertEnd = faceVerts[vertexIndex + 1];
+                    }
+                    
+                    if (polygonModel.projectVertexZ[vertEnd] >= clipNear) {
+                        int l7 = polygonModel.projectVertexZ[vertexIndexInModel] - polygonModel.projectVertexZ[vertEnd];
+                        int j5 = polygonModel.projectVertexX[vertexIndexInModel]
+                                - ((polygonModel.projectVertexX[vertexIndexInModel] - polygonModel.projectVertexX[vertEnd])
+                                        * (polygonModel.projectVertexZ[vertexIndexInModel] - clipNear)) / l7;
+                        int k6 = polygonModel.projectVertexY[vertexIndexInModel]
+                                - ((polygonModel.projectVertexY[vertexIndexInModel] - polygonModel.projectVertexY[vertEnd])
+                                        * (polygonModel.projectVertexZ[vertexIndexInModel] - clipNear)) / l7;
+                        planeX[plane] = (j5 << viewDistance) / clipNear;
+                        planeY[plane] = (k6 << viewDistance) / clipNear;
+                        vertexShade[plane] = light;
+                        plane++;
+                    }
+                }
+            }
+
+            // Determine vertex shade
+            for (int face = 0; face < numVertices; face++) {
+                if (vertexShade[face] < 0) {
+                    vertexShade[face] = 0;
+                } else if (vertexShade[face] > 255) {
+                    vertexShade[face] = 255;
+                }
+                if (polygon.faceFill >= 0) {
+                    Texture tex = Resources.textures[polygon.faceFill];
+                    if (tex.isLarge()) {
+                        vertexShade[face] <<= 9;
+                    } else {
+                        vertexShade[face] <<= 6;
+                    }
+                }
+            }
+
+            generateScanlines(0, 0, 0, 0, plane, planeX, planeY, vertexShade, polygonModel, polyFace);
+
+            if (maxY > minY) {
+                rasterize(canvas, numVertices, vertexX, vertexY, vertexZ, polygon.faceFill, polygonModel);
+            }
         }
+    }
+
+    private void renderSprite(GameModel polygonModel, int polyFace,
+            Canvas canvas) {
+        SpriteEntity spriteEntity = scene.getSpriteEntities()[polyFace];
+        int faceverts[] = polygonModel.faceVertices[polyFace];
+        int face0 = faceverts[0];
+        int vx = polygonModel.vertexViewX[face0];
+        int vy = polygonModel.vertexViewY[face0];
+        int vz = polygonModel.projectVertexZ[face0];
+        int w = (spriteEntity.getWidth() << viewDistance) / vz;
+        int h = (spriteEntity.getHeight() << viewDistance) / vz;
+        int x = vx - w / 2;
+        int y = (baseY + vy) - h;
+        canvas.spriteClip(x + baseX, y, w, h, spriteEntity.getId());
     }
 
     public void setBounds(int baseX, int baseY, int clipX, int clipY, int width, int viewDistance) {
@@ -2121,7 +2173,7 @@ public class SceneRenderer {
     }
 
     public void setMousePos(int mouseX, int mouseY) {
-        this.mouseX = mouseX;
+        this.mouseX = mouseX - baseX;
         this.mouseY = mouseY;
         mousePickedCount = 0;
     }

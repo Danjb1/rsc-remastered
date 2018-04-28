@@ -173,8 +173,11 @@ public class RsLauncher {
         Point mouseLoc = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mouseLoc, gamePanel);
         state.setMousePos(mouseLoc.x, mouseLoc.y);
-        state.pollInput();
-        state.discardUnusedInput();
+        
+        synchronized (state) {
+            state.pollInput();
+            state.clearInput();
+        }
     }
 
     private void tick() {

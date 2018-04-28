@@ -60,7 +60,7 @@ public class Camera {
         frustumNearZ += z;
     }
 
-    public void setCamera(int x, int y, int z, int pitch, int yaw, int roll, int maybeZoom) {
+    public void setCamera(int x, int y, int z, int pitch, int yaw, int roll, int cameraHeight) {
         pitch &= 0x3ff;
         yaw &= 0x3ff;
         roll &= 0x3ff;
@@ -69,7 +69,7 @@ public class Camera {
         this.roll = 1024 - roll & 0x3ff;
         int l1 = 0;
         int i2 = 0;
-        int j2 = maybeZoom;
+        int j2 = cameraHeight;
         if (pitch != 0) {
             int k2 = sin2048Cache[pitch];
             int j3 = sin2048Cache[pitch + 1024];

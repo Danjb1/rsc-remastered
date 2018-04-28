@@ -13,12 +13,12 @@ public abstract class State implements
     protected int mouseX;
     protected int mouseY;
     
-    private MouseEvent lastMouseEvent;
+    private boolean leftClickReleased;
 
     public void pollInput() {}
 
-    public void discardUnusedInput() {
-        lastMouseEvent = null;
+    public void clearInput() {
+        leftClickReleased = false;
     }
 
     public void tick() {}
@@ -29,13 +29,16 @@ public abstract class State implements
     public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void mousePressed(MouseEvent e) {
-        lastMouseEvent = e;
-    }
+    public void mousePressed(MouseEvent e) {}
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        lastMouseEvent = e;
+        synchronized (this) {
+            if (e.getButton() == MouseEvent.BUTTON1 &&
+                    e.getID() == MouseEvent.MOUSE_RELEASED) {
+                leftClickReleased = true;
+            }
+        }
     }
 
     @Override
@@ -59,9 +62,7 @@ public abstract class State implements
     }
 
     protected boolean wasLeftClickReleased() {
-        return lastMouseEvent != null &&
-                lastMouseEvent.getButton() == MouseEvent.BUTTON1 &&
-                lastMouseEvent.getID() == MouseEvent.MOUSE_RELEASED;
+        return leftClickReleased;
     }
 
 }
