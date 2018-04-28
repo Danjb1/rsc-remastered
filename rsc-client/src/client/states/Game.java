@@ -114,7 +114,6 @@ public class Game extends State {
     
     private void groundTileSelected(int tileX, int tileZ) {
         if (wasLeftClickReleased()) {
-            System.out.println("clicked on tile: " + tileX + ", " + tileZ);
             player.x = tileX * World.TILE_WIDTH;
             player.z = tileZ * World.TILE_DEPTH;
         }

@@ -53,7 +53,7 @@ public class RsLauncher {
     }
 
     private void createFrame(int width, int height, String title) {
-        gamePanel = new GamePanel(this, width, height);
+        gamePanel = new GamePanel(width, height);
         frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
@@ -132,10 +132,11 @@ public class RsLauncher {
                 }
             }
 
+            pollInput();
+            
             // Process the game continually until we are due to render
             int timeSinceLastRender = 0;
             while (timeSinceLastRender < 256) {
-                pollInput();
                 tick();
                 timeSinceLastRender += timeSinceLastFrame;
             }
@@ -185,7 +186,7 @@ public class RsLauncher {
     }
 
     private void render() {
-        gamePanel.repaint();
+        gamePanel.render(state);
     }
 
     public void changeState(State newState) {
