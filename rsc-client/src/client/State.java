@@ -64,5 +64,13 @@ public abstract class State implements
     protected boolean wasLeftClickReleased() {
         return leftClickReleased;
     }
+    
+    public int getMouseX() {
+        return mouseX;
+    }
+    
+    public int getMouseY() {
+        return mouseY;
+    }
 
 }

@@ -11,10 +11,10 @@ public class Scene {
     private static final int MAX_MODELS = 15000;
     private static final int MAX_SPRITES = 1000;
 
-    private GameModel spriteFaces;
+    private Model spriteFaces;
     private Camera camera;
     private int numModels;
-    private GameModel models[] = new GameModel[MAX_MODELS];
+    private Model models[] = new Model[MAX_MODELS];
     private int numSprites;
     private SpriteEntity spriteEntities[] = new SpriteEntity[MAX_SPRITES];
 
@@ -29,7 +29,7 @@ public class Scene {
         for (int l = 0; l < spriteEntities.length; l++) {
             spriteEntities[l] = new SpriteEntity();
         }
-        spriteFaces = new GameModel(MAX_SPRITES * 2, MAX_SPRITES);
+        spriteFaces = new Model(MAX_SPRITES * 2, MAX_SPRITES);
         camera = new Camera();
         
         camera.setCamera(0, 0, 0, 912, 0, 0, 2000);
@@ -37,7 +37,7 @@ public class Scene {
         setLight(-50, -10, -50);
     }
 
-    public void addModel(GameModel gameModel) {
+    public void addModel(Model gameModel) {
         if (gameModel == null) {
             System.out.println("Warning tried to add null object!");
             return;
@@ -48,7 +48,7 @@ public class Scene {
         }
     }
 
-    public void removeModel(GameModel gameModel) {
+    public void removeModel(Model gameModel) {
         for (int i = 0; i < numModels; i++) {
             if (models[i] == gameModel) {
                 numModels--;
@@ -118,7 +118,7 @@ public class Scene {
 
     }
 
-    public GameModel getSpriteFaces() {
+    public Model getSpriteFaces() {
         return spriteFaces;
     }
     
@@ -130,7 +130,7 @@ public class Scene {
         return numModels;
     }
     
-    public GameModel[] getModels() {
+    public Model[] getModels() {
         return models;
     }
     

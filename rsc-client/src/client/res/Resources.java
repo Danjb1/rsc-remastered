@@ -25,7 +25,6 @@ import client.entityhandling.defs.SpellDef;
 import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
 import client.model.Sector;
-import client.scene.Sprite;
 import client.util.DataUtils;
 
 /**

@@ -13,7 +13,7 @@ public class Polygon {
     public int maxPlaneY;
     public int minZ;
     public int maxZ;
-    public GameModel gameModel;
+    public Model gameModel;
     public int face;
     public int depth;
     public int normalX;

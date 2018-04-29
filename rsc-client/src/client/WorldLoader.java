@@ -1,9 +1,12 @@
 package client;
 
 import client.entityhandling.defs.TileDef;
+import client.model.Sector;
 import client.res.Resources;
-import client.scene.GameModel;
+import client.scene.Model;
 import client.util.DataUtils;
+import client.util.ModelUtils;
+import client.world.World;
 
 /**
  * Class responsible for loading the World.
@@ -15,7 +18,7 @@ public class WorldLoader {
     /**
      * Model used when loading regions.
      */
-    private GameModel tmpModel = new GameModel(
+    private Model tmpModel = new Model(
             World.NUM_TERRAIN_FACES + 256,
             World.NUM_TERRAIN_FACES + 256,
             true,
@@ -23,9 +26,12 @@ public class WorldLoader {
             false,
             false,
             true);
-    
+
+    private static final int REGION_WIDTH = 18 * World.TILE_WIDTH;
+    private static final int REGION_DEPTH = 13 * World.TILE_DEPTH + 112;
+
     private static final int[] GROUND_COLOURS = new int[256];
-    
+
     static {
         // Initialise ground colours
         for (int i = 0; i < 64; i++) {
@@ -62,6 +68,64 @@ public class WorldLoader {
         this.world = world;
     }
 
+    public boolean loadRegion(int x, int z) {
+        
+        x += REGION_WIDTH;
+        z += REGION_DEPTH;
+        
+        if (world.containsPoint(x, z)) {
+            // No need to load region if already loaded
+            return false;
+        }
+
+        world.garbageCollect();
+        
+        int layer = world.getCurrentLayer();
+        loadLayer(x, z, layer, true);
+
+        if (layer == 0) {
+
+            // Load upper storeys (they should be visible from the ground floor)
+            loadLayer(x, z, 1, false);
+            loadLayer(x, z, 2, false);
+
+            // Set the active sectors back to the current layer
+            loadSectors(x, z, layer);
+        }
+        
+        int previousRegionX = world.getRegionX();
+        int previousRegionZ = world.getRegionZ();
+        
+        x = (x + (Sector.WIDTH / 2)) / Sector.WIDTH;
+        z = (z + (Sector.DEPTH / 2)) / Sector.DEPTH;
+        int regionX = (x * Sector.WIDTH - Sector.WIDTH) - REGION_WIDTH;
+        int regionZ = (z * Sector.DEPTH - Sector.DEPTH) - REGION_DEPTH;
+        
+        world.setRegion(regionX, regionZ);
+
+        // Set map boundary around the loaded region
+        world.setMapBoundary(
+                x * Sector.WIDTH - 32,
+                z * Sector.DEPTH - 32,
+                x * Sector.WIDTH + 32,
+                z * Sector.DEPTH + 32);
+
+        int dx = regionX - previousRegionX;
+        int dz = regionZ - previousRegionZ;
+
+        // Move objects
+        for (int i = 0; i < world.getNumGameObjects(); i++) {
+            world.getGameObject(i).move(-dx, -dz);
+        }
+
+        // Move doors
+        for (int i = 0; i < world.getNumDoors(); i++) {
+            world.getDoor(i).move(-dx, -dz);
+        }
+        
+        return true;
+    }
+
     /**
      * Loads a single layer of the given region.
      * 
@@ -70,7 +134,7 @@ public class WorldLoader {
      * @param layer
      * @param isCurrentLayer
      */
-    public void loadRegion(int regionX, int regionZ, int layer, boolean isCurrentLayer) {
+    private void loadLayer(int regionX, int regionZ, int layer, boolean isCurrentLayer) {
 
         loadSectors(regionX, regionZ, layer);
         
@@ -321,7 +385,7 @@ public class WorldLoader {
 
             tmpModel.recalculateLighting(true, 40, 48, -50, -10, -50);
             
-            GameModel[] landscapeModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 233, false);
+            Model[] landscapeModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 233, false);
             world.setLandscapeModels(landscapeModels);
 
             for (int x = 0; x < World.NUM_TILES_X; x++) {
@@ -341,24 +405,24 @@ public class WorldLoader {
             for (int z = 0; z < World.NUM_TILES_Z - 1; z++) {
                 int k3 = getVerticalWall(x, z);
                 if (k3 > 0 && Resources.getDoorDef(k3 - 1).getUnknown() == 0) {
-                    createWall(tmpModel, k3 - 1, x, z, x + 1, z);
+                    ModelUtils.createWall(world, tmpModel, k3 - 1, x, z, x + 1, z);
                 }
                 k3 = getHorizontalWall(x, z);
                 if (k3 > 0 && Resources.getDoorDef(k3 - 1).getUnknown() == 0) {
-                    createWall(tmpModel, k3 - 1, x, z, x, z + 1);
+                    ModelUtils.createWall(world, tmpModel, k3 - 1, x, z, x, z + 1);
                 }
                 k3 = getDiagonalWalls(x, z);
                 if (k3 > 0 && k3 < 12000 && Resources.getDoorDef(k3 - 1).getUnknown() == 0) {
-                    createWall(tmpModel, k3 - 1, x, z, x + 1, z + 1);
+                    ModelUtils.createWall(world, tmpModel, k3 - 1, x, z, x + 1, z + 1);
                 }
                 if (k3 > 12000 && k3 < 24000 && Resources.getDoorDef(k3 - 12001).getUnknown() == 0) {
-                    createWall(tmpModel, k3 - 12001, x + 1, z, x, z + 1);
+                    ModelUtils.createWall(world, tmpModel, k3 - 12001, x + 1, z, x, z + 1);
                 }
             }
         }
 
         tmpModel.recalculateLighting(false, 60, 24, -50, -10, -50);
-        GameModel[] wallModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 338, true);
+        Model[] wallModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 338, true);
         world.setWallModels(layer, wallModels);
 
         // Raise wall heights
@@ -641,7 +705,7 @@ public class WorldLoader {
         }
         
         tmpModel.recalculateLighting(true, 50, 50, -50, -10, -50);
-        GameModel[] roofModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 169, true);
+        Model[] roofModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 169, true);
         world.setRoofModels(layer, roofModels);
         
         // Raise heights of upper storeys?
@@ -654,10 +718,10 @@ public class WorldLoader {
         }
     }
 
-    public void loadSectors(int regionX, int regionZ, int layer) {
+    private void loadSectors(int regionX, int regionZ, int layer) {
         
-        int sectorX = (regionX + 24) / 48;
-        int sectorZ = (regionZ + 24) / 48;
+        int sectorX = (regionX + (Sector.WIDTH / 2)) / Sector.WIDTH;
+        int sectorZ = (regionZ + (Sector.DEPTH / 2)) / Sector.DEPTH;
         
         world.setSector(0, Resources.loadSector(sectorX - 1, sectorZ - 1, layer));
         world.setSector(1, Resources.loadSector(sectorX, sectorZ - 1, layer));
@@ -667,76 +731,26 @@ public class WorldLoader {
         setGroundTextureOverlays();
     }
 
-    public int getRoofTexture(int x, int z) {
+    private int getRoofTexture(int x, int z) {
         
         if (x < 0 || x >= World.NUM_TILES_X || z < 0 || z >= World.NUM_TILES_Z) {
             return 0;
         }
         
         byte byte0 = 0;
-        if (x >= 48 && z < 48) {
+        if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             byte0 = 1;
-            x -= 48;
-        } else if (x < 48 && z >= 48) {
+            x -= Sector.WIDTH;
+        } else if (x < Sector.WIDTH && z >= Sector.DEPTH) {
             byte0 = 2;
-            z -= 48;
-        } else if (x >= 48 && z >= 48) {
+            z -= Sector.DEPTH;
+        } else if (x >= Sector.WIDTH && z >= Sector.DEPTH) {
             byte0 = 3;
-            x -= 48;
-            z -= 48;
+            x -= Sector.WIDTH;
+            z -= Sector.DEPTH;
         }
         
         return world.getSector(byte0).getTile(x, z).roofTexture;
-    }
-
-    private void createWall(GameModel gameModel, int wallIndex, int x1, int z1, int x2, int z2) {
-        setAmbientLighting(x1, z1, 40);
-        setAmbientLighting(x2, z2, 40);
-        int height = Resources.getDoorDef(wallIndex).getModelVar1();
-        int frontTexture = Resources.getDoorDef(wallIndex).getModelVar2();
-        int backTexture = Resources.getDoorDef(wallIndex).getModelVar3();
-        int i2 = x1 * 128;
-        int j2 = z1 * 128;
-        int k2 = x2 * 128;
-        int l2 = z2 * 128;
-        int i3 = gameModel.createVertexWithoutDuplication(i2, -world.getElevation(x1, z1), j2);
-        int j3 = gameModel.createVertexWithoutDuplication(i2, -world.getElevation(x1, z1) - height, j2);
-        int k3 = gameModel.createVertexWithoutDuplication(k2, -world.getElevation(x2, z2) - height, l2);
-        int l3 = gameModel.createVertexWithoutDuplication(k2, -world.getElevation(x2, z2), l2);
-        
-        int i4 = gameModel.createFace(4, new int[] { i3, j3, k3, l3 }, frontTexture, backTexture);
-        if (Resources.getDoorDef(wallIndex).getUnknown() == 5) {
-            gameModel.faceTag[i4] = 30000 + wallIndex;
-        } else {
-            gameModel.faceTag[i4] = 0;
-        }
-    }
-
-    private void setAmbientLighting(int x, int z, int height) {
-        int modelIndex1 = x / 12;
-        int modelIndex2 = z / 12;
-        int otherModelIndex1 = (x - 1) / 12;
-        int otherModelIndex2 = (z - 1) / 12;
-        setAmbientLighting(modelIndex1, modelIndex2, x, z, height);
-        if (modelIndex1 != otherModelIndex1) {
-            setAmbientLighting(otherModelIndex1, modelIndex2, x, z, height);
-        }
-        if (modelIndex2 != otherModelIndex2) {
-            setAmbientLighting(modelIndex1, otherModelIndex2, x, z, height);
-        }
-        if (modelIndex1 != otherModelIndex1 && modelIndex2 != otherModelIndex2) {
-            setAmbientLighting(otherModelIndex1, otherModelIndex2, x, z, height);
-        }
-    }
-
-    private void setAmbientLighting(int modelIndex1, int modelIndex2, int x, int z, int ambience) {
-        GameModel gameModel = world.getLandscapeModel(modelIndex1 + modelIndex2 * 8);
-        for (int vertex = 0; vertex < gameModel.vertexIndex; vertex++) {
-            if (gameModel.vertexX[vertex] == x * 128 && gameModel.vertexZ[vertex] == z * 128) {
-                gameModel.setVertexAmbience(vertex, ambience);
-                return;
-            }
-        }
     }
 
     private int getVerticalWall(int x, int z) {
@@ -746,16 +760,16 @@ public class WorldLoader {
         }
         
         byte sector = 0;
-        if (x >= 48 && z < 48) {
+        if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             sector = 1;
-            x -= 48;
-        } else if (x < 48 && z >= 48) {
+            x -= Sector.WIDTH;
+        } else if (x < Sector.WIDTH && z >= Sector.DEPTH) {
             sector = 2;
-            z -= 48;
-        } else if (x >= 48 && z >= 48) {
+            z -= Sector.DEPTH;
+        } else if (x >= Sector.WIDTH && z >= Sector.DEPTH) {
             sector = 3;
-            x -= 48;
-            z -= 48;
+            x -= Sector.WIDTH;
+            z -= Sector.DEPTH;
         }
         
         return world.getSector(sector).getTile(x, z).verticalWall & 0xff;
@@ -768,16 +782,16 @@ public class WorldLoader {
         }
         
         byte sector = 0;
-        if (x >= 48 && z < 48) {
+        if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             sector = 1;
-            x -= 48;
-        } else if (x < 48 && z >= 48) {
+            x -= Sector.WIDTH;
+        } else if (x < Sector.WIDTH && z >= Sector.DEPTH) {
             sector = 2;
-            z -= 48;
-        } else if (x >= 48 && z >= 48) {
+            z -= Sector.DEPTH;
+        } else if (x >= Sector.WIDTH && z >= Sector.DEPTH) {
             sector = 3;
-            x -= 48;
-            z -= 48;
+            x -= Sector.WIDTH;
+            z -= Sector.DEPTH;
         }
         
         return world.getSector(sector).getTile(x, z).horizontalWall & 0xff;
@@ -790,16 +804,16 @@ public class WorldLoader {
         }
         
         byte sector = 0;
-        if (x >= 48 && z < 48) {
+        if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             sector = 1;
-            x -= 48;
-        } else if (x < 48 && z >= 48) {
+            x -= Sector.WIDTH;
+        } else if (x < Sector.WIDTH && z >= Sector.DEPTH) {
             sector = 2;
-            z -= 48;
-        } else if (x >= 48 && z >= 48) {
+            z -= Sector.DEPTH;
+        } else if (x >= Sector.WIDTH && z >= Sector.DEPTH) {
             sector = 3;
-            x -= 48;
-            z -= 48;
+            x -= Sector.WIDTH;
+            z -= Sector.DEPTH;
         }
         
         return world.getSector(sector).getTile(x, z).diagonalWalls;
@@ -821,22 +835,22 @@ public class WorldLoader {
         return Resources.getTileDef(texture - 1).getColour();
     }
 
-    public boolean isCentreRoof(int x, int z) {
+    private boolean isCentreRoof(int x, int z) {
         return getRoofTexture(x, z) > 0 &&
                 getRoofTexture(x - 1, z) > 0 &&
                 getRoofTexture(x - 1, z - 1) > 0 &&
                 getRoofTexture(x, z - 1) > 0;
     }
 
-    public boolean isCornerRoof(int x, int z) {
+    private boolean isCornerRoof(int x, int z) {
         return getRoofTexture(x, z) > 0 ||
                 getRoofTexture(x - 1, z) > 0 ||
                 getRoofTexture(x - 1, z - 1) > 0 ||
                 getRoofTexture(x, z - 1) > 0;
     }
 
-    public void setDoorElevation(int doorIndex, int x1, int z1, int x2, int z2) {
-        int heightIncrement = Resources.getDoorDef(doorIndex).getModelVar1();
+    private void setDoorElevation(int doorIndex, int x1, int z1, int x2, int z2) {
+        int heightIncrement = Resources.getDoorDef(doorIndex).getHeight();
         if (world.getElevation(x1, z1) < 0x13880) {
             world.setElevation(x1, z1,
                     world.getElevation(x1, z1) + 0x13880 + heightIncrement);

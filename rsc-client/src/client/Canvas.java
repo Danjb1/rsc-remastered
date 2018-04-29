@@ -1,12 +1,10 @@
 package client;
 
 import client.res.Resources;
-import client.scene.Sprite;
+import client.res.Sprite;
 
 /**
  * Class responsible for storing and manipulating pixel data of a 2D image.
- * 
- * <p>Here be dragons...
  * 
  * <p><i>Based on <code>Surface.java</code> from other RSC sources.</i>
  * 

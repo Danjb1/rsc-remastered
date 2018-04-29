@@ -24,8 +24,8 @@ import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
 import client.render.LoadingScreenRenderer;
 import client.res.Resources;
+import client.res.Sprite;
 import client.res.Texture;
-import client.scene.Sprite;
 import client.util.DataUtils;
 
 public class LoadingScreen extends State {

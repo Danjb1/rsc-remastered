@@ -39,7 +39,7 @@ Ideally, OpenRSC will include all the features from the latest RuneScape Classic
 
 The client is useless without the game data (maps, images, sounds, etc.).
 
-Historically, the RuneScape game data was sent to the client in the form of "jag" and "mem" files. Fortunately, the [community](https://github.com/SamHammersley/JAG-Archive-Editor) [has](https://github.com/tomfitzhenry/RuneScape-classic-dump/blob/master/RSC%20Map%20Generator/RSC%20Map%20Generator/src/com/hikilaka/file/JagArchiveLoader.java) [managed](https://sites.google.com/site/commiesRuneScapedocumentation/cache/archives) to decipher these file formats, and has repackaged the necessary files into RSCD archives, the simplest of which are essentially ZIP files.
+Historically, the RuneScape game data was sent to the client in the form of "jag" and "mem" files. Fortunately, the [community](https://github.com/SamHammersley/JAG-Archive-Editor) [has](https://github.com/tomfitzhenry/RuneScape-classic-dump/blob/master/RSC%20Map%20Generator/RSC%20Map%20Generator/src/com/hikilaka/file/JagArchiveLoader.java) [managed](https://sites.google.com/site/commiesRuneScapedocumentation/cache/archives) to decipher these file formats, and has repackaged the necessary files into RSCD files, which are just ZIP or GZIP archives.
 
 The following RSCD files are required by OpenRSC:
 

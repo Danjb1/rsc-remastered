@@ -4,19 +4,19 @@ import client.Canvas;
 import client.res.Resources;
 import client.res.Texture;
 import client.scene.Camera;
-import client.scene.GameModel;
+import client.scene.Model;
 import client.scene.Polygon;
-import client.scene.Scanline;
 import client.scene.Scene;
 import client.scene.SpriteEntity;
 
 /**
- * Class capable of rendering a scene.
+ * Class responsible for rendering a scene.
  * 
  * <p>This is essentially a 3d software renderer; we could save a lot of
  * complexity by porting to OpenGL instead.
  * 
- * <p>Here be dragons...
+ * <p>This class should not be aware of the game at all, and the game should
+ * not be aware of what goes on inside this class.
  * 
  * <p><i>Based on <code>client.Scene</code> from EasyRSC.</i>
  */
@@ -28,26 +28,20 @@ public class SceneRenderer {
     
     private static final int VIEW_DISTANCE = 9;
 
-    private static final int MAX_MOUSE_PICKS = 100;
-    
     private Scene scene;
     private Camera camera;
     private int visiblePolygonCount;
     private Polygon visiblePolygons[] = new Polygon[MAX_POLYGONS];
     
-    private int mouseX;
-    private int mouseY;
-    private int mousePickedCount;
-    private GameModel mousePickedModels[] = new GameModel[MAX_MOUSE_PICKS];
-    private int mousePickedFaces[] = new int[MAX_MOUSE_PICKS];
+    private MousePicker mousePicker;
     
     private int rampCount = 50;
     private int gradientBase[] = new int[rampCount];
     private int gradientRamps[][] = new int[rampCount][256];
     private int currentGradientRamps[];
-    private int width = 512;
-    private int baseX = 256;
-    private int baseY = 256;
+    private int width;
+    private int baseX;
+    private int baseY;
     private int viewDistance = 9;
     private int normalMagnitude = 4;
     private Scanline scanlines[];
@@ -79,7 +73,14 @@ public class SceneRenderer {
      * Max view distance for sprites.
      */
     private int clipFar2d = 2400 + (Camera.DEFAULT_HEIGHT * 2);
-    
+
+    private class Scanline {
+        public int startX;
+        public int endX;
+        public int startS;
+        public int endS;
+    }
+
     public SceneRenderer(Scene scene, int width, int height) {
         this.scene = scene;
         this.camera = scene.getCamera();
@@ -114,7 +115,7 @@ public class SceneRenderer {
         // Draw each model in the scene
         for (int i = 0; i < scene.getNumModels(); i++) {
             
-            GameModel gameModel = scene.getModels()[i];
+            Model gameModel = scene.getModels()[i];
             
             if (!gameModel.visible) {
                 // Model is not visible
@@ -208,7 +209,7 @@ public class SceneRenderer {
         }
 
         // Render 2d models (sprites)
-        GameModel spriteFaces = scene.getSpriteFaces();
+        Model spriteFaces = scene.getSpriteFaces();
         if (spriteFaces.visible) {
             for (int face = 0; face < spriteFaces.numFaces; face++) {
                 int faceVertices[] = spriteFaces.faceVertices[face];
@@ -246,7 +247,7 @@ public class SceneRenderer {
         for (int polygonIndex = 0; polygonIndex < visiblePolygonCount; polygonIndex++) {
             
             Polygon polygon = visiblePolygons[polygonIndex];
-            GameModel polygonModel = polygon.gameModel;
+            Model polygonModel = polygon.gameModel;
             int polyFace = polygon.face;
             
             // Is polygon a sprite?
@@ -371,7 +372,7 @@ public class SceneRenderer {
         }
     }
 
-    private void renderSprite(GameModel polygonModel, int polyFace,
+    private void renderSprite(Model polygonModel, int polyFace,
             Canvas canvas) {
         SpriteEntity spriteEntity = scene.getSpriteEntities()[polyFace];
         int faceverts[] = polygonModel.faceVertices[polyFace];
@@ -393,10 +394,13 @@ public class SceneRenderer {
         this.baseY = baseY;
         this.width = width;
         this.viewDistance = viewDistance;
+        
         scanlines = new Scanline[clipY + baseY];
-        for (int k1 = 0; k1 < clipY + baseY; k1++) {
-            scanlines[k1] = new Scanline();
+        for (int i = 0; i < clipY + baseY; i++) {
+            scanlines[i] = new Scanline();
         }
+        
+        mousePicker = new MousePicker(baseX);
     }
 
     private static void polygonsQSort(Polygon[] polygons, int low, int high) {
@@ -522,7 +526,7 @@ public class SceneRenderer {
             int planeX[],
             int planeY[],
             int vertexShade[],
-            GameModel gameModel,
+            Model gameModel,
             int faceId) {
         
         if (plane == 3) {
@@ -1112,21 +1116,25 @@ public class SceneRenderer {
             }
         }
 
+        /*
+         * Mouse Picking
+         */
+        
+        int mouseX = mousePicker.getMouseY();
+        int mouseY = mousePicker.getMouseY();
+        
         if (mouseY >= minY && mouseY < maxY) {
             Scanline scanline = scanlines[mouseY];
-            // Determine if the mouse is over a Model
             if (mouseX >= scanline.startX >> 8 &&
                     mouseX <= scanline.endX >> 8 &&
                     scanline.startX <= scanline.endX &&
                     !gameModel.unpickable) {
-                mousePickedModels[mousePickedCount] = gameModel;
-                mousePickedFaces[mousePickedCount] = faceId;
-                mousePickedCount++;
+                mousePicker.add(gameModel, faceId);
             }
         }
     }
 
-    private void rasterize(Canvas canvas, int numFaces, int vertexX[], int vertexY[], int vertexZ[], int textureId, GameModel gameModel) {
+    private void rasterize(Canvas canvas, int numFaces, int vertexX[], int vertexY[], int vertexZ[], int textureId, Model gameModel) {
         
         if (textureId == -2) {
             // Transparent
@@ -1540,7 +1548,7 @@ public class SceneRenderer {
 
     private void initialisePolygon3d(int i) {
         Polygon polygon = visiblePolygons[i];
-        GameModel gameModel = polygon.gameModel;
+        Model gameModel = polygon.gameModel;
         int face = polygon.face;
         int faceVertices[] = gameModel.faceVertices[face];
         int faceNumVertices = gameModel.faceNumVertices[face];
@@ -1613,7 +1621,7 @@ public class SceneRenderer {
 
     private void initialisePolygon2d(int i) {
         Polygon polygon = visiblePolygons[i];
-        GameModel gameModel = polygon.gameModel;
+        Model gameModel = polygon.gameModel;
         int face = polygon.face;
         int faceVertices[] = gameModel.faceVertices[face];
         int l = 0;
@@ -1684,8 +1692,8 @@ public class SceneRenderer {
         if (polygon2.minZ > polygon1.maxZ) {
             return false;
         }
-        GameModel gameModel = polygon1.gameModel;
-        GameModel model_1 = polygon2.gameModel;
+        Model gameModel = polygon1.gameModel;
+        Model model_1 = polygon2.gameModel;
         int i = polygon1.face;
         int j = polygon2.face;
         int ai[] = gameModel.faceVertices[i];
@@ -1788,8 +1796,8 @@ public class SceneRenderer {
     }
 
     private boolean heuristicPolygon(Polygon polygon, Polygon entity_1) {
-        GameModel gameModel = polygon.gameModel;
-        GameModel model_1 = entity_1.gameModel;
+        Model gameModel = polygon.gameModel;
+        Model model_1 = entity_1.gameModel;
         int i = polygon.face;
         int j = entity_1.face;
         int ai[] = gameModel.faceVertices[i];
@@ -2172,22 +2180,8 @@ public class SceneRenderer {
         return method308(j6, k10, k15, flag);
     }
 
-    public void setMousePos(int mouseX, int mouseY) {
-        this.mouseX = mouseX - baseX;
-        this.mouseY = mouseY;
-        mousePickedCount = 0;
-    }
-
-    public int getMousePickedCount() {
-        return mousePickedCount;
-    }
-    
-    public GameModel[] getMousePickedModels() {
-        return mousePickedModels;
-    }
-    
-    public int[] getMousePickedFaces() {
-        return mousePickedFaces;
+    public MousePicker getMousePicker() {
+        return mousePicker;
     }
     
 }

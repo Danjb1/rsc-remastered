@@ -1,12 +1,10 @@
-package client.scene;
+package client.res;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-
-import client.res.Resources;
 
 public class Sprite {
 

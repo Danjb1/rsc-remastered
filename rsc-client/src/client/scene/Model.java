@@ -10,7 +10,7 @@ import client.util.DataUtils;
  * 
  * @author Dan Bryce
  */
-public class GameModel {
+public class Model {
 
     public int vertexIndex;
     public int projectVertexX[];
@@ -69,15 +69,15 @@ public class GameModel {
     private int anIntArray283[];
     private int anIntArray284[];
     private int anIntArray285[];
-    private int xSpeed;
-    private int ySpeed;
-    private int zSpeed;
-    private int somethingX;
-    private int somethingY;
-    private int somethingZ;
-    private int somethingElseX;
-    private int somethingElseY;
-    private int somethingElseZ;
+    private int translateX;
+    private int translateY;
+    private int translateZ;
+    private int rotX;
+    private int rotY;
+    private int rotZ;
+    private int scaleX;
+    private int scaleY;
+    private int scaleZ;
     private int initially256_1;
     private int initially256_2;
     private int initially256_3;
@@ -148,7 +148,7 @@ public class GameModel {
      * @param i
      * @param flag
      */
-    public GameModel(byte abyte0[], int i, boolean flag) {
+    public Model(byte abyte0[], int i, boolean flag) {
         transformState = 1;
         visible = true;
         textureTranslucent = false;
@@ -240,7 +240,7 @@ public class GameModel {
      *
      * @param path
      */
-    public GameModel(String path) {
+    public Model(String path) {
         transformState = 1;
         visible = true;
         textureTranslucent = false;
@@ -328,7 +328,7 @@ public class GameModel {
      * @param models
      * @param i
      */
-    public GameModel(GameModel models[], int i, boolean flag, boolean flag1, boolean flag2, boolean flag3) {
+    public Model(Model models[], int i, boolean flag, boolean flag1, boolean flag2, boolean flag3) {
         transformState = 1;
         visible = true;
         textureTranslucent = false;
@@ -360,7 +360,7 @@ public class GameModel {
      * @param models
      * @param i
      */
-    public GameModel(GameModel models[], int i) {
+    public Model(Model models[], int i) {
         transformState = 1;
         visible = true;
         textureTranslucent = false;
@@ -388,7 +388,7 @@ public class GameModel {
      * @param i
      * @param j
      */
-    public GameModel(int i, int j) {
+    public Model(int i, int j) {
         transformState = 1;
         visible = true;
         textureTranslucent = false;
@@ -426,7 +426,7 @@ public class GameModel {
      * @param unpickable
      * @param flag4
      */
-    public GameModel(int maxVertices, int maxFaces, boolean flag, boolean flag1, boolean flag2, boolean unpickable, boolean flag4) {
+    public Model(int maxVertices, int maxFaces, boolean flag, boolean flag1, boolean flag2, boolean unpickable, boolean flag4) {
         transformState = 1;
         visible = true;
         textureTranslucent = false;
@@ -498,9 +498,9 @@ public class GameModel {
         vertexIndex = 0;
         this.maxVertices = maxVertices;
         this.count2 = maxFaces;
-        xSpeed = ySpeed = zSpeed = 0;
-        somethingX = somethingY = somethingZ = 0;
-        somethingElseX = somethingElseY = somethingElseZ = 256;
+        translateX = translateY = translateZ = 0;
+        rotX = rotY = rotZ = 0;
+        scaleX = scaleY = scaleZ = 256;
         initially256_1 = initially256_2 = initially256_3 = initially256_4 = initially256_5 = initially256_6 = 256;
         state = 0;
     }
@@ -536,7 +536,7 @@ public class GameModel {
      * @param i
      * @param flag
      */
-    public void copyModel(GameModel models[], int i, boolean flag) {
+    public void copyModel(Model models[], int i, boolean flag) {
         int j = 0;
         int k = 0;
         for (int l = 0; l < i; l++) {
@@ -549,8 +549,8 @@ public class GameModel {
             someMatrix2 = new int[j][];
         }
         for (int i1 = 0; i1 < i; i1++) {
-            GameModel gameModel = models[i1];
-            gameModel.resetSomeData();
+            Model gameModel = models[i1];
+            gameModel.resetTransformation();
             lightAmbience = gameModel.lightAmbience;
             anInt307 = gameModel.anInt307;
             distX = gameModel.distX;
@@ -659,8 +659,8 @@ public class GameModel {
         return numFaces++;
     }
 
-    public GameModel[] createModelArray(int i, int j, int k, int l, int i1, int count, int k1, boolean flag) {
-        resetSomeData();
+    public Model[] createModelArray(int i, int j, int k, int l, int i1, int count, int k1, boolean flag) {
+        resetTransformation();
         int ai[] = new int[count];
         int ai1[] = new int[count];
         for (int l1 = 0; l1 < count; l1++) {
@@ -683,12 +683,12 @@ public class GameModel {
             ai1[k4]++;
         }
 
-        GameModel models[] = new GameModel[count];
+        Model models[] = new Model[count];
         for (int l2 = 0; l2 < count; l2++) {
             if (ai[l2] > k1) {
                 ai[l2] = k1;
             }
-            models[l2] = new GameModel(ai[l2], ai1[l2], true, true, true, flag, true);
+            models[l2] = new Model(ai[l2], ai1[l2], true, true, true, flag, true);
             models[l2].anInt307 = anInt307;
             models[l2].lightAmbience = lightAmbience;
         }
@@ -714,7 +714,7 @@ public class GameModel {
         return models;
     }
 
-    public void copySomeDataIntoTheNextIndex(GameModel gameModel, int ai[], int count, int index) {
+    public void copySomeDataIntoTheNextIndex(Model gameModel, int ai[], int count, int index) {
         int ai1[] = new int[count];
         for (int k = 0; k < count; k++) {
             int l = ai1[k] = gameModel.createVertexWithoutDuplication(vertexX[ai[k]], vertexY[ai[k]], vertexZ[ai[k]]);
@@ -784,34 +784,34 @@ public class GameModel {
         vertexAmbience[vertex] = (byte) ambience;
     }
 
-    public void modAndMaskVars(int i, int j, int k) {
-        somethingX = somethingX + i & 0xff;
-        somethingY = somethingY + j & 0xff;
-        somethingZ = somethingZ + k & 0xff;
+    public void modRotation(int rotX, int rotY, int rotZ) {
+        this.rotX += rotX & 0xff;
+        this.rotY += rotY & 0xff;
+        this.rotZ += rotZ & 0xff;
         updateState();
         transformState = 1;
     }
 
-    public void maskVars(int i, int j, int k) {
-        somethingX = i & 0xff;
-        somethingY = j & 0xff;
-        somethingZ = k & 0xff;
+    public void setRotation(int i, int j, int k) {
+        rotX = i & 0xff;
+        rotY = j & 0xff;
+        rotZ = k & 0xff;
         updateState();
         transformState = 1;
     }
 
-    public void modVars(int i, int j, int k) {
-        xSpeed += i;
-        ySpeed += j;
-        zSpeed += k;
+    public void modTranslation(int translateX, int translateY, int translateZ) {
+        this.translateX += translateX;
+        this.translateY += translateY;
+        this.translateZ += translateZ;
         updateState();
         transformState = 1;
     }
 
-    public void setVars(int i, int j, int k) {
-        xSpeed = i;
-        ySpeed = j;
-        zSpeed = k;
+    public void setTranslation(int translateX, int translateY, int translateZ) {
+        this.translateX = translateX;
+        this.translateY = translateY;
+        this.translateZ = translateZ;
         updateState();
         transformState = 1;
     }
@@ -822,15 +822,15 @@ public class GameModel {
             state = 4;
             return;
         }
-        if (somethingElseX != 256 || somethingElseY != 256 || somethingElseZ != 256) {
+        if (scaleX != 256 || scaleY != 256 || scaleZ != 256) {
             state = 3;
             return;
         }
-        if (somethingX != 0 || somethingY != 0 || somethingZ != 0) {
+        if (rotX != 0 || rotY != 0 || rotZ != 0) {
             state = 2;
             return;
         }
-        if (xSpeed != 0 || ySpeed != 0 || zSpeed != 0) {
+        if (translateX != 0 || translateY != 0 || translateZ != 0) {
             state = 1;
             return;
         } else {
@@ -839,34 +839,33 @@ public class GameModel {
         }
     }
 
-    private void move(int i, int j, int k) {
-        for (int l = 0; l < vertexIndex; l++) {
-            xPosition[l] += i;
-            yPosition[l] += j;
-            zPosition[l] += k;
+    private void translate(int dx, int dy, int dz) {
+        for (int i = 0; i < vertexIndex; i++) {
+            xPosition[i] += dx;
+            yPosition[i] += dy;
+            zPosition[i] += dz;
         }
-
     }
 
-    private void doSomeNastyMath(int i, int j, int k) {
+    private void rotate(int rotX, int rotY, int rotZ) {
         for (int i3 = 0; i3 < vertexIndex; i3++) {
-            if (k != 0) {
-                int l = trigValues1[k];
-                int k1 = trigValues1[k + 256];
+            if (rotZ != 0) {
+                int l = trigValues1[rotZ];
+                int k1 = trigValues1[rotZ + 256];
                 int j2 = yPosition[i3] * l + xPosition[i3] * k1 >> 15;
                 yPosition[i3] = yPosition[i3] * k1 - xPosition[i3] * l >> 15;
                 xPosition[i3] = j2;
             }
-            if (i != 0) {
-                int i1 = trigValues1[i];
-                int l1 = trigValues1[i + 256];
+            if (rotX != 0) {
+                int i1 = trigValues1[rotX];
+                int l1 = trigValues1[rotX + 256];
                 int k2 = yPosition[i3] * l1 - zPosition[i3] * i1 >> 15;
                 zPosition[i3] = yPosition[i3] * i1 + zPosition[i3] * l1 >> 15;
                 yPosition[i3] = k2;
             }
-            if (j != 0) {
-                int j1 = trigValues1[j];
-                int i2 = trigValues1[j + 256];
+            if (rotY != 0) {
+                int j1 = trigValues1[rotY];
+                int i2 = trigValues1[rotY + 256];
                 int l2 = zPosition[i3] * j1 + xPosition[i3] * i2 >> 15;
                 zPosition[i3] = zPosition[i3] * i2 - xPosition[i3] * j1 >> 15;
                 xPosition[i3] = l2;
@@ -875,31 +874,37 @@ public class GameModel {
 
     }
 
-    private void doStuffIfParametersAreNonZero(int i, int j, int k, int l, int i1, int j1) {
-        for (int k1 = 0; k1 < vertexIndex; k1++) {
-            if (i != 0) {
-                xPosition[k1] += yPosition[k1] * i >> 8;
+    private void doSomeVertexTransformation(
+            int yMultiplierToX,
+            int yMultiplierToZ,
+            int zMultiplierToX,
+            int zMultiplierToY,
+            int xMultiplierToZ,
+            int xMultiplierToY) {
+        for (int i = 0; i < vertexIndex; i++) {
+            if (yMultiplierToX != 0) {
+                xPosition[i] += yPosition[i] * yMultiplierToX >> 8;
             }
-            if (j != 0) {
-                zPosition[k1] += yPosition[k1] * j >> 8;
+            if (yMultiplierToZ != 0) {
+                zPosition[i] += yPosition[i] * yMultiplierToZ >> 8;
             }
-            if (k != 0) {
-                xPosition[k1] += zPosition[k1] * k >> 8;
+            if (zMultiplierToX != 0) {
+                xPosition[i] += zPosition[i] * zMultiplierToX >> 8;
             }
-            if (l != 0) {
-                yPosition[k1] += zPosition[k1] * l >> 8;
+            if (zMultiplierToY != 0) {
+                yPosition[i] += zPosition[i] * zMultiplierToY >> 8;
             }
-            if (i1 != 0) {
-                zPosition[k1] += xPosition[k1] * i1 >> 8;
+            if (xMultiplierToZ != 0) {
+                zPosition[i] += xPosition[i] * xMultiplierToZ >> 8;
             }
-            if (j1 != 0) {
-                yPosition[k1] += xPosition[k1] * j1 >> 8;
+            if (xMultiplierToY != 0) {
+                yPosition[i] += xPosition[i] * xMultiplierToY >> 8;
             }
         }
 
     }
 
-    private void modifySomeValues(int i, int j, int k) {
+    private void scale(int i, int j, int k) {
         for (int l = 0; l < vertexIndex; l++) {
             xPosition[l] = xPosition[l] * i >> 8;
             yPosition[l] = yPosition[l] * j >> 8;
@@ -1063,7 +1068,7 @@ public class GameModel {
         recalculateFaceLighting();
     }
 
-    private void doStuffBasedOnState() {
+    private void transform() {
         if (transformState == 2) {
             transformState = 0;
             for (int i = 0; i < vertexIndex; i++) {
@@ -1085,17 +1090,17 @@ public class GameModel {
             }
 
             if (state >= 2) {
-                doSomeNastyMath(somethingX, somethingY, somethingZ);
+                rotate(rotX, rotY, rotZ);
             }
             if (state >= 3) {
-                modifySomeValues(somethingElseX, somethingElseY, somethingElseZ);
+                scale(scaleX, scaleY, scaleZ);
             }
             if (state >= 4) {
-                doStuffIfParametersAreNonZero(initially256_1, initially256_2, initially256_3, initially256_4,
+                doSomeVertexTransformation(initially256_1, initially256_2, initially256_3, initially256_4,
                         initially256_5, initially256_6);
             }
             if (state >= 1) {
-                move(xSpeed, ySpeed, zSpeed);
+                translate(translateX, translateY, translateZ);
             }
             doSomeBoundsChecking();
             doSomeDistanceCalculations();
@@ -1103,7 +1108,7 @@ public class GameModel {
     }
 
     public void project(Camera camera, int viewDistance, int clipNear) {
-        doStuffBasedOnState();
+        transform();
         if (anInt252 > camera.getFrustumNearZ() ||
                 anInt253 < camera.getFrustumFarZ() ||
                 anInt248 > camera.getFrustumMinX() ||
@@ -1168,45 +1173,45 @@ public class GameModel {
 
     }
 
-    public void resetSomeData() {
-        doStuffBasedOnState();
+    public void resetTransformation() {
+        transform();
         for (int i = 0; i < vertexIndex; i++) {
             vertexX[i] = xPosition[i];
             vertexY[i] = yPosition[i];
             vertexZ[i] = zPosition[i];
         }
 
-        xSpeed = ySpeed = zSpeed = 0;
-        somethingX = somethingY = somethingZ = 0;
-        somethingElseX = somethingElseY = somethingElseZ = 256;
+        translateX = translateY = translateZ = 0;
+        rotX = rotY = rotZ = 0;
+        scaleX = scaleY = scaleZ = 256;
         initially256_1 = initially256_2 = initially256_3 = initially256_4 = initially256_5 = initially256_6 = 256;
         state = 0;
     }
 
-    public GameModel createNewGiantCrystalFromThisModel() {
-        GameModel models[] = new GameModel[1];
+    public Model createNewGiantCrystalFromThisModel() {
+        Model models[] = new Model[1];
         models[0] = this;
-        GameModel gameModel = new GameModel(models, 1);
+        Model gameModel = new Model(models, 1);
         gameModel.anInt245 = anInt245;
         gameModel.transparent = transparent;
         return gameModel;
     }
 
-    public GameModel createNewModelFromThisOne(boolean flag, boolean flag1, boolean flag2, boolean flag3) {
-        GameModel models[] = new GameModel[1];
+    public Model createNewModelFromThisOne(boolean flag, boolean flag1, boolean flag2, boolean flag3) {
+        Model models[] = new Model[1];
         models[0] = this;
-        GameModel gameModel = new GameModel(models, 1, flag, flag1, flag2, flag3);
+        Model gameModel = new Model(models, 1, flag, flag1, flag2, flag3);
         gameModel.anInt245 = anInt245;
         return gameModel;
     }
 
-    public void copyDataFromModel(GameModel gameModel) {
-        somethingX = gameModel.somethingX;
-        somethingY = gameModel.somethingY;
-        somethingZ = gameModel.somethingZ;
-        xSpeed = gameModel.xSpeed;
-        ySpeed = gameModel.ySpeed;
-        zSpeed = gameModel.zSpeed;
+    public void copyDataFromModel(Model gameModel) {
+        rotX = gameModel.rotX;
+        rotY = gameModel.rotY;
+        rotZ = gameModel.rotZ;
+        translateX = gameModel.translateX;
+        translateY = gameModel.translateY;
+        translateZ = gameModel.translateZ;
         updateState();
         transformState = 1;
     }

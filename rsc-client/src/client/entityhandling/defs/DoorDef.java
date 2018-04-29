@@ -33,15 +33,15 @@ public class DoorDef extends EntityDef {
         return unknown;
     }
 
-    public int getModelVar1() {
+    public int getHeight() {
         return modelVar1;
     }
 
-    public int getModelVar2() {
+    public int getFrontTexture() {
         return modelVar2;
     }
 
-    public int getModelVar3() {
+    public int getBackTexture() {
         return modelVar3;
     }
     

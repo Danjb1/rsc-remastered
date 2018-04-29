@@ -9,12 +9,12 @@ import java.nio.ByteBuffer;
 public class Sector {
 
     /**
-     * The width of a Sector.
+     * The width of a Sector, in tiles.
      */
     public static final int WIDTH = 48;
 
     /**
-     * The depth of a Sector.
+     * The depth of a Sector, in tiles.
      */
     public static final int DEPTH = 48;
 
