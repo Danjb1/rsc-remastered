@@ -13,12 +13,12 @@ The initial goal is to be able to fully render the Runecape world and freely mov
 :heavy_check_mark:️ Landscape rendering\
 :heavy_check_mark:️ Wall rendering\
 :heavy_check_mark:️ Roof rendering\
+:heavy_check_mark:️ Dynamic world loading\
 :x: Door rendering\
 :x: Model rendering (e.g. trees, fountains)\
 :x: Mob rendering\
 :x: Camera rotation\
-:x: Zooming\
-:x: Dynamic world loading
+:x: Zooming
 
 ## :page_with_curl: Disclaimer
 

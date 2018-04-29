@@ -60,11 +60,6 @@ public class World {
     private static final int NUM_LAYERS = 4;
     
     /**
-     * Whether to dispose of the scene during garbage collection.
-     */
-    private boolean requiresClean;
-
-    /**
      * The Scene that should hold the loaded world models.
      */
     private Scene scene;
@@ -126,10 +121,8 @@ public class World {
         this.scene = scene;
     }
 
-    public void garbageCollect() {
-        if (requiresClean) {
-            scene.dispose();
-        }
+    public void clear() {
+        scene.dispose();
         for (int i = 0; i < 64; i++) {
             landscapeModels[i] = null;
             for (int k = 0; k < 4; k++) {
@@ -318,7 +311,7 @@ public class World {
         sectors[i] = sector;
     }
 
-    public Sector getSector(byte i) {
+    public Sector getSector(int i) {
         return sectors[i];
     }
     
@@ -375,5 +368,5 @@ public class World {
     public GameObject getGameObject(int i) {
         return gameObjects[i];
     }
-    
+
 }

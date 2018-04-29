@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import client.Canvas;
 import client.State;
 import client.model.Mob;
+import client.model.Sector;
 import client.render.GameRenderer;
 import client.render.MousePicker;
 import client.scene.Camera;
@@ -103,6 +104,36 @@ public class Game extends State {
 
     @Override
     public void tick() {
+        
+        /*
+         * Load next Sectors
+         */
+        
+        if (player.x < 16 * World.TILE_WIDTH) {
+            int sectorX = worldLoader.getCurrentSectorX() - 1;
+            int sectorZ = worldLoader.getCurrentSectorZ();
+            worldLoader.loadSector(sectorX, sectorZ);
+            player.x += Sector.WIDTH * World.TILE_WIDTH;
+            
+        } else if (player.x > 80 * World.TILE_WIDTH) {
+            int sectorX = worldLoader.getCurrentSectorX() + 1;
+            int sectorZ = worldLoader.getCurrentSectorZ();
+            worldLoader.loadSector(sectorX, sectorZ);
+            player.x -= Sector.WIDTH * World.TILE_WIDTH;
+        }
+
+        if (player.z < 16 * World.TILE_DEPTH) {
+            int sectorX = worldLoader.getCurrentSectorX();
+            int sectorZ = worldLoader.getCurrentSectorZ() - 1;
+            worldLoader.loadSector(sectorX, sectorZ);
+            player.z += Sector.DEPTH * World.TILE_DEPTH;
+            
+        } else if (player.z > 80 * World.TILE_DEPTH) {
+            int sectorX = worldLoader.getCurrentSectorX();
+            int sectorZ = worldLoader.getCurrentSectorZ() + 1;
+            worldLoader.loadSector(sectorX, sectorZ);
+            player.z -= Sector.DEPTH * World.TILE_DEPTH;
+        }
     }
 
     public LoadingScreen getLoadingScreen() {

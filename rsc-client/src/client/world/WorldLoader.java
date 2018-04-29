@@ -100,10 +100,10 @@ public class WorldLoader {
      */
     public void loadSector(int sectorX, int sectorZ) {
         
-        System.out.println(sectorX + ", " + sectorZ);
+        System.out.println("Loading sector: " + sectorX + ", " + sectorZ);
 
-        // Perform any clean up in preparation for loading the new sector
-        world.garbageCollect();
+        // Remove old models
+        world.clear();
         
         // Load the new sector
         loadRequiredLayers(sectorX, sectorZ, world.getCurrentLayer());
@@ -934,6 +934,24 @@ public class WorldLoader {
      */
     private int getSectorZ(int tileZ) {
         return (tileZ + (Sector.DEPTH / 2)) / Sector.DEPTH;
+    }
+
+    /**
+     * Gets the x-index of the currently-loaded sector.
+     * 
+     * @return
+     */
+    public int getCurrentSectorX() {
+        return (world.getOriginX() + WORLD_START_X) / Sector.WIDTH + 1;
+    }
+
+    /**
+     * Gets the z-index of the currently-loaded sector.
+     * 
+     * @return
+     */
+    public int getCurrentSectorZ() {
+        return (world.getOriginZ() + WORLD_START_Z) / Sector.DEPTH + 1;
     }
 
 }
