@@ -87,7 +87,7 @@ public class GameRenderer {
          */
         for (int i = 0; i < world.getNumDoors(); i++) {
             Door door = world.getDoor(i);
-            if (world.containsTile(door.getX(), door.getZ())) {
+            if (world.containsTileRelativeToOrigin(door.getX(), door.getZ())) {
                 scene.addModel(door.getModel());
             }
         }

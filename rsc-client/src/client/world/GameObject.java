@@ -62,7 +62,7 @@ public class GameObject {
         int tileZ = ((z + z + height) * World.TILE_DEPTH) / 2;
         
         // Add new models
-        if (world.containsTile(x, z)) {
+        if (world.containsTileRelativeToOrigin(x, z)) {
             model.setTranslation(tileX, -world.getAveragedElevation(tileX, tileZ), tileZ);
             
             if (type == 74) {

@@ -99,8 +99,16 @@ public class World {
     
     private int[][] elevation = new int[NUM_TILES_X][NUM_TILES_Z];
 
-    private int regionX;
-    private int regionZ;
+    /**
+     * The first tile in the World that is currently loaded, in the x-axis.
+     */
+    private int originX;
+    
+    /**
+     * The first tile in the World that is currently loaded, in the z-axis.
+     */
+    private int originZ;
+    
     private int currentLayer = 0;
     
     private int mapBoundaryX1;
@@ -162,7 +170,7 @@ public class World {
 
     public int getGroundElevation(int x, int z) {
         
-        if (!containsTile(x, z)) {
+        if (!containsTileRelativeToOrigin(x, z)) {
             return 0;
         }
         
@@ -329,26 +337,27 @@ public class World {
         this.mapBoundaryZ2 = mapBoundaryZ2;
     }
     
-    public int getRegionX() {
-        return regionX;
+    public int getOriginX() {
+        return originX;
     }
     
-    public int getRegionZ() {
-        return regionZ;
+    public int getOriginZ() {
+        return originZ;
     }
 
-    public boolean containsPoint(int x, int z) {
-        return x > mapBoundaryX1 && x < mapBoundaryX2 &&
-                z > mapBoundaryZ1 && z < mapBoundaryZ2;
+    public boolean containsTile(int tileX, int tileZ) {
+        return tileX > mapBoundaryX1 && tileX < mapBoundaryX2 &&
+                tileZ > mapBoundaryZ1 && tileZ < mapBoundaryZ2;
     }
 
-    public boolean containsTile(int x, int z) {
-        return x >= 0 && z >= 0 && x < NUM_TILES_X && z < NUM_TILES_Z;
+    public boolean containsTileRelativeToOrigin(int tileX, int tileZ) {
+        return tileX >= 0 && tileZ >= 0 &&
+                tileX < NUM_TILES_X && tileZ < NUM_TILES_Z;
     }
 
-    public void setRegion(int regionX, int regionZ) {
-        this.regionX = regionX;
-        this.regionZ = regionZ;
+    public void setOrigin(int originX, int originZ) {
+        this.originX = originX;
+        this.originZ = originZ;
     }
 
     public int getNumDoors() {

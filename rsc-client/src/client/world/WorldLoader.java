@@ -1,4 +1,4 @@
-package client;
+package client.world;
 
 import client.entityhandling.defs.TileDef;
 import client.model.Sector;
@@ -6,7 +6,6 @@ import client.res.Resources;
 import client.scene.Model;
 import client.util.DataUtils;
 import client.util.ModelUtils;
-import client.world.World;
 
 /**
  * Class responsible for loading the World.
@@ -16,7 +15,7 @@ import client.world.World;
 public class WorldLoader {
 
     /**
-     * Model used when loading regions.
+     * Model used when loading sectors.
      */
     private Model tmpModel = new Model(
             World.NUM_TERRAIN_FACES + 256,
@@ -27,8 +26,8 @@ public class WorldLoader {
             false,
             true);
 
-    private static final int REGION_WIDTH = 18 * World.TILE_WIDTH;
-    private static final int REGION_DEPTH = 13 * World.TILE_DEPTH + 112;
+    private static final int WORLD_START_X = 2304;
+    private static final int WORLD_START_Z = 1776;
 
     private static final int[] GROUND_COLOURS = new int[256];
 
@@ -68,75 +67,100 @@ public class WorldLoader {
         this.world = world;
     }
 
-    public boolean loadRegion(int x, int z) {
+    /**
+     * Loads the sector containing the given tile.
+     * 
+     * @param tileX
+     * @param tileZ
+     * @return
+     */
+    public boolean loadContainingSector(int tileX, int tileZ) {
         
-        x += REGION_WIDTH;
-        z += REGION_DEPTH;
+        tileX += WORLD_START_X;
+        tileZ += WORLD_START_Z;
         
-        if (world.containsPoint(x, z)) {
-            // No need to load region if already loaded
+        // Check if containing sector is already loaded
+        if (world.containsTile(tileX, tileZ)) {
             return false;
         }
 
-        world.garbageCollect();
-        
-        int layer = world.getCurrentLayer();
-        loadLayer(x, z, layer, true);
+        // Load Sector
+        int sectorX = getSectorX(tileX);
+        int sectorZ = getSectorZ(tileZ);
+        loadSector(sectorX, sectorZ);
 
-        if (layer == 0) {
-
-            // Load upper storeys (they should be visible from the ground floor)
-            loadLayer(x, z, 1, false);
-            loadLayer(x, z, 2, false);
-
-            // Set the active sectors back to the current layer
-            loadSectors(x, z, layer);
-        }
-        
-        int previousRegionX = world.getRegionX();
-        int previousRegionZ = world.getRegionZ();
-        
-        x = (x + (Sector.WIDTH / 2)) / Sector.WIDTH;
-        z = (z + (Sector.DEPTH / 2)) / Sector.DEPTH;
-        int regionX = (x * Sector.WIDTH - Sector.WIDTH) - REGION_WIDTH;
-        int regionZ = (z * Sector.DEPTH - Sector.DEPTH) - REGION_DEPTH;
-        
-        world.setRegion(regionX, regionZ);
-
-        // Set map boundary around the loaded region
-        world.setMapBoundary(
-                x * Sector.WIDTH - 32,
-                z * Sector.DEPTH - 32,
-                x * Sector.WIDTH + 32,
-                z * Sector.DEPTH + 32);
-
-        int dx = regionX - previousRegionX;
-        int dz = regionZ - previousRegionZ;
-
-        // Move objects
-        for (int i = 0; i < world.getNumGameObjects(); i++) {
-            world.getGameObject(i).move(-dx, -dz);
-        }
-
-        // Move doors
-        for (int i = 0; i < world.getNumDoors(); i++) {
-            world.getDoor(i).move(-dx, -dz);
-        }
-        
         return true;
     }
 
     /**
-     * Loads a single layer of the given region.
+     * Loads the given sector.
      * 
-     * @param regionX
-     * @param regionZ
+     * @param sectorX
+     * @param sectorZ
+     */
+    public void loadSector(int sectorX, int sectorZ) {
+        
+        System.out.println(sectorX + ", " + sectorZ);
+
+        // Perform any clean up in preparation for loading the new sector
+        world.garbageCollect();
+        
+        // Load the new sector
+        loadRequiredLayers(sectorX, sectorZ, world.getCurrentLayer());
+
+        // Set map boundary around the loaded sectors
+        world.setMapBoundary(
+                sectorX * Sector.WIDTH - 32,
+                sectorZ * Sector.DEPTH - 32,
+                sectorX * Sector.WIDTH + 32,
+                sectorZ * Sector.DEPTH + 32);
+
+        // Set the current origin
+        int prevOriginX = world.getOriginX();
+        int prevOriginZ = world.getOriginZ();
+        int originX = (sectorX * Sector.WIDTH - Sector.WIDTH) - WORLD_START_X;
+        int originZ = (sectorZ * Sector.DEPTH - Sector.DEPTH) - WORLD_START_Z;
+        world.setOrigin(originX, originZ);
+
+        // Shift objects
+        int dx = originX - prevOriginX;
+        int dz = originZ - prevOriginZ;
+        moveObjects(dx, dz);
+    }
+    
+    /**
+     * Loads all required layers of the given sector.
+     * 
+     * @param sectorX
+     * @param sectorZ
+     * @param currentLayer
+     */
+    private void loadRequiredLayers(int sectorX, int sectorZ, int currentLayer) {
+        
+        loadLayer(sectorX, sectorZ, currentLayer, true);
+
+        if (currentLayer == 0) {
+
+            // Load upper storeys (they should be visible from the ground floor)
+            loadLayer(sectorX, sectorZ, 1, false);
+            loadLayer(sectorX, sectorZ, 2, false);
+
+            // Set the active sectors back to the current layer
+            setCurrentSector(sectorX, sectorZ, currentLayer);
+        }
+    }
+
+    /**
+     * Loads a single layer of the given sector.
+     * 
+     * @param sectorX
+     * @param sectorZ
      * @param layer
      * @param isCurrentLayer
      */
-    private void loadLayer(int regionX, int regionZ, int layer, boolean isCurrentLayer) {
+    private void loadLayer(int sectorX, int sectorZ, int layer, boolean isCurrentLayer) {
 
-        loadSectors(regionX, regionZ, layer);
+        setCurrentSector(sectorX, sectorZ, layer);
         
         tmpModel.clear();
 
@@ -718,10 +742,7 @@ public class WorldLoader {
         }
     }
 
-    private void loadSectors(int regionX, int regionZ, int layer) {
-        
-        int sectorX = (regionX + (Sector.WIDTH / 2)) / Sector.WIDTH;
-        int sectorZ = (regionZ + (Sector.DEPTH / 2)) / Sector.DEPTH;
+    private void setCurrentSector(int sectorX, int sectorZ, int layer) {
         
         world.setSector(0, Resources.loadSector(sectorX - 1, sectorZ - 1, layer));
         world.setSector(1, Resources.loadSector(sectorX, sectorZ - 1, layer));
@@ -880,6 +901,39 @@ public class WorldLoader {
                 }
             }
         }
+    }
+
+    private void moveObjects(int dx, int dz) {
+
+        // Move GameObjects
+        for (int i = 0; i < world.getNumGameObjects(); i++) {
+            world.getGameObject(i).move(-dx, -dz);
+        }
+
+        // Move Doors
+        for (int i = 0; i < world.getNumDoors(); i++) {
+            world.getDoor(i).move(-dx, -dz);
+        }
+    }
+
+    /**
+     * Gets the Sector co-ordinate containing the given tile.
+     * 
+     * @param tileX
+     * @return
+     */
+    private int getSectorX(int tileX) {
+        return (tileX + (Sector.WIDTH / 2)) / Sector.WIDTH;
+    }
+
+    /**
+     * Gets the Sector co-ordinate containing the given tile.
+     * 
+     * @param tileZ
+     * @return
+     */
+    private int getSectorZ(int tileZ) {
+        return (tileZ + (Sector.DEPTH / 2)) / Sector.DEPTH;
     }
 
 }

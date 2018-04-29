@@ -4,7 +4,6 @@ import java.awt.Graphics;
 
 import client.Canvas;
 import client.State;
-import client.WorldLoader;
 import client.model.Mob;
 import client.render.GameRenderer;
 import client.render.MousePicker;
@@ -12,6 +11,7 @@ import client.scene.Camera;
 import client.scene.Model;
 import client.scene.Scene;
 import client.world.World;
+import client.world.WorldLoader;
 
 /**
  * State responsible for running the game.
@@ -22,6 +22,9 @@ import client.world.World;
  */
 public class Game extends State {
 
+    public static final int SPAWN_SECTOR_X = 50;
+    public static final int SPAWN_SECTOR_Z = 51;
+    
     /**
      * Object used to load the world.
      */
@@ -46,6 +49,7 @@ public class Game extends State {
     
     public Game() {
         
+        // Player position is relative to the World origin
         player = new Mob();
         player.x = 66 * World.TILE_WIDTH;
         player.z = 32 * World.TILE_DEPTH;
@@ -54,7 +58,7 @@ public class Game extends State {
         
         world = new World(scene);
         worldLoader = new WorldLoader(world);
-        worldLoader.loadRegion(114, 656);
+        worldLoader.loadSector(SPAWN_SECTOR_X, SPAWN_SECTOR_Z);
         
         renderer = new GameRenderer(this);
     }

@@ -1120,7 +1120,7 @@ public class SceneRenderer {
          * Mouse Picking
          */
         
-        int mouseX = mousePicker.getMouseY();
+        int mouseX = mousePicker.getMouseX();
         int mouseY = mousePicker.getMouseY();
         
         if (mouseY >= minY && mouseY < maxY) {
