@@ -2,7 +2,7 @@
 
 An open-source re-implementation of RuneScape Classic for private use.
 
-[![Screenshot](docs/screenshot.png "Screenshot")](https://youtu.be/o6hY1LMLiSU)
+[![Screenshot](docs/screenshot.png)](https://youtu.be/o6hY1LMLiSU)
 
 See **[ABOUT.md](docs/ABOUT.md)** for more information.
 
@@ -24,8 +24,8 @@ The initial goal is to be able to fully render the Runescape world and freely mo
 
 ## :video_game: Controls
 
-**Left Click:** Teleport
-**Page Up:** Go up a layer
+**Left Click:** Teleport\
+**Page Up:** Go up a layer\
 **Page Down:** Go down a layer
 
 ## :page_with_curl: Disclaimer
