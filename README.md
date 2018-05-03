@@ -2,7 +2,7 @@
 
 An open-source re-implementation of RuneScape Classic for private use.
 
-[![OpenRSC](docs/screenshot.png](https://youtu.be/o6hY1LMLiSU)
+[![Screenshot](docs/screenshot.png "Screenshot")](https://youtu.be/o6hY1LMLiSU)
 
 See **[ABOUT.md](docs/ABOUT.md)** for more information.
 
