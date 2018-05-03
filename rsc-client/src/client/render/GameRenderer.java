@@ -1,6 +1,10 @@
 package client.render;
 
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+
 import client.Canvas;
+import client.Input;
 import client.RsLauncher;
 import client.scene.Camera;
 import client.scene.Scene;
@@ -23,34 +27,57 @@ import client.world.World;
  */
 public class GameRenderer {
 
+    private static final int FOG_DISTANCE = 2300;
+    
     private Game game;
+    private Input input;
     private World world;
     private Scene scene;
     private Camera camera;
 
     private SceneRenderer sceneRenderer;
     private MousePicker mousePicker;
-    
+
+    private Canvas canvas;
+    private BufferedImage image;
+
     public GameRenderer(Game game) {
         this.game = game;
         
+        input = game.getInput();
         world = game.getWorld();
         scene = game.getScene();
         camera = scene.getCamera();
         
-        sceneRenderer = new SceneRenderer(
-                scene,
-                RsLauncher.WINDOW_WIDTH,
-                RsLauncher.WINDOW_HEIGHT);
+        int width = RsLauncher.WINDOW_WIDTH;
+        int height = RsLauncher.WINDOW_HEIGHT;
+        
+        sceneRenderer = new SceneRenderer(scene, width, height);
         mousePicker = sceneRenderer.getMousePicker();
+
+        canvas = new Canvas(width, height);
+        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     }
     
-    public void render(Canvas canvas) {
+    public void render(Graphics g) {
+
+        // Build the scene
         buildScene();
         updateCamera();
 
-        mousePicker.setMousePos(game.getMouseX(), game.getMouseY());
+        // Prepare for mouse picking
+        mousePicker.setMousePos(input.getMouseX(), input.getMouseY());
+        
+        // First render our scene to the Canvas
+        canvas.clear();
         sceneRenderer.render(canvas);
+
+        // Then copy the Canvas to an image
+        image.setRGB(0, 0, image.getWidth(), image.getHeight(),
+                canvas.getPixels(), 0, image.getWidth());
+        
+        // Finally, draw this image to the screen
+        g.drawImage(image, 0, 0, null);
     }
 
     private void buildScene() {
@@ -107,7 +134,7 @@ public class GameRenderer {
         camera.setCamera(x, y, z, pitch, yaw, roll, height);
 
         // Update fog distance based on camera height
-        scene.fogZDistance = 2300 + (game.getCameraHeight() * 2);
+        scene.fogZDistance = FOG_DISTANCE + (game.getCameraHeight() * 2);
     }
 
     public MousePicker getMousePicker() {

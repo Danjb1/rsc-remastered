@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import client.Canvas;
 import client.RsLauncher;
 import client.State;
 import client.entityhandling.defs.AnimationDef;
@@ -40,8 +39,6 @@ public class LoadingScreen extends State {
     public static final int SPRITE_PROJECTILE_START = 3160;
     public static final int SPRITE_TEXTURE_START = 3220;
 
-    private RsLauncher rs;
-    
     private String message = "Loading...";
     private int progress = -1;
 
@@ -51,8 +48,8 @@ public class LoadingScreen extends State {
 
     private List<String> models = new ArrayList<>();
 
-    public LoadingScreen(RsLauncher rs) {
-        this.rs = rs;
+    public LoadingScreen(RsLauncher launcher) {
+        super(launcher);
 
         /*
          * Load ZIP archives.
@@ -72,8 +69,8 @@ public class LoadingScreen extends State {
     }
 
     @Override
-    public void render(Canvas canvas, Graphics g) {
-        LoadingScreenRenderer.render(g, canvas, this);
+    public void render(Graphics g) {
+        LoadingScreenRenderer.render(g, this);
     }
 
     /**
@@ -120,7 +117,7 @@ public class LoadingScreen extends State {
             updateProgress(100, "Starting game...");
         }
 
-        rs.finishedLoading();
+        launcher.changeState(new LoginScreen(launcher));
     }
 
     private void generateExperienceTable() {

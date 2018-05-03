@@ -1,8 +1,9 @@
 package client.states;
 
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
 
-import client.Canvas;
+import client.RsLauncher;
 import client.State;
 import client.model.Mob;
 import client.model.Sector;
@@ -48,7 +49,8 @@ public class Game extends State {
     private int screenRotationY;
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
     
-    public Game() {
+    public Game(RsLauncher launcher) {
+        super(launcher);
         
         // Player position is relative to the World origin
         player = new Mob();
@@ -66,6 +68,13 @@ public class Game extends State {
     
     @Override
     public void pollInput() {
+
+        // Key handling
+        if (input.wasKeyReleased(KeyEvent.VK_PAGE_UP)) {
+            worldLoader.ascend();
+        } else if (input.wasKeyReleased(KeyEvent.VK_PAGE_DOWN)) {
+            worldLoader.descend();
+        }
 
         // Get mouse-picked models / faces from the rendered scene
         MousePicker mousePicker = renderer.getMousePicker();
@@ -96,7 +105,7 @@ public class Game extends State {
     }
     
     private void groundTileSelected(int tileX, int tileZ) {
-        if (wasLeftClickReleased()) {
+        if (input.wasLeftClickReleased()) {
             player.x = tileX * World.TILE_WIDTH;
             player.z = tileZ * World.TILE_DEPTH;
         }
@@ -110,28 +119,20 @@ public class Game extends State {
          */
         
         if (player.x < 16 * World.TILE_WIDTH) {
-            int sectorX = worldLoader.getCurrentSectorX() - 1;
-            int sectorZ = worldLoader.getCurrentSectorZ();
-            worldLoader.loadSector(sectorX, sectorZ);
+            worldLoader.loadSector(world.getSectorX() - 1, world.getSectorZ());
             player.x += Sector.WIDTH * World.TILE_WIDTH;
             
         } else if (player.x > 80 * World.TILE_WIDTH) {
-            int sectorX = worldLoader.getCurrentSectorX() + 1;
-            int sectorZ = worldLoader.getCurrentSectorZ();
-            worldLoader.loadSector(sectorX, sectorZ);
+            worldLoader.loadSector(world.getSectorX() + 1, world.getSectorZ());
             player.x -= Sector.WIDTH * World.TILE_WIDTH;
         }
 
         if (player.z < 16 * World.TILE_DEPTH) {
-            int sectorX = worldLoader.getCurrentSectorX();
-            int sectorZ = worldLoader.getCurrentSectorZ() - 1;
-            worldLoader.loadSector(sectorX, sectorZ);
+            worldLoader.loadSector(world.getSectorX(), world.getSectorZ() - 1);
             player.z += Sector.DEPTH * World.TILE_DEPTH;
             
         } else if (player.z > 80 * World.TILE_DEPTH) {
-            int sectorX = worldLoader.getCurrentSectorX();
-            int sectorZ = worldLoader.getCurrentSectorZ() + 1;
-            worldLoader.loadSector(sectorX, sectorZ);
+            worldLoader.loadSector(world.getSectorX(), world.getSectorZ() + 1);
             player.z -= Sector.DEPTH * World.TILE_DEPTH;
         }
     }
@@ -177,8 +178,8 @@ public class Game extends State {
     }
     
     @Override
-    public void render(Canvas canvas, Graphics g) {
-        renderer.render(canvas);
+    public void render(Graphics g) {
+        renderer.render(g);
     }
     
 }

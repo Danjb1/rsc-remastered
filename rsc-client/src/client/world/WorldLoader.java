@@ -26,10 +26,24 @@ public class WorldLoader {
             false,
             true);
 
-    private static final int WORLD_START_X = 2304;
-    private static final int WORLD_START_Z = 1776;
-
+    /**
+     * Ground colour palette.
+     */
     private static final int[] GROUND_COLOURS = new int[256];
+
+    /**
+     * The minimum possible layer ID.
+     * 
+     * This is actually used for ground level.
+     */
+    private static final int MIN_LAYER = 0;
+
+    /**
+     * The maximum possible layer ID.
+     * 
+     * Strangely, this is actually used as the underground layer.
+     */
+    private static final int MAX_LAYER = 3;
 
     static {
         // Initialise ground colours
@@ -76,8 +90,8 @@ public class WorldLoader {
      */
     public boolean loadContainingSector(int tileX, int tileZ) {
         
-        tileX += WORLD_START_X;
-        tileZ += WORLD_START_Z;
+        tileX += World.START_X;
+        tileZ += World.START_Z;
         
         // Check if containing sector is already loaded
         if (world.containsTile(tileX, tileZ)) {
@@ -100,31 +114,18 @@ public class WorldLoader {
      */
     public void loadSector(int sectorX, int sectorZ) {
         
-        System.out.println("Loading sector: " + sectorX + ", " + sectorZ);
-
         // Remove old models
         world.clear();
         
         // Load the new sector
-        loadRequiredLayers(sectorX, sectorZ, world.getCurrentLayer());
-
-        // Set map boundary around the loaded sectors
-        world.setMapBoundary(
-                sectorX * Sector.WIDTH - 32,
-                sectorZ * Sector.DEPTH - 32,
-                sectorX * Sector.WIDTH + 32,
-                sectorZ * Sector.DEPTH + 32);
-
-        // Set the current origin
         int prevOriginX = world.getOriginX();
         int prevOriginZ = world.getOriginZ();
-        int originX = (sectorX * Sector.WIDTH - Sector.WIDTH) - WORLD_START_X;
-        int originZ = (sectorZ * Sector.DEPTH - Sector.DEPTH) - WORLD_START_Z;
-        world.setOrigin(originX, originZ);
+        world.setCurrentSector(sectorX, sectorZ);
+        loadRequiredLayers(sectorX, sectorZ, world.getCurrentLayer());
 
         // Shift objects
-        int dx = originX - prevOriginX;
-        int dz = originZ - prevOriginZ;
+        int dx = world.getOriginX() - prevOriginX;
+        int dz = world.getOriginZ() - prevOriginZ;
         moveObjects(dx, dz);
     }
     
@@ -136,7 +137,10 @@ public class WorldLoader {
      * @param currentLayer
      */
     private void loadRequiredLayers(int sectorX, int sectorZ, int currentLayer) {
-        
+
+        System.out.println("Loading sector: " + sectorX + ", " + sectorZ +
+                " (" + currentLayer + ")");
+
         loadLayer(sectorX, sectorZ, currentLayer, true);
 
         if (currentLayer == 0) {
@@ -937,21 +941,53 @@ public class WorldLoader {
     }
 
     /**
-     * Gets the x-index of the currently-loaded sector.
-     * 
-     * @return
+     * Moves up a layer.
      */
-    public int getCurrentSectorX() {
-        return (world.getOriginX() + WORLD_START_X) / Sector.WIDTH + 1;
+    public void ascend() {
+        
+        int currentLayer = world.getCurrentLayer();
+        
+        if (currentLayer == MAX_LAYER - 1) {
+            // We are already at the topmost layer
+            return;
+        }
+        
+        if (currentLayer == MAX_LAYER) {
+            // We are underground
+            currentLayer = -1;
+        } 
+        
+        world.setCurrentLayer(currentLayer + 1);
+        reloadCurrentSector();
     }
 
     /**
-     * Gets the z-index of the currently-loaded sector.
-     * 
-     * @return
+     * Moves down a layer.
      */
-    public int getCurrentSectorZ() {
-        return (world.getOriginZ() + WORLD_START_Z) / Sector.DEPTH + 1;
+    public void descend() {
+        
+        int currentLayer = world.getCurrentLayer();
+
+        if (currentLayer == MAX_LAYER) {
+            // We are underground, so we cannot go any lower
+            return;
+        }
+        
+        int newLayer = currentLayer - 1;
+        if (newLayer < MIN_LAYER) {
+            // We have gone underground
+            newLayer = MAX_LAYER;
+        }
+        
+        world.setCurrentLayer(newLayer);
+        reloadCurrentSector();
+    }
+
+    /**
+     * Reloads the current sector.
+     */
+    private void reloadCurrentSector() {
+        loadSector(world.getSectorX(), world.getSectorZ());
     }
 
 }

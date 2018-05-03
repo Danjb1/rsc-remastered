@@ -6,11 +6,10 @@ import java.awt.Point;
 import java.awt.Toolkit;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import client.states.Game;
 import client.states.LoadingScreen;
-import client.states.LoginScreen;
 
 /**
  * Class responsible for setting up and running the game.
@@ -37,10 +36,9 @@ public class RsLauncher {
      */
     private boolean exiting;
 
-    private GamePanel gamePanel;
-    
     private JFrame frame;
-
+    private JPanel gamePanel;
+    
     private State state;
 
     public static void main(String[] args) {
@@ -53,7 +51,10 @@ public class RsLauncher {
     }
 
     private void createFrame(int width, int height, String title) {
-        gamePanel = new GamePanel(width, height);
+        
+        gamePanel = new JPanel();
+        gamePanel.setPreferredSize(new Dimension(width, height));
+        
         frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
@@ -163,21 +164,15 @@ public class RsLauncher {
         }
     }
 
-    public void finishedLoading() {
-        changeState(new LoginScreen());
-        
-        // Skip the login screen for now
-        changeState(new Game());
-    }
-    
     private void pollInput() {
         Point mouseLoc = MouseInfo.getPointerInfo().getLocation();
         SwingUtilities.convertPointFromScreen(mouseLoc, gamePanel);
-        state.setMousePos(mouseLoc.x, mouseLoc.y);
+        Input input = state.getInput();
+        input.setMousePos(mouseLoc.x, mouseLoc.y);
         
-        synchronized (state) {
+        synchronized (input) {
             state.pollInput();
-            state.clearInput();
+            input.clear();
         }
     }
 
@@ -186,20 +181,22 @@ public class RsLauncher {
     }
 
     private void render() {
-        gamePanel.render(state);
+        state.render(gamePanel.getGraphics());
     }
 
     public void changeState(State newState) {
         
         // Remove listeners from previous state
-        gamePanel.removeMouseListener(state);
-        frame.removeKeyListener(state);
+        Input input = state.getInput();
+        gamePanel.removeMouseListener(input);
+        frame.removeKeyListener(input);
         
         state = newState;
 
         // Add listeners to new state
-        gamePanel.addMouseListener(state);
-        frame.addKeyListener(state);
+        input = state.getInput();
+        gamePanel.addMouseListener(input);
+        frame.addKeyListener(input);
     }
     
     public State getState() {

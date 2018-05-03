@@ -5,7 +5,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 
-import client.Canvas;
+import client.RsLauncher;
 import client.states.LoadingScreen;
 
 /**
@@ -22,11 +22,10 @@ public class LoadingScreenRenderer {
     private static final int OUTLINE_WIDTH = BAR_WIDTH + 3;
     private static final int OUTLINE_HEIGHT = BAR_HEIGHT + 3;
 
-    public static void render(Graphics g, Canvas canvas,
-            LoadingScreen loadingScreen) {
+    public static void render(Graphics g, LoadingScreen loadingScreen) {
 
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
+        int width = RsLauncher.WINDOW_WIDTH;
+        int height = RsLauncher.WINDOW_HEIGHT;
 
         // Draw background
         g.setColor(Color.BLACK);

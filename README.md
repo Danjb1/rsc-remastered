@@ -2,13 +2,15 @@
 
 An open-source re-implementation of RuneScape Classic for private use.
 
+[![OpenRSC](docs/screenshot.png](https://youtu.be/o6hY1LMLiSU)
+
 See **[ABOUT.md](docs/ABOUT.md)** for more information.
 
 ## :chart_with_upwards_trend: Progress
 
-The initial goal is to be able to fully render the Runecape world and freely move around it. Later, gameplay and server-side functionality can be added.
+The initial goal is to be able to fully render the Runescape world and freely move around it. Later, gameplay and server-side functionality can be added.
 
-:heavy_check_mark: Loading screen (loads game data from RSCD archives)\
+:heavy_check_mark: Loading screen\
 :heavy_check_mark:️ Title screen\
 :heavy_check_mark:️ Landscape rendering\
 :heavy_check_mark:️ Wall rendering\
@@ -19,6 +21,12 @@ The initial goal is to be able to fully render the Runecape world and freely mov
 :x: Mob rendering\
 :x: Camera rotation\
 :x: Zooming
+
+## :video_game: Controls
+
+**Left Click:** Teleport
+**Page Up:** Go up a layer
+**Page Down:** Go down a layer
 
 ## :page_with_curl: Disclaimer
 

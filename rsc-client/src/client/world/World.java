@@ -15,6 +15,16 @@ import client.scene.Scene;
 public class World {
 
     /**
+     * Offset from which tile co-ordinates are calculated.
+     */
+    public static final int START_X = 2304;
+
+    /**
+     * Offset from which tile co-ordinates are calculated.
+     */
+    public static final int START_Z = 1776;
+
+    /**
      * Width of 1 Tile, in world units.
      */
     public static final int TILE_WIDTH = 128;
@@ -58,7 +68,7 @@ public class World {
      * Number of layers in the world.
      */
     private static final int NUM_LAYERS = 4;
-    
+
     /**
      * The Scene that should hold the loaded world models.
      */
@@ -105,6 +115,10 @@ public class World {
     private int originZ;
     
     private int currentLayer = 0;
+    
+    private int sectorX;
+    
+    private int sectorZ;
     
     private int mapBoundaryX1;
     private int mapBoundaryZ1;
@@ -319,17 +333,6 @@ public class World {
         return currentLayer;
     }
 
-    public void setMapBoundary(
-            int mapBoundaryX1,
-            int mapBoundaryZ1,
-            int mapBoundaryX2,
-            int mapBoundaryZ2) {
-        this.mapBoundaryX1 = mapBoundaryX1;
-        this.mapBoundaryZ1 = mapBoundaryZ1;
-        this.mapBoundaryX2 = mapBoundaryX2;
-        this.mapBoundaryZ2 = mapBoundaryZ2;
-    }
-    
     public int getOriginX() {
         return originX;
     }
@@ -348,11 +351,6 @@ public class World {
                 tileX < NUM_TILES_X && tileZ < NUM_TILES_Z;
     }
 
-    public void setOrigin(int originX, int originZ) {
-        this.originX = originX;
-        this.originZ = originZ;
-    }
-
     public int getNumDoors() {
         return numDoors;
     }
@@ -367,6 +365,33 @@ public class World {
     
     public GameObject getGameObject(int i) {
         return gameObjects[i];
+    }
+
+    public void setCurrentLayer(int currentLayer) {
+        this.currentLayer = currentLayer;
+    }
+    
+    public int getSectorX() {
+        return sectorX;
+    }
+    
+    public int getSectorZ() {
+        return sectorZ;
+    }
+
+    public void setCurrentSector(int sectorX, int sectorZ) {
+        this.sectorX = sectorX;
+        this.sectorZ = sectorZ;
+        
+        // Set map boundary around the loaded sectors
+        mapBoundaryX1 = sectorX * Sector.WIDTH - 32;
+        mapBoundaryZ1 = sectorZ * Sector.DEPTH - 32;
+        mapBoundaryX2 = sectorX * Sector.WIDTH + 32;
+        mapBoundaryZ2 = sectorZ * Sector.DEPTH + 32;
+
+        // Set the current origin
+        originX = (sectorX * Sector.WIDTH - Sector.WIDTH) - START_X;
+        originZ = (sectorZ * Sector.DEPTH - Sector.DEPTH) - START_Z;
     }
 
 }
