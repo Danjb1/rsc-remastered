@@ -2,12 +2,10 @@ package client.states;
 
 import java.awt.Graphics;
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import client.RsLauncher;
 import client.State;
@@ -29,8 +27,8 @@ import client.util.DataUtils;
 
 public class LoadingScreen extends State {
 
-    private static final String LANDSCAPE_FILENAME = "Landscape.rscd";
-    private static final String SPRITES_FILENAME = "Sprites.rscd";
+    private static final String LANDSCAPE_FILENAME = "Landscape.zip";
+    private static final String SPRITES_FILENAME = "Sprites.zip";
 
     public static final int SPRITE_MEDIA_START = 2000;
     public static final int SPRITE_UTIL_START = 2100;
@@ -51,21 +49,8 @@ public class LoadingScreen extends State {
     public LoadingScreen(RsLauncher launcher) {
         super(launcher);
 
-        /*
-         * Load ZIP archives.
-         * 
-         * Ideally we would use getResource() here but we need a concrete File,
-         * not an input stream! This means we can't ship the data files inside
-         * the JAR unless we seriously re-work this code.
-         */
-        try {
-            Resources.spriteArchive = new ZipFile(new File(
-                    Resources.DATA_DIR + SPRITES_FILENAME));
-            Resources.tileArchive = new ZipFile(new File(
-                    Resources.DATA_DIR + LANDSCAPE_FILENAME));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        // Load sprites
+        Resources.spriteArchive = Resources.loadZipData(SPRITES_FILENAME);
     }
 
     @Override
@@ -131,16 +116,19 @@ public class LoadingScreen extends State {
     }
 
     private void loadGameData() {
-        Resources.npcs       = (NpcDef[])        Resources.loadData("NPCs.rscd");
-        Resources.items      = (ItemDef[])       Resources.loadData("Items.rscd");
-        Resources.textureDefs   = (TextureDef[])    Resources.loadData("Textures.rscd");
-        Resources.animations = (AnimationDef[])  Resources.loadData("Animations.rscd");
-        Resources.spells     = (SpellDef[])      Resources.loadData("Spells.rscd");
-        Resources.prayers    = (PrayerDef[])     Resources.loadData("Prayers.rscd");
-        Resources.tiles      = (TileDef[])       Resources.loadData("Tiles.rscd");
-        Resources.doors      = (DoorDef[])       Resources.loadData("Doors.rscd");
-        Resources.elevation  = (ElevationDef[])  Resources.loadData("Elevation.rscd");
-        Resources.objects    = (GameObjectDef[]) Resources.loadData("Objects.rscd");
+        
+        Resources.tileArchive = Resources.loadZipData(LANDSCAPE_FILENAME);
+        
+        Resources.npcs       = (NpcDef[])        Resources.loadGzipData("NPCs.xml.gz");
+        Resources.items      = (ItemDef[])       Resources.loadGzipData("Items.xml.gz");
+        Resources.textureDefs = (TextureDef[])   Resources.loadGzipData("Textures.xml.gz");
+        Resources.animations = (AnimationDef[])  Resources.loadGzipData("Animations.xml.gz");
+        Resources.spells     = (SpellDef[])      Resources.loadGzipData("Spells.xml.gz");
+        Resources.prayers    = (PrayerDef[])     Resources.loadGzipData("Prayers.xml.gz");
+        Resources.tiles      = (TileDef[])       Resources.loadGzipData("Tiles.xml.gz");
+        Resources.doors      = (DoorDef[])       Resources.loadGzipData("Doors.xml.gz");
+        Resources.elevation  = (ElevationDef[])  Resources.loadGzipData("Elevation.xml.gz");
+        Resources.objects    = (GameObjectDef[]) Resources.loadGzipData("Objects.xml.gz");
 
         // Initialise items
         for (int id = 0; id < Resources.items.length; id++) {

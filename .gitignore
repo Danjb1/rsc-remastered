@@ -1,6 +1,5 @@
-/rsc-client/.classpath
-/rsc-client/.project
-/rsc-client/.settings/*.prefs
-/rsc-client/bin
-/rsc-client/res/data/extracted
-/rsc-client/res/data/server
+.classpath
+.project
+.settings
+bin
+/docs/memdump

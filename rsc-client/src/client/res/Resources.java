@@ -110,7 +110,16 @@ public class Resources {
         }
     }
 
-    public static Object loadData(String filename) {
+    public static ZipFile loadZipData(String filename) {
+        try {
+            return new ZipFile(new File(DATA_DIR + filename));
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Object loadGzipData(String filename) {
         try {
             InputStream is = new GZIPInputStream(
                     getResourceAsStream(DATA_DIR + filename));
