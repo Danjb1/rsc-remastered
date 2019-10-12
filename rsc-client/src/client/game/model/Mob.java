@@ -1,4 +1,4 @@
-package client.model;
+package client.game.model;
 
 public class Mob {
 

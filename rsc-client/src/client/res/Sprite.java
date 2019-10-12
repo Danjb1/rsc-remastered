@@ -108,17 +108,13 @@ public class Sprite {
         return "id = " + id + "; package = " + packageName;
     }
 
-    /**
-     * IO Operations *
+    /*
+     * IO Operations
      */
 
     public void serializeTo(File file) throws IOException {
         Resources.writeData(file, this);
     }
-
-    //    public static Sprite deserializeFrom(File file) throws IOException, ClassNotFoundException {
-    //        return (Sprite) Resources.loadData(file);
-    //    }
 
     public BufferedImage toImage() {
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -132,7 +128,10 @@ public class Sprite {
 
     /**
      * WARNING: packageName, id, xShift, yShift, something1, something2 are lost
-     * when loading from img. *
+     * when loading from img.
+     *
+     * @param img
+     * @return
      */
     public static Sprite fromImage(BufferedImage img) {
         int[] pixels = new int[img.getWidth() * img.getHeight()];
@@ -149,7 +148,10 @@ public class Sprite {
     }
 
     /**
-     * Writes the sprites raw data into a ByteBuffer
+     * Writes the Sprite's raw data into a ByteBuffer
+     *
+     * @return
+     * @throws IOException
      */
     public ByteBuffer serialise() throws IOException {
         ByteBuffer out = ByteBuffer.allocate(25 + (pixels.length * 4));

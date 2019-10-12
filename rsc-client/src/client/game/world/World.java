@@ -1,15 +1,15 @@
-package client.world;
+package client.game.world;
 
-import client.model.Sector;
-import client.scene.Model;
-import client.scene.Scene;
+import client.game.model.Sector;
+import client.game.scene.Model;
+import client.game.scene.Scene;
 
 /**
  * Class representing the game world.
- * 
+ *
  * The x- and z-axes are on the horizontal plane, and the y-axis is the
  * elevation.
- * 
+ *
  * @author Dan Bryce
  */
 public class World {
@@ -33,7 +33,7 @@ public class World {
      * Depth of 1 Tile, in world units.
      */
     public static final int TILE_DEPTH = 128;
-    
+
     /**
      * Number of Sectors loaded in the x-axis.
      */
@@ -53,17 +53,17 @@ public class World {
      * The number of loaded Tiles in the x-axis.
      */
     public static final int NUM_TILES_X = SECTORS_X * Sector.WIDTH;
-    
+
     /**
      * The number of loaded Tiles in the y-axis.
      */
     public static final int NUM_TILES_Z = SECTORS_Z * Sector.DEPTH;
-    
+
     /**
      * Number of faces present in the loaded terrain.
      */
     public static final int NUM_TERRAIN_FACES = NUM_SECTORS * Sector.NUM_FACES;
-    
+
     /**
      * Number of layers in the world.
      */
@@ -76,7 +76,7 @@ public class World {
 
     /**
      * Tile position corresponding to a given face of the terrain model.
-     * 
+     *
      * <p>The index is given by the faceTag of the selected face.
      */
     private int[] tileXForFace = new int[NUM_TERRAIN_FACES];
@@ -84,9 +84,9 @@ public class World {
 
     /**
      * Currently-loaded Sectors.
-     * 
+     *
      * <p>When we load sector (x, z) we end up with the following:
-     * 
+     *
      * <pre>
      *  sectors[0] = (x - 1, z - 1)
      *  sectors[1] = (x, z - 1)
@@ -97,29 +97,29 @@ public class World {
     private Sector[] sectors = new Sector[NUM_SECTORS];
 
     private Model[] landscapeModels = new Model[64];
-    
+
     private Model[][] wallModels = new Model[NUM_LAYERS][64];
-    
+
     private Model[][] roofModels = new Model[NUM_LAYERS][64];
-    
+
     private int[][] elevation = new int[NUM_TILES_X][NUM_TILES_Z];
 
     /**
      * The first tile in the World that is currently loaded, in the x-axis.
      */
     private int originX;
-    
+
     /**
      * The first tile in the World that is currently loaded, in the z-axis.
      */
     private int originZ;
-    
+
     private int currentLayer = 0;
-    
+
     private int sectorX;
-    
+
     private int sectorZ;
-    
+
     private int mapBoundaryX1;
     private int mapBoundaryZ1;
     private int mapBoundaryX2;
@@ -150,7 +150,7 @@ public class World {
         this.tileXForFace[faceId] = x;
         this.tileZForFace[faceId] = z;
     }
-    
+
     public int getTileXForFace(int faceId) {
         return tileXForFace[faceId];
     }
@@ -176,11 +176,11 @@ public class World {
     }
 
     public int getGroundElevation(int x, int z) {
-        
+
         if (!containsTileRelativeToOrigin(x, z)) {
             return 0;
         }
-        
+
         byte layer = 0;
         if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             layer = 1;
@@ -193,26 +193,26 @@ public class World {
             x -= Sector.WIDTH;
             z -= Sector.DEPTH;
         }
-        
+
         return (sectors[layer].getTile(x, z).groundElevation & 0xff) * 3;
     }
 
     public int getAveragedElevation(int tileX, int tileZ) {
-        
+
         int x = tileX >> 7;
         int z = tileZ >> 7;
         int i1 = tileX & 0x7f;
         int j1 = tileZ & 0x7f;
-        
-        if (x < 0 || z < 0 || 
+
+        if (x < 0 || z < 0 ||
                 x >= World.NUM_TILES_X - 1 || z >= World.NUM_TILES_Z - 1) {
             return 0;
         }
-        
+
         int k1;
         int l1;
         int i2;
-        
+
         if (i1 <= 128 - j1) {
             k1 = getGroundElevation(x, z);
             l1 = getGroundElevation(x + 1, z) - k1;
@@ -224,13 +224,13 @@ public class World {
             i1 = 128 - i1;
             j1 = 128 - j1;
         }
-        
+
         return k1 + (l1 * i1) / 128 + (i2 * j1) / 128;
     }
 
     public void setWallModels(int layer, Model[] newWallModels) {
         wallModels[layer] = newWallModels;
-        
+
         for (int i = 0; i < 64; i++) {
             scene.addModel(wallModels[layer][i]);
         }
@@ -242,7 +242,7 @@ public class World {
             scene.addModel(roofModels[layer][l9]);
         }
     }
-    
+
     public Model getLandscapeModel(int i) {
         return landscapeModels[i];
     }
@@ -256,11 +256,11 @@ public class World {
     }
 
     public int getGroundTexture(int x, int z) {
-        
+
         if (x < 0 || x >= NUM_TILES_X || z < 0 || z >= NUM_TILES_Z) {
             return 0;
         }
-        
+
         byte layer = 0;
         if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             layer = 1;
@@ -273,16 +273,16 @@ public class World {
             x -= Sector.WIDTH;
             z -= Sector.DEPTH;
         }
-        
+
         return sectors[layer].getTile(x, z).texture & 0xFF;
     }
 
     public void setGroundTextureOverlay(int x, int z, int groundOverlay) {
-        
+
         if (x < 0 || x >= NUM_TILES_X || z < 0 || z >= NUM_TILES_Z) {
             return;
         }
-        
+
         byte layer = 0;
         if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             layer = 1;
@@ -295,16 +295,16 @@ public class World {
             x -= Sector.WIDTH;
             z -= Sector.DEPTH;
         }
-        
+
         sectors[layer].getTile(x, z).groundOverlay = (byte) groundOverlay;
     }
 
     public int getGroundTextureOverlay(int x, int z) {
-        
+
         if (x < 0 || x >= NUM_TILES_X || z < 0 || z >= NUM_TILES_Z) {
             return 0;
         }
-        
+
         byte layer = 0;
         if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             layer = 1;
@@ -317,7 +317,7 @@ public class World {
             x -= Sector.WIDTH;
             z -= Sector.DEPTH;
         }
-        
+
         return sectors[layer].getTile(x, z).groundOverlay & 0xff;
     }
 
@@ -328,7 +328,7 @@ public class World {
     public Sector getSector(int i) {
         return sectors[i];
     }
-    
+
     public int getCurrentLayer() {
         return currentLayer;
     }
@@ -336,7 +336,7 @@ public class World {
     public int getOriginX() {
         return originX;
     }
-    
+
     public int getOriginZ() {
         return originZ;
     }
@@ -358,11 +358,11 @@ public class World {
     public Door getDoor(int i) {
         return doors[i];
     }
-    
+
     public int getNumGameObjects() {
         return numGameObjects;
     }
-    
+
     public GameObject getGameObject(int i) {
         return gameObjects[i];
     }
@@ -370,11 +370,11 @@ public class World {
     public void setCurrentLayer(int currentLayer) {
         this.currentLayer = currentLayer;
     }
-    
+
     public int getSectorX() {
         return sectorX;
     }
-    
+
     public int getSectorZ() {
         return sectorZ;
     }
@@ -382,7 +382,7 @@ public class World {
     public void setCurrentSector(int sectorX, int sectorZ) {
         this.sectorX = sectorX;
         this.sectorZ = sectorZ;
-        
+
         // Set map boundary around the loaded sectors
         mapBoundaryX1 = sectorX * Sector.WIDTH - 32;
         mapBoundaryZ1 = sectorZ * Sector.DEPTH - 32;

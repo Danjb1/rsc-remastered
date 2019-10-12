@@ -1,4 +1,4 @@
-package client.model;
+package client.game.model;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
  * A representation of one tile within our world map.
  */
 public class Tile {
-    
+
     /**
      * The elevation of this tile.
      */
@@ -45,6 +45,9 @@ public class Tile {
 
     /**
      * Writes the Tile raw data into a ByteBuffer.
+     *
+     * @return
+     * @throws IOException
      */
     public ByteBuffer pack() throws IOException {
         ByteBuffer out = ByteBuffer.allocate(10);
@@ -64,13 +67,17 @@ public class Tile {
 
     /**
      * Create a new tile from raw data packed into the given ByteBuffer.
+     *
+     * @param in
+     * @return
+     * @throws IOException
      */
     public static Tile unpack(ByteBuffer in) throws IOException {
-        
+
         if (in.remaining() < 10) {
             throw new IOException("Provided buffer too short");
         }
-        
+
         Tile tile = new Tile();
 
         tile.groundElevation = in.get();
@@ -83,5 +90,5 @@ public class Tile {
 
         return tile;
     }
-    
+
 }

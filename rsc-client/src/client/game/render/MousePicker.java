@@ -1,6 +1,6 @@
-package client.render;
+package client.game.render;
 
-import client.scene.Model;
+import client.game.scene.Model;
 
 public class MousePicker {
 

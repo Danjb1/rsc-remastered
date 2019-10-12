@@ -1,13 +1,13 @@
-package client.render;
+package client.game.render;
 
 import client.Canvas;
+import client.game.scene.Camera;
+import client.game.scene.Model;
+import client.game.scene.Polygon;
+import client.game.scene.Scene;
+import client.game.scene.SpriteEntity;
 import client.res.Resources;
 import client.res.Texture;
-import client.scene.Camera;
-import client.scene.Model;
-import client.scene.Polygon;
-import client.scene.Scene;
-import client.scene.SpriteEntity;
 
 /**
  * Class responsible for rendering a scene.

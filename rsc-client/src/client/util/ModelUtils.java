@@ -1,9 +1,9 @@
 package client.util;
 
+import client.game.scene.Model;
+import client.game.world.Door;
+import client.game.world.World;
 import client.res.Resources;
-import client.scene.Model;
-import client.world.Door;
-import client.world.World;
 
 public class ModelUtils {
 

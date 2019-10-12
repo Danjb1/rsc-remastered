@@ -1,19 +1,19 @@
-package client.render;
+package client.loading;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 
-import client.RsLauncher;
-import client.states.LoadingScreen;
+import client.Canvas;
+import client.StateRenderer;
 
 /**
  * Class responsible for rendering the loading screen.
- * 
+ *
  * @author Dan Bryce
  */
-public class LoadingScreenRenderer {
+public class LoadingScreenRenderer extends StateRenderer {
 
     private static final Color BAR_COLOUR = new Color(144, 192, 64);
     private static final Font LOADING_FONT = new Font("Helvetica", 0, 12);
@@ -22,18 +22,24 @@ public class LoadingScreenRenderer {
     private static final int OUTLINE_WIDTH = BAR_WIDTH + 3;
     private static final int OUTLINE_HEIGHT = BAR_HEIGHT + 3;
 
-    public static void render(Graphics g, LoadingScreen loadingScreen) {
+    private LoadingScreen loadingScreen;
 
-        int width = RsLauncher.WINDOW_WIDTH;
-        int height = RsLauncher.WINDOW_HEIGHT;
+    public LoadingScreenRenderer(LoadingScreen loadingScreen) {
+        this.loadingScreen = loadingScreen;
+    }
+
+    @Override
+    public void render(Canvas canvas) {
+
+        Graphics g = canvas.getImage().createGraphics();
 
         // Draw background
         g.setColor(Color.BLACK);
-        g.fillRect(0, 0, width, height);
+        g.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         // Draw loading bar
-        int x = width / 2 - BAR_WIDTH / 2;
-        int y = height / 2 - BAR_HEIGHT / 2;
+        int x = canvas.getWidth() / 2 - BAR_WIDTH / 2;
+        int y = canvas.getHeight() / 2 - BAR_HEIGHT / 2;
         g.setColor(BAR_COLOUR);
         g.drawRect(x - 2, y - 2, OUTLINE_WIDTH, OUTLINE_HEIGHT);
         g.fillRect(x, y,

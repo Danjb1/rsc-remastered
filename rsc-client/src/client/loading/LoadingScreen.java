@@ -1,6 +1,5 @@
-package client.states;
+package client.loading;
 
-import java.awt.Graphics;
 import java.io.BufferedInputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -9,6 +8,7 @@ import java.util.zip.ZipEntry;
 
 import client.RsLauncher;
 import client.State;
+import client.StateRenderer;
 import client.entityhandling.defs.AnimationDef;
 import client.entityhandling.defs.DoorDef;
 import client.entityhandling.defs.ElevationDef;
@@ -19,7 +19,7 @@ import client.entityhandling.defs.PrayerDef;
 import client.entityhandling.defs.SpellDef;
 import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
-import client.render.LoadingScreenRenderer;
+import client.login.LoginScreen;
 import client.res.Resources;
 import client.res.Sprite;
 import client.res.Texture;
@@ -37,6 +37,8 @@ public class LoadingScreen extends State {
     public static final int SPRITE_PROJECTILE_START = 3160;
     public static final int SPRITE_TEXTURE_START = 3220;
 
+    private LoadingScreenRenderer renderer;
+
     private String message = "Loading...";
     private int progress = -1;
 
@@ -51,11 +53,13 @@ public class LoadingScreen extends State {
 
         // Load sprites
         Resources.spriteArchive = Resources.loadZipData(SPRITES_FILENAME);
+
+        renderer = new LoadingScreenRenderer(this);
     }
 
     @Override
-    public void render(Graphics g) {
-        LoadingScreenRenderer.render(g, this);
+    public StateRenderer getRenderer() {
+        return renderer;
     }
 
     /**
@@ -116,9 +120,9 @@ public class LoadingScreen extends State {
     }
 
     private void loadGameData() {
-        
+
         Resources.tileArchive = Resources.loadZipData(LANDSCAPE_FILENAME);
-        
+
         Resources.npcs       = (NpcDef[])        Resources.loadGzipData("NPCs.xml.gz");
         Resources.items      = (ItemDef[])       Resources.loadGzipData("Items.xml.gz");
         Resources.textureDefs = (TextureDef[])   Resources.loadGzipData("Textures.xml.gz");
@@ -139,7 +143,7 @@ public class LoadingScreen extends State {
 
         // Initialise objects
         for (int id = 0; id < Resources.objects.length; id++) {
-            Resources.objects[id].modelID = 
+            Resources.objects[id].modelID =
                     getModelIndex(Resources.objects[id].getObjectModel());
         }
     }

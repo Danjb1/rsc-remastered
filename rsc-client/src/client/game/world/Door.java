@@ -1,6 +1,6 @@
-package client.world;
+package client.game.world;
 
-import client.scene.Model;
+import client.game.scene.Model;
 import client.util.ModelUtils;
 
 public class Door {

@@ -24,14 +24,14 @@ import client.entityhandling.defs.PrayerDef;
 import client.entityhandling.defs.SpellDef;
 import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
-import client.model.Sector;
+import client.game.model.Sector;
 import client.util.DataUtils;
 
 /**
  * Class responsible for reading and storing resources required by the game.
- * 
+ *
  * <p><i>Based on <code>EntityHandler.java</code> from other RSC sources.</i>
- * 
+ *
  * @author Dan Bryce
  */
 public class Resources {
@@ -45,9 +45,9 @@ public class Resources {
     /**
      * Package containing entity definitions.
      */
-    private static final String ENTITY_DEF_PACKAGE_NAME = 
+    private static final String ENTITY_DEF_PACKAGE_NAME =
             "client.entityhandling.defs";
-    
+
     /**
      * XStream used to read from / write to XML.
      */
@@ -58,12 +58,12 @@ public class Resources {
      */
     public static ZipFile spriteArchive;
     public static ZipFile tileArchive;
-    
+
     /**
      * Loaded Sprites
      */
     public static Sprite[] sprites = new Sprite[4000];
-    
+
     /*
      * Loaded entity definitions
      */
@@ -82,7 +82,7 @@ public class Resources {
      * Texture data
      */
     public static Texture[] textures;
-    
+
     static {
         // XStream aliases
         addAlias("NPCDef",        ENTITY_DEF_PACKAGE_NAME + ".NpcDef");
@@ -200,13 +200,13 @@ public class Resources {
     }
 
     public static void prepareTexture(int id) {
-        
+
         if (id < 0) {
             return;
         }
-        
+
         Texture tex = textures[id];
-        
+
         if (tex.pixels != null) {
             // Texture already loaded
             return;
@@ -216,7 +216,7 @@ public class Resources {
         tex.pixels = new int[numPixels];
         int textureSize = !tex.isLarge() ? 64 : 128;
         int pixelIndex = 0;
-        
+
         // Produce texture by looking up colours in the palette
         for (int y = 0; y < textureSize; y++) {
             for (int x = 0; x < textureSize; x++) {
@@ -235,7 +235,7 @@ public class Resources {
 
         /*
          * Produce 3 additional versions of the texture.
-         * 
+         *
          * These seem to be darker versions, which seem to be drawn over the
          * normal texture during rendering.
          */

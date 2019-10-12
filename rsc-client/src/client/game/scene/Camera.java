@@ -1,4 +1,4 @@
-package client.scene;
+package client.game.scene;
 
 /**
  * Class representing the camera within the game world.

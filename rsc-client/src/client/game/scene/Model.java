@@ -1,4 +1,4 @@
-package client.scene;
+package client.game.scene;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -7,7 +7,7 @@ import client.util.DataUtils;
 
 /**
  * Class respresenting a 3d model.
- * 
+ *
  * @author Dan Bryce
  */
 public class Model {
@@ -327,6 +327,10 @@ public class Model {
      *
      * @param models
      * @param i
+     * @param flag
+     * @param flag1
+     * @param flag2
+     * @param flag3
      */
     public Model(Model models[], int i, boolean flag, boolean flag1, boolean flag2, boolean flag3) {
         transformState = 1;
@@ -595,16 +599,16 @@ public class Model {
 
     /**
      * Adds the given vertex, and returns its index.
-     * 
+     *
      * If the vertex already exists, simply returns its index.
-     * 
+     *
      * @param x
      * @param y
      * @param z
      * @return
      */
     public int createVertexWithoutDuplication(int x, int y, int z) {
-        
+
         // Check if vertex has already been added
         for (int l = 0; l < vertexIndex; l++) {
             if (vertexX[l] == x && vertexY[l] == y && vertexZ[l] == z) {
@@ -615,47 +619,47 @@ public class Model {
         if (vertexIndex >= maxVertices) {
             return -1;
         }
-        
+
         vertexX[vertexIndex] = x;
         vertexY[vertexIndex] = y;
         vertexZ[vertexIndex] = z;
-        
+
         return vertexIndex++;
     }
 
     /**
      * Adds the given vertex, and returns its index.
-     * 
+     *
      * @param x
      * @param y
      * @param z
      * @return
      */
     public int createVertex(int x, int z, int y) {
-        
+
         if (vertexIndex >= maxVertices) {
             return -1;
         }
-        
+
         vertexX[vertexIndex] = x;
         vertexY[vertexIndex] = z;
         vertexZ[vertexIndex] = y;
-        
+
         return vertexIndex++;
     }
 
     public int createFace(int numVertices, int vertices[], int fillFront, int fillBack) {
-        
+
         if (numFaces >= count2) {
             return -1;
         }
-        
+
         faceNumVertices[numFaces] = numVertices;
         faceVertices[numFaces] = vertices;
         faceFillFront[numFaces] = fillFront;
         faceFillBack[numFaces] = fillBack;
         transformState = 1;
-        
+
         return numFaces++;
     }
 

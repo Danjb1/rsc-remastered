@@ -1,4 +1,4 @@
-package client.scene;
+package client.game.scene;
 
 /**
  * An Entity present in the game world, represented by a Sprite.

@@ -1,10 +1,9 @@
-package client.states;
-
-import java.awt.Graphics;
+package client.login;
 
 import client.RsLauncher;
 import client.State;
-import client.render.LoginScreenRenderer;
+import client.StateRenderer;
+import client.game.Game;
 
 public class LoginScreen extends State {
 
@@ -12,13 +11,13 @@ public class LoginScreen extends State {
 
     public LoginScreen(RsLauncher launcher) {
         super(launcher);
-        
+
         renderer = new LoginScreenRenderer(this);
     }
-    
+
     @Override
-    public void render(Graphics g) {
-        renderer.render(g);
+    public StateRenderer getRenderer() {
+        return renderer;
     }
 
     @Override
@@ -28,5 +27,5 @@ public class LoginScreen extends State {
             launcher.changeState(new Game(launcher));
         }
     }
-    
+
 }

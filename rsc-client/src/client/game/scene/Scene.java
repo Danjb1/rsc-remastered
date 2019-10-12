@@ -1,4 +1,4 @@
-package client.scene;
+package client.game.scene;
 
 /**
  * A collection of models and sprites along with lighting settings, ready for

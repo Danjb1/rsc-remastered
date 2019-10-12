@@ -1,15 +1,15 @@
-package client.world;
+package client.game.world;
 
 import client.entityhandling.defs.TileDef;
-import client.model.Sector;
+import client.game.model.Sector;
+import client.game.scene.Model;
 import client.res.Resources;
-import client.scene.Model;
 import client.util.DataUtils;
 import client.util.ModelUtils;
 
 /**
  * Class responsible for loading the World.
- * 
+ *
  * @author Dan Bryce
  */
 public class WorldLoader {
@@ -33,14 +33,14 @@ public class WorldLoader {
 
     /**
      * The minimum possible layer ID.
-     * 
+     *
      * This is actually used for ground level.
      */
     private static final int MIN_LAYER = 0;
 
     /**
      * The maximum possible layer ID.
-     * 
+     *
      * Strangely, this is actually used as the underground layer.
      */
     private static final int MAX_LAYER = 3;
@@ -48,25 +48,25 @@ public class WorldLoader {
     static {
         // Initialise ground colours
         for (int i = 0; i < 64; i++) {
-            
+
             // Pale Grass / Snow
             GROUND_COLOURS[i] = DataUtils.rgbToInt(
                     255 - i * 4,
                     255 - (int) (i * 1.75),
                     255 - i * 4);
-            
+
             // Grass
             GROUND_COLOURS[i + 64] = DataUtils.rgbToInt(
                     i * 3,
                     144,
                     0);
-            
+
             // Sand
             GROUND_COLOURS[i + 128] = DataUtils.rgbToInt(
                     192 - (int) (i * 1.5),
                     144 - (int) (i * 1.5),
                     0);
-            
+
             // Dark Grass / Mud
             GROUND_COLOURS[i + 192] = DataUtils.rgbToInt(
                     96 - (int) (i * 1.5),
@@ -74,25 +74,25 @@ public class WorldLoader {
                     0);
         }
     }
-    
+
     private World world;
-    
+
     public WorldLoader(World world) {
         this.world = world;
     }
 
     /**
      * Loads the sector containing the given tile.
-     * 
+     *
      * @param tileX
      * @param tileZ
      * @return
      */
     public boolean loadContainingSector(int tileX, int tileZ) {
-        
+
         tileX += World.START_X;
         tileZ += World.START_Z;
-        
+
         // Check if containing sector is already loaded
         if (world.containsTile(tileX, tileZ)) {
             return false;
@@ -108,15 +108,15 @@ public class WorldLoader {
 
     /**
      * Loads the given sector.
-     * 
+     *
      * @param sectorX
      * @param sectorZ
      */
     public void loadSector(int sectorX, int sectorZ) {
-        
+
         // Remove old models
         world.clear();
-        
+
         // Load the new sector
         int prevOriginX = world.getOriginX();
         int prevOriginZ = world.getOriginZ();
@@ -128,10 +128,10 @@ public class WorldLoader {
         int dz = world.getOriginZ() - prevOriginZ;
         moveObjects(dx, dz);
     }
-    
+
     /**
      * Loads all required layers of the given sector.
-     * 
+     *
      * @param sectorX
      * @param sectorZ
      * @param currentLayer
@@ -156,7 +156,7 @@ public class WorldLoader {
 
     /**
      * Loads a single layer of the given sector.
-     * 
+     *
      * @param sectorX
      * @param sectorZ
      * @param layer
@@ -165,21 +165,21 @@ public class WorldLoader {
     private void loadLayer(int sectorX, int sectorZ, int layer, boolean isCurrentLayer) {
 
         setCurrentSector(sectorX, sectorZ, layer);
-        
+
         tmpModel.clear();
 
         if (isCurrentLayer) {
-            
+
             /*
-             * Load terrain 
+             * Load terrain
              */
-    
+
             // Set elevation and lighting
             for (int x = 0; x < World.NUM_TILES_X; x++) {
                 for (int z = 0; z < World.NUM_TILES_Z; z++) {
-                    
+
                     int elevation = -world.getGroundElevation(x, z);
-                    
+
                     // Flatten water under bridges
                     if (world.getGroundTextureOverlay(x, z) > 0
                             && Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
@@ -190,7 +190,7 @@ public class WorldLoader {
                     } else if (world.getGroundTextureOverlay(x, z - 1) > 0
                             && Resources.getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
                         elevation = 0;
-                    } else if (world.getGroundTextureOverlay(x - 1, z - 1) > 0 && 
+                    } else if (world.getGroundTextureOverlay(x - 1, z - 1) > 0 &&
                             Resources.getTileDef(world.getGroundTextureOverlay(x - 1, z - 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
                         elevation = 0;
                     }
@@ -199,7 +199,7 @@ public class WorldLoader {
                             x * World.TILE_WIDTH,
                             elevation,
                             z * World.TILE_DEPTH);
-                    
+
                     // Randomise vertex ambience
                     int ambience = (int) (Math.random() * 10D) - 5;
                     tmpModel.setVertexAmbience(vertexId, ambience);
@@ -209,28 +209,28 @@ public class WorldLoader {
             // Set ground colours
             for (int x = 0; x < World.NUM_TILES_X - 1; x++) {
                 for (int z = 0; z < World.NUM_TILES_Z - 1; z++) {
-                    
+
                     int groundTexture = world.getGroundTexture(x, z);
                     int groundColour = GROUND_COLOURS[groundTexture];
                     int groundColour1 = groundColour;
                     int groundColour2 = groundColour;
-                    
+
                     // Each Tile is made of 2 triangles
                     int triangleIndex = 0;
-                    
+
                     // Tiles in upper layers are black
                     if (layer == 1 || layer == 2) {
                         groundColour = 0xbc614e;
                         groundColour1 = 0xbc614e;
                         groundColour2 = 0xbc614e;
                     }
-                    
+
                     if (world.getGroundTextureOverlay(x, z) > 0) {
                         int groundTextureOverlay = world.getGroundTextureOverlay(x, z);
                         int tileType1 = Resources.getTileDef(groundTextureOverlay - 1).getType();
                         int tileType2 = getTileType(x, z);
                         groundColour = groundColour1 = Resources.getTileDef(groundTextureOverlay - 1).getColour();
-                        
+
                         // Set water texture under bridges
                         if (tileType1 == TileDef.TYPE_BRIDGE) {
                             groundColour = 1;
@@ -240,7 +240,7 @@ public class WorldLoader {
                                 groundColour1 = 31;
                             }
                         }
-    
+
                         if (tileType1 == 5) {
                             if (getDiagonalWalls(x, z) > 0 && getDiagonalWalls(x, z) < 24000) {
                                 if (getOverlayIfRequired(x - 1, z, groundColour2) != 0xbc614e
@@ -261,7 +261,7 @@ public class WorldLoader {
                                     triangleIndex = 1;
                                 }
                             }
-                            
+
                         // Create smooth diagonal lines for road / water edges, etc.
                         } else if (tileType1 != 2 || getDiagonalWalls(x, z) > 0 && getDiagonalWalls(x, z) < 24000) {
                             if (getTileType(x - 1, z) != tileType2 && getTileType(x, z - 1) != tileType2) {
@@ -279,7 +279,7 @@ public class WorldLoader {
                             }
                         }
                     }
-                    
+
                     int i17 = ((world.getGroundElevation(x + 1, z + 1) - world.getGroundElevation(x + 1, z))
                             + world.getGroundElevation(x, z + 1)) - world.getGroundElevation(x, z);
                     if (groundColour != groundColour1 || i17 != 0) {
@@ -336,7 +336,7 @@ public class WorldLoader {
             // Create bridges
             for (int x = 1; x < World.NUM_TILES_X - 1; x++) {
                 for (int z = 1; z < World.NUM_TILES_Z - 1; z++) {
-                    
+
                     if (world.getGroundTextureOverlay(x, z) > 0
                             && Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                         int l7 = Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getColour();
@@ -349,7 +349,7 @@ public class WorldLoader {
                         int i20 = tmpModel.createFace(4, ai2, l7, 0xbc614e);
                         world.setTilePosForFace(i20, x, z);
                         tmpModel.faceTag[i20] = 0x30d40 + i20;
-                        
+
                     } else if (world.getGroundTextureOverlay(x, z) == 0
                             || Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() != 3) {
                         if (world.getGroundTextureOverlay(x, z + 1) > 0 && Resources
@@ -365,7 +365,7 @@ public class WorldLoader {
                             world.setTilePosForFace(j20, x, z);
                             tmpModel.faceTag[j20] = 0x30d40 + j20;
                         }
-                        
+
                         if (world.getGroundTextureOverlay(x, z - 1) > 0 && Resources
                                 .getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
                             int j8 = Resources.getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getColour();
@@ -379,7 +379,7 @@ public class WorldLoader {
                             world.setTilePosForFace(k20, x, z);
                             tmpModel.faceTag[k20] = 0x30d40 + k20;
                         }
-                        
+
                         if (world.getGroundTextureOverlay(x + 1, z) > 0 && Resources
                                 .getTileDef(world.getGroundTextureOverlay(x + 1, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                             int k8 = Resources.getTileDef(world.getGroundTextureOverlay(x + 1, z) - 1).getColour();
@@ -393,7 +393,7 @@ public class WorldLoader {
                             world.setTilePosForFace(l20, x, z);
                             tmpModel.faceTag[l20] = 0x30d40 + l20;
                         }
-                        
+
                         if (world.getGroundTextureOverlay(x - 1, z) > 0 && Resources
                                 .getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                             int l8 = Resources.getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1).getColour();
@@ -412,7 +412,7 @@ public class WorldLoader {
             }
 
             tmpModel.recalculateLighting(true, 40, 48, -50, -10, -50);
-            
+
             Model[] landscapeModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 233, false);
             world.setLandscapeModels(landscapeModels);
 
@@ -424,11 +424,11 @@ public class WorldLoader {
         }
 
         tmpModel.clear();
-        
+
         /*
          * Load walls
          */
-        
+
         for (int x = 0; x < World.NUM_TILES_X - 1; x++) {
             for (int z = 0; z < World.NUM_TILES_Z - 1; z++) {
                 int k3 = getVerticalWall(x, z);
@@ -521,25 +521,25 @@ public class WorldLoader {
                     if (j24 < 0x13880) {
                         world.setElevation(l11, i14, l23);
                     } else {
-                        world.setElevation(l11, i14, 
+                        world.setElevation(l11, i14,
                                 world.getElevation(l11, i14) - 0x13880);
                     }
                     if (l24 < 0x13880) {
                         world.setElevation(j16, k18, l23);
                     } else {
-                        world.setElevation(j16, k18, 
+                        world.setElevation(j16, k18,
                                 world.getElevation(j16, k18) - 0x13880);
                     }
                     if (j25 < 0x13880) {
                         world.setElevation(j19, j21, l23);
                     } else {
-                        world.setElevation(j19, j21, 
+                        world.setElevation(j19, j21,
                                 world.getElevation(j19, j21) - 0x13880);
                     }
                     if (l25 < 0x13880) {
                         world.setElevation(l22, j23, l23);
                     } else {
-                        world.setElevation(l22, j23, 
+                        world.setElevation(l22, j23,
                                 world.getElevation(l22, j23) - 0x13880);
                     }
                 }
@@ -731,11 +731,11 @@ public class WorldLoader {
                 }
             }
         }
-        
+
         tmpModel.recalculateLighting(true, 50, 50, -50, -10, -50);
         Model[] roofModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 169, true);
         world.setRoofModels(layer, roofModels);
-        
+
         // Raise heights of upper storeys?
         for (int x = 0; x < World.NUM_TILES_X; x++) {
             for (int z = 0; z < World.NUM_TILES_Z; z++) {
@@ -747,21 +747,21 @@ public class WorldLoader {
     }
 
     private void setCurrentSector(int sectorX, int sectorZ, int layer) {
-        
+
         world.setSector(0, Resources.loadSector(sectorX - 1, sectorZ - 1, layer));
         world.setSector(1, Resources.loadSector(sectorX, sectorZ - 1, layer));
         world.setSector(2, Resources.loadSector(sectorX - 1, sectorZ, layer));
         world.setSector(3, Resources.loadSector(sectorX, sectorZ, layer));
-        
+
         setGroundTextureOverlays();
     }
 
     private int getRoofTexture(int x, int z) {
-        
+
         if (x < 0 || x >= World.NUM_TILES_X || z < 0 || z >= World.NUM_TILES_Z) {
             return 0;
         }
-        
+
         byte byte0 = 0;
         if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             byte0 = 1;
@@ -774,16 +774,16 @@ public class WorldLoader {
             x -= Sector.WIDTH;
             z -= Sector.DEPTH;
         }
-        
+
         return world.getSector(byte0).getTile(x, z).roofTexture;
     }
 
     private int getVerticalWall(int x, int z) {
-        
+
         if (x < 0 || x >= World.NUM_TILES_X || z < 0 || z >= World.NUM_TILES_Z) {
             return 0;
         }
-        
+
         byte sector = 0;
         if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             sector = 1;
@@ -796,16 +796,16 @@ public class WorldLoader {
             x -= Sector.WIDTH;
             z -= Sector.DEPTH;
         }
-        
+
         return world.getSector(sector).getTile(x, z).verticalWall & 0xff;
     }
 
     private int getHorizontalWall(int x, int z) {
-        
+
         if (x < 0 || x >= World.NUM_TILES_X || z < 0 || z >= World.NUM_TILES_Z) {
             return 0;
         }
-        
+
         byte sector = 0;
         if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             sector = 1;
@@ -818,16 +818,16 @@ public class WorldLoader {
             x -= Sector.WIDTH;
             z -= Sector.DEPTH;
         }
-        
+
         return world.getSector(sector).getTile(x, z).horizontalWall & 0xff;
     }
 
     private int getDiagonalWalls(int x, int z) {
-        
+
         if (x < 0 || x >= World.NUM_TILES_X || z < 0 || z >= World.NUM_TILES_Z) {
             return 0;
         }
-        
+
         byte sector = 0;
         if (x >= Sector.WIDTH && z < Sector.DEPTH) {
             sector = 1;
@@ -840,7 +840,7 @@ public class WorldLoader {
             x -= Sector.WIDTH;
             z -= Sector.DEPTH;
         }
-        
+
         return world.getSector(sector).getTile(x, z).diagonalWalls;
     }
 
@@ -889,11 +889,11 @@ public class WorldLoader {
     private void setGroundTextureOverlays() {
         for (int x = 0; x < World.NUM_TILES_X; x++) {
             for (int z = 0; z < World.NUM_TILES_Z; z++) {
-                
+
                 if (world.getGroundTextureOverlay(x, z) != 250) {
                     continue;
                 }
-                
+
                 if (x == 47 && world.getGroundTextureOverlay(x + 1, z) != 250
                         && world.getGroundTextureOverlay(x + 1, z) != 2) {
                     world.setGroundTextureOverlay(x, z, 9);
@@ -922,7 +922,7 @@ public class WorldLoader {
 
     /**
      * Gets the Sector co-ordinate containing the given tile.
-     * 
+     *
      * @param tileX
      * @return
      */
@@ -932,7 +932,7 @@ public class WorldLoader {
 
     /**
      * Gets the Sector co-ordinate containing the given tile.
-     * 
+     *
      * @param tileZ
      * @return
      */
@@ -944,19 +944,19 @@ public class WorldLoader {
      * Moves up a layer.
      */
     public void ascend() {
-        
+
         int currentLayer = world.getCurrentLayer();
-        
+
         if (currentLayer == MAX_LAYER - 1) {
             // We are already at the topmost layer
             return;
         }
-        
+
         if (currentLayer == MAX_LAYER) {
             // We are underground
             currentLayer = -1;
-        } 
-        
+        }
+
         world.setCurrentLayer(currentLayer + 1);
         reloadCurrentSector();
     }
@@ -965,20 +965,20 @@ public class WorldLoader {
      * Moves down a layer.
      */
     public void descend() {
-        
+
         int currentLayer = world.getCurrentLayer();
 
         if (currentLayer == MAX_LAYER) {
             // We are underground, so we cannot go any lower
             return;
         }
-        
+
         int newLayer = currentLayer - 1;
         if (newLayer < MIN_LAYER) {
             // We have gone underground
             newLayer = MAX_LAYER;
         }
-        
+
         world.setCurrentLayer(newLayer);
         reloadCurrentSector();
     }

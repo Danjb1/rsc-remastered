@@ -1,30 +1,43 @@
 package client;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+
 import client.res.Resources;
 import client.res.Sprite;
 
 /**
  * Class responsible for storing and manipulating pixel data of a 2D image.
- * 
+ *
  * <p><i>Based on <code>Surface.java</code> from other RSC sources.</i>
- * 
+ *
  * @author Dan Bryce
  */
 public class Canvas {
 
     private static final int COLOUR_BLACK = 0;
 
+    private BufferedImage image;
+
     private int width;
-    
+
     private int height;
-    
+
     private int[] pixels;
-    
-    public Canvas(int width, int height) {
-        this.width = width;
-        this.height = height;
-        
-        pixels = new int[width * height];
+
+    /**
+     * Creates a Canvas that wraps a BufferedImage.
+     *
+     * @param image
+     */
+    public Canvas(BufferedImage image) {
+        this.image = image;
+
+        width = image.getWidth();
+        height = image.getHeight();
+
+        DataBufferInt buffer = (DataBufferInt) image.getRaster().getDataBuffer();
+        pixels = buffer.getData();
     }
 
     public void clear() {
@@ -32,22 +45,26 @@ public class Canvas {
             pixels[i] = COLOUR_BLACK;
         }
     }
-    
+
+    public BufferedImage getImage() {
+        return image;
+    }
+
     public int getWidth() {
         return width;
     }
-    
+
     public int getHeight() {
         return height;
     }
-    
+
     public int[] getPixels() {
         return pixels;
     }
 
     /**
      * Draws the sprite with the given ID at the given position.
-     * 
+     *
      * @param x
      * @param y
      * @param id
@@ -107,7 +124,7 @@ public class Canvas {
         if (spriteWidth <= 0 || spriteHeight <= 0) {
             return;
         }
-        
+
         setPixels(pixels, sprite.getPixels(),
                 sourceIndex, targetIndex,
                 spriteWidth, spriteHeight,
@@ -212,7 +229,7 @@ public class Canvas {
 
     private void plotSale(int texturePixels[], int i, int j, int k, int l, int i1, int j1, int k1, int l1, int i2,
             int j2, int k2) {
-        
+
         int l2 = j;
         for (int i3 = -k1; i3 < 0; i3 += k2) {
             int j3 = (k >> 16) * j2;
@@ -234,11 +251,11 @@ public class Canvas {
 
     /**
      * Draws a textured scanline.
-     * 
+     *
      * Used for walls and roofs.
-     * 
+     *
      * BLACK MAGIC - DO NOT TOUCH.
-     * 
+     *
      * @param texturePixels
      * @param i
      * @param j
@@ -267,15 +284,15 @@ public class Canvas {
             int pxOffset,
             int paramD,
             int paramDModifier) {
-        
+
         if (scanlineSize <= 0) {
             return;
         }
-        
+
         int i3 = 0;
         int j3 = 0;
         int colourShift = 0;
-        
+
         if (paramC != 0) {
             i = paramA / paramC << 7;
             j = paramB / paramC << 7;
@@ -287,11 +304,11 @@ public class Canvas {
         } else if (i > 16256) {
             i = 16256;
         }
-        
+
         paramA += paramAModifier;
         paramB += paramBModifier;
         paramC += paramCModifier;
-        
+
         if (paramC != 0) {
             i3 = paramA / paramC << 7;
             j3 = paramB / paramC << 7;
@@ -303,18 +320,18 @@ public class Canvas {
         } else if (i3 > 16256) {
             i3 = 16256;
         }
-        
+
         int k3 = i3 - i >> 4;
         int l3 = j3 - j >> 4;
 
         // Draw 16 pixels with each loop iteration
         for (int j4 = 0; j4 < scanlineSize >> 4; j4++) {
-            
+
             /*
              * These next sections could be rolled up into 2 nested for-loops.
              * Presumably this wasn't done for performance reasons.
              */
-            
+
             i += paramD & 0x600000;
             colourShift = paramD >> 23;
             paramD += paramDModifier;
@@ -382,7 +399,7 @@ public class Canvas {
             paramA += paramAModifier;
             paramB += paramBModifier;
             paramC += paramCModifier;
-            
+
             if (paramC != 0) {
                 i3 = paramA / paramC << 7;
                 j3 = paramB / paramC << 7;
@@ -394,7 +411,7 @@ public class Canvas {
             } else if (i3 > 16256) {
                 i3 = 16256;
             }
-            
+
             k3 = i3 - i >> 4;
             l3 = j3 - j >> 4;
         }
@@ -430,42 +447,42 @@ public class Canvas {
         if (scanlineSize <= 0) {
             return;
         }
-        
+
         int i3 = 0;
         int j3 = 0;
         int i4 = 0;
-        
+
         if (i1 != 0) {
             i = k / i1 << 7;
             j = l / i1 << 7;
         }
-        
+
         if (i < 0) {
             i = 0;
         } else if (i > 16256) {
             i = 16256;
         }
-        
+
         k += j1;
         l += k1;
         i1 += l1;
-        
+
         if (i1 != 0) {
             i3 = k / i1 << 7;
             j3 = l / i1 << 7;
         }
-        
+
         if (i3 < 0) {
             i3 = 0;
         } else if (i3 > 16256) {
             i3 = 16256;
         }
-        
+
         int k3 = i3 - i >> 4;
         int l3 = j3 - j >> 4;
-            
+
         for (int j4 = scanlineSize >> 4; j4 > 0; j4--) {
-            
+
             i += k2 & 0x600000;
             i4 = k2 >> 23;
             k2 += l2;
@@ -481,7 +498,7 @@ public class Canvas {
             pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            
+
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
@@ -497,7 +514,7 @@ public class Canvas {
             pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            
+
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
@@ -513,7 +530,7 @@ public class Canvas {
             pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i += k3;
             j += l3;
-            
+
             i = (i & 0x3fff) + (k2 & 0x600000);
             i4 = k2 >> 23;
             k2 += l2;
@@ -529,22 +546,22 @@ public class Canvas {
             pixels[pxOffset++] = (texturePixels[(j & 0x3f80) + (i >> 7)] >>> i4) + (pixels[pxOffset] >> 1 & 0x7f7f7f);
             i = i3;
             j = j3;
-            
+
             k += j1;
             l += k1;
             i1 += l1;
-            
+
             if (i1 != 0) {
                 i3 = k / i1 << 7;
                 j3 = l / i1 << 7;
             }
-            
+
             if (i3 < 0) {
                 i3 = 0;
             } else if (i3 > 16256) {
                 i3 = 16256;
             }
-            
+
             k3 = i3 - i >> 4;
             l3 = j3 - j >> 4;
         }
@@ -581,62 +598,62 @@ public class Canvas {
         if (scanlineSize <= 0) {
             return;
         }
-        
+
         int j3 = 0;
         int k3 = 0;
         i3 <<= 2;
-        
+
         if (j1 != 0) {
             j3 = l / j1 << 7;
             k3 = i1 / j1 << 7;
         }
-        
+
         if (j3 < 0) {
             j3 = 0;
         } else if (j3 > 16256) {
             j3 = 16256;
         }
-        
+
         for (int j4 = scanlineSize; j4 > 0; j4 -= 16) {
-            
+
             l += k1;
             i1 += l1;
             j1 += i2;
             j = j3;
             k = k3;
-            
+
             if (j1 != 0) {
                 j3 = l / j1 << 7;
                 k3 = i1 / j1 << 7;
             }
-            
+
             if (j3 < 0) {
                 j3 = 0;
             } else if (j3 > 16256) {
                 j3 = 16256;
             }
-            
+
             int l3 = j3 - j >> 4;
             int i4 = k3 - k >> 4;
             int k4 = l2 >> 23;
-            
+
             j += l2 & 0x600000;
             l2 += i3;
-            
+
             if (j4 < 16) {
-                
+
                 // Render fewer than 16 pixels
-                
+
                 for (int l4 = 0; l4 < j4; l4++) {
-                    
+
                     if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                         pixels[pxOffset] = i;
                     }
-                    
+
                     pxOffset++;
                     j += l3;
                     k += i4;
-                    
+
                     if ((l4 & 3) == 3) {
                         j = (j & 0x3fff) + (l2 & 0x600000);
                         k4 = l2 >> 23;
@@ -647,124 +664,124 @@ public class Canvas {
             } else {
 
                 // Render 16 pixels
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 j = (j & 0x3fff) + (l2 & 0x600000);
                 k4 = l2 >> 23;
                 l2 += i3;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 j = (j & 0x3fff) + (l2 & 0x600000);
                 k4 = l2 >> 23;
                 l2 += i3;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 j = (j & 0x3fff) + (l2 & 0x600000);
                 k4 = l2 >> 23;
                 l2 += i3;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
                 pxOffset++;
                 j += l3;
                 k += i4;
-                
+
                 if ((i = texturePixels[(k & 0x3f80) + (j >> 7)] >>> k4) != 0) {
                     pixels[pxOffset] = i;
                 }
@@ -782,7 +799,7 @@ public class Canvas {
         if (i2 <= 0) {
             return;
         }
-        
+
         int i3 = 0;
         int j3 = 0;
         l2 <<= 2;
@@ -1001,7 +1018,7 @@ public class Canvas {
 
     public void renderScanline_SmallTextureWithTransparency(int i, int j, int k, int texturePixels[], int l, int i1, int j1,
             int k1, int l1, int i2, int j2, int k2, int l2, int i3) {
-        
+
         if (j2 <= 0) {
             return;
         }
@@ -1162,7 +1179,7 @@ public class Canvas {
     }
 
     public void renderScanline_TranslucentGradient(int i, int j, int k, int ai1[], int l, int i1) {
-        
+
         if (i >= 0) {
             return;
         }
@@ -1213,7 +1230,7 @@ public class Canvas {
      * Used for grass!
      */
     public void renderScanline_Gradient(int i, int j, int k, int currentGradientRamps[], int l, int i1) {
-        
+
         if (i >= 0) {
             return;
         }
@@ -1260,25 +1277,25 @@ public class Canvas {
     }
 
     public void drawLineX(int x1, int y, int x2, int colour) {
-        
+
         if (y < 0 || y >= height) {
             // Line is outside the image bounds
             return;
         }
-        
+
         if (x1 < 0) {
             // Ensure we don't start outside the image bounds
             x2 -= 0 - x1;
             x1 = 0;
         }
-        
+
         if (x1 + x2 > width) {
             // Ensure we don't finish outside the image bounds
             x2 = width - x1;
         }
-        
+
         int startIndex = x1 + y * width;
-        
+
         for (int i = 0; i < x2; i++) {
             pixels[startIndex + i] = colour;
         }

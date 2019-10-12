@@ -1,7 +1,7 @@
-package client.world;
+package client.game.world;
 
+import client.game.scene.Model;
 import client.res.Resources;
-import client.scene.Model;
 
 public class GameObject {
 

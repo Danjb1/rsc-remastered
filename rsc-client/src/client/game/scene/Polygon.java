@@ -1,4 +1,4 @@
-package client.scene;
+package client.game.scene;
 
 public class Polygon {
 

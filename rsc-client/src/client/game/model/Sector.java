@@ -1,4 +1,4 @@
-package client.model;
+package client.game.model;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -27,7 +27,7 @@ public class Sector {
      * Total number of faces within a Sector.
      */
     public static final int NUM_FACES = NUM_TILES * 2;
-    
+
     /**
      * An array containing all the tiles within this Sector.
      */
@@ -45,6 +45,10 @@ public class Sector {
 
     /**
      * Sets the the Tile at the given coords.
+     *
+     * @param x
+     * @param z
+     * @param t
      */
     public void setTile(int x, int z, Tile t) {
         setTile(x * Sector.WIDTH + z, t);
@@ -59,6 +63,10 @@ public class Sector {
 
     /**
      * Gets the Tile at the given coords.
+     *
+     * @param x
+     * @param z
+     * @return
      */
     public Tile getTile(int x, int z) {
         return getTile(x * Sector.WIDTH + z);
@@ -66,6 +74,9 @@ public class Sector {
 
     /**
      * Gets the Tile at the given index.
+     *
+     * @param i
+     * @return
      */
     public Tile getTile(int i) {
         return tiles[i];
@@ -73,6 +84,9 @@ public class Sector {
 
     /**
      * Writes the Sector raw data into a ByteBuffer.
+     *
+     * @return
+     * @throws IOException
      */
     public ByteBuffer pack() throws IOException {
         ByteBuffer out = ByteBuffer.allocate(10 * tiles.length);
@@ -87,13 +101,17 @@ public class Sector {
 
     /**
      * Create a new Sector from raw data packed into the given ByteBuffer.
+     *
+     * @param in
+     * @return
+     * @throws IOException
      */
     public static Sector unpack(ByteBuffer in) throws IOException {
-        
+
         if (in.remaining() < (10 * NUM_TILES)) {
             throw new IOException("Provided buffer too short");
         }
-        
+
         Sector sector = new Sector();
 
         for (int i = 0; i < NUM_TILES; i++) {
@@ -102,5 +120,5 @@ public class Sector {
 
         return sector;
     }
-    
+
 }
