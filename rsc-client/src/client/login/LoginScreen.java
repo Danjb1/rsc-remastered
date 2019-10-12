@@ -1,6 +1,6 @@
 package client.login;
 
-import client.RsLauncher;
+import client.RuneClient;
 import client.State;
 import client.StateRenderer;
 import client.game.Game;
@@ -9,7 +9,7 @@ public class LoginScreen extends State {
 
     private LoginScreenRenderer renderer;
 
-    public LoginScreen(RsLauncher launcher) {
+    public LoginScreen(RuneClient launcher) {
         super(launcher);
 
         renderer = new LoginScreenRenderer(this);

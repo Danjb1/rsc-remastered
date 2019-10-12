@@ -19,7 +19,7 @@ import client.loading.LoadingScreen;
  *
  * @author Dan Bryce
  */
-public class RsLauncher {
+public class RuneClient {
 
     public static final int WINDOW_WIDTH = 1280;
     public static final int WINDOW_HEIGHT = 720;
@@ -42,13 +42,7 @@ public class RsLauncher {
 
     private State state;
 
-    public static void main(String[] args) {
-        RsLauncher rs = new RsLauncher();
-        rs.loadGame();
-        rs.run();
-    }
-
-    public RsLauncher() {
+    public RuneClient() {
         createFrame(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
 
         screenBuffer = new BufferedImage(
@@ -77,7 +71,7 @@ public class RsLauncher {
         frame.toFront();
     }
 
-    private void loadGame() {
+    public void load() {
 
         LoadingScreen loadingScreen = new LoadingScreen(this);
         state = loadingScreen;

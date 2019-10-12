@@ -2,7 +2,7 @@ package client.game.render;
 
 import client.Canvas;
 import client.Input;
-import client.RsLauncher;
+import client.RuneClient;
 import client.StateRenderer;
 import client.game.Game;
 import client.game.scene.Camera;
@@ -44,8 +44,8 @@ public class GameRenderer extends StateRenderer {
         scene = game.getScene();
         camera = scene.getCamera();
 
-        int width = RsLauncher.WINDOW_WIDTH;
-        int height = RsLauncher.WINDOW_HEIGHT;
+        int width = RuneClient.WINDOW_WIDTH;
+        int height = RuneClient.WINDOW_HEIGHT;
 
         sceneRenderer = new SceneRenderer(scene, width, height);
         mousePicker = sceneRenderer.getMousePicker();

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
-import client.RsLauncher;
+import client.RuneClient;
 import client.State;
 import client.StateRenderer;
 import client.entityhandling.defs.AnimationDef;
@@ -20,6 +20,7 @@ import client.entityhandling.defs.SpellDef;
 import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
 import client.login.LoginScreen;
+import client.res.ResourceLoader;
 import client.res.Resources;
 import client.res.Sprite;
 import client.res.Texture;
@@ -48,11 +49,11 @@ public class LoadingScreen extends State {
 
     private List<String> models = new ArrayList<>();
 
-    public LoadingScreen(RsLauncher launcher) {
+    public LoadingScreen(RuneClient launcher) {
         super(launcher);
 
         // Load sprites
-        Resources.spriteArchive = Resources.loadZipData(SPRITES_FILENAME);
+        Resources.spriteArchive = ResourceLoader.loadZipData(SPRITES_FILENAME);
 
         renderer = new LoadingScreenRenderer(this);
     }
@@ -121,18 +122,18 @@ public class LoadingScreen extends State {
 
     private void loadGameData() {
 
-        Resources.tileArchive = Resources.loadZipData(LANDSCAPE_FILENAME);
+        Resources.tileArchive = ResourceLoader.loadZipData(LANDSCAPE_FILENAME);
 
-        Resources.npcs       = (NpcDef[])        Resources.loadGzipData("NPCs.xml.gz");
-        Resources.items      = (ItemDef[])       Resources.loadGzipData("Items.xml.gz");
-        Resources.textureDefs = (TextureDef[])   Resources.loadGzipData("Textures.xml.gz");
-        Resources.animations = (AnimationDef[])  Resources.loadGzipData("Animations.xml.gz");
-        Resources.spells     = (SpellDef[])      Resources.loadGzipData("Spells.xml.gz");
-        Resources.prayers    = (PrayerDef[])     Resources.loadGzipData("Prayers.xml.gz");
-        Resources.tiles      = (TileDef[])       Resources.loadGzipData("Tiles.xml.gz");
-        Resources.doors      = (DoorDef[])       Resources.loadGzipData("Doors.xml.gz");
-        Resources.elevation  = (ElevationDef[])  Resources.loadGzipData("Elevation.xml.gz");
-        Resources.objects    = (GameObjectDef[]) Resources.loadGzipData("Objects.xml.gz");
+        Resources.animations  = (AnimationDef[])  ResourceLoader.loadGzipData("Animations.xml.gz");
+        Resources.doors       = (DoorDef[])       ResourceLoader.loadGzipData("Doors.xml.gz");
+        Resources.elevation   = (ElevationDef[])  ResourceLoader.loadGzipData("Elevation.xml.gz");
+        Resources.items       = (ItemDef[])       ResourceLoader.loadGzipData("Items.xml.gz");
+        Resources.npcs        = (NpcDef[])        ResourceLoader.loadGzipData("NPCs.xml.gz");
+        Resources.objects     = (GameObjectDef[]) ResourceLoader.loadGzipData("Objects.xml.gz");
+        Resources.prayers     = (PrayerDef[])     ResourceLoader.loadGzipData("Prayers.xml.gz");
+        Resources.spells      = (SpellDef[])      ResourceLoader.loadGzipData("Spells.xml.gz");
+        Resources.textureDefs = (TextureDef[])    ResourceLoader.loadGzipData("Textures.xml.gz");
+        Resources.tiles       = (TileDef[])       ResourceLoader.loadGzipData("Tiles.xml.gz");
 
         // Initialise items
         for (int id = 0; id < Resources.items.length; id++) {

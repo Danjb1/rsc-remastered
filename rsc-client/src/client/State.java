@@ -2,11 +2,11 @@ package client;
 
 public abstract class State {
 
-    protected RsLauncher launcher;
+    protected RuneClient launcher;
 
     protected Input input = new Input();
 
-    public State(RsLauncher launcher) {
+    public State(RuneClient launcher) {
         this.launcher = launcher;
     }
 

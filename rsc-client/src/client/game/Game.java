@@ -2,7 +2,7 @@ package client.game;
 
 import java.awt.event.KeyEvent;
 
-import client.RsLauncher;
+import client.RuneClient;
 import client.State;
 import client.StateRenderer;
 import client.game.model.Mob;
@@ -51,7 +51,7 @@ public class Game extends State {
     private int screenRotationY;
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
 
-    public Game(RsLauncher launcher) {
+    public Game(RuneClient launcher) {
         super(launcher);
 
         // Player position is relative to the World origin

@@ -113,7 +113,7 @@ public class Sprite {
      */
 
     public void serializeTo(File file) throws IOException {
-        Resources.writeData(file, this);
+        ResourceLoader.writeData(file, this);
     }
 
     public BufferedImage toImage() {
