@@ -1,4 +1,4 @@
-package server.model;
+package server.game.model;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

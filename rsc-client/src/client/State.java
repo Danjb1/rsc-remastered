@@ -10,6 +10,8 @@ public abstract class State {
         this.launcher = launcher;
     }
 
+    public void start() {}
+
     public void pollInput() {}
 
     public void tick() {}

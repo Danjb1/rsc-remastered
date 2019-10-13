@@ -1,6 +1,8 @@
 package client.game;
 
 import java.awt.event.KeyEvent;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import client.RuneClient;
 import client.State;
@@ -16,6 +18,7 @@ import client.game.world.World;
 import client.game.world.WorldLoader;
 import client.loading.LoadingScreen;
 import client.login.LoginScreen;
+import client.net.Connection;
 
 /**
  * State responsible for running the game.
@@ -29,11 +32,10 @@ public class Game extends State {
     public static final int SPAWN_SECTOR_X = 50;
     public static final int SPAWN_SECTOR_Z = 51;
 
-    /**
-     * Object used to load the world.
-     */
-    private WorldLoader worldLoader;
+    private ExecutorService executor;
+    private Connection connection;
 
+    private WorldLoader worldLoader;
     private World world;
     private Scene scene;
     private Mob player;
@@ -51,21 +53,21 @@ public class Game extends State {
     private int screenRotationY;
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
 
-    public Game(RuneClient launcher) {
+    public Game(RuneClient launcher, Connection connection) {
         super(launcher);
 
-        // Player position is relative to the World origin
-        player = new Mob();
-        player.x = 66 * World.TILE_WIDTH;
-        player.z = 32 * World.TILE_DEPTH;
+        this.connection = connection;
 
         scene = new Scene();
-
         world = new World(scene);
         worldLoader = new WorldLoader(world);
-        worldLoader.loadSector(SPAWN_SECTOR_X, SPAWN_SECTOR_Z);
-
         renderer = new GameRenderer(this);
+    }
+
+    @Override
+    public void start() {
+        executor = Executors.newCachedThreadPool();
+        executor.execute(connection.createPacketReaderThread());
     }
 
     @Override
@@ -121,6 +123,11 @@ public class Game extends State {
     @Override
     public void tick() {
 
+        if (player == null) {
+            // Not yet logged in
+            return;
+        }
+
         /*
          * Load next Sectors
          */
@@ -142,6 +149,15 @@ public class Game extends State {
             worldLoader.loadSector(world.getSectorX(), world.getSectorZ() + 1);
             player.z -= Sector.DEPTH * World.TILE_DEPTH;
         }
+    }
+
+    public void loggedIn() {
+        // TODO: call this upon receiving LoginSuccessPacket
+        // Player position is relative to the World origin
+        player = new Mob();
+        player.x = 66 * World.TILE_WIDTH;
+        player.z = 32 * World.TILE_DEPTH;
+        worldLoader.loadSector(SPAWN_SECTOR_X, SPAWN_SECTOR_Z);
     }
 
     public LoadingScreen getLoadingScreen() {

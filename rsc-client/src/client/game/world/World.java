@@ -394,4 +394,8 @@ public class World {
         originZ = (sectorZ * Sector.DEPTH - Sector.DEPTH) - START_Z;
     }
 
+    public boolean isLoaded() {
+        return sectors[0] != null;
+    }
+
 }

@@ -1,4 +1,4 @@
-package server.model;
+package server.game.model;
 
 public class Mob {
 

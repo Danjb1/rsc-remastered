@@ -147,6 +147,7 @@ public class RuneClient {
         frame.removeKeyListener(input);
 
         state = newState;
+        state.start();
 
         // Add listeners to new state
         input = state.getInput();

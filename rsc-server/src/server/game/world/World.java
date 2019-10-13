@@ -1,6 +1,6 @@
-package server;
+package server.game.world;
 
-import server.model.Sector;
+import server.game.model.Sector;
 
 public class World {
 

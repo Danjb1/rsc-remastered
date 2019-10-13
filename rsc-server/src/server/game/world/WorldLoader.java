@@ -1,4 +1,4 @@
-package server;
+package server.game.world;
 
 import java.util.List;
 import java.util.zip.ZipFile;

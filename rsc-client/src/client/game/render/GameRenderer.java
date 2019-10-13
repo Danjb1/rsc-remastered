@@ -54,6 +54,11 @@ public class GameRenderer extends StateRenderer {
     @Override
     public void render(Canvas canvas) {
 
+        // Don't render until the world is loaded
+        if (!world.isLoaded()) {
+            return;
+        }
+
         // Build the scene
         buildScene();
         updateCamera();
