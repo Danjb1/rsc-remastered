@@ -63,11 +63,11 @@ public class GameObject {
         
         // Add new models
         if (world.containsTileRelativeToOrigin(x, z)) {
-            model.setTranslation(tileX, -world.getAveragedElevation(tileX, tileZ), tileZ);
+            model.setTranslate(tileX, -world.getAveragedElevation(tileX, tileZ), tileZ);
             
             if (type == 74) {
                 // Special case object needs to be higher?
-                model.modTranslation(0, -480, 0);
+                model.translate(0, -480, 0);
             }
         }
     }

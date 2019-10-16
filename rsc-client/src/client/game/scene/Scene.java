@@ -75,7 +75,7 @@ public class Scene {
 
     public void reduceSprites(int i) {
         numSprites -= i;
-        spriteFaces.reduceCounters(i, i * 2);
+        spriteFaces.removeGeometry(i, i * 2);
         if (numSprites < 0) {
             numSprites = 0;
         }
@@ -83,16 +83,16 @@ public class Scene {
 
     public int addSpriteEntity(SpriteEntity spriteEntity, int tag) {
         spriteEntities[numSprites] = spriteEntity;
-        int v1 = spriteFaces.createVertex(
+        int v1 = spriteFaces.addVertex(
                 spriteEntity.getX(),
                 spriteEntity.getY(),
                 spriteEntity.getZ());
-        int v2 = spriteFaces.createVertex(
+        int v2 = spriteFaces.addVertex(
                 spriteEntity.getX(),
                 spriteEntity.getZ() - spriteEntity.getHeight(),
                 spriteEntity.getY());
         int vertices[] = { v1, v2 };
-        spriteFaces.createFace(2, vertices, 0, 0);
+        spriteFaces.addFace(2, vertices, 0, 0);
         spriteFaces.faceTag[numSprites] = tag;
         numSprites++;
         return numSprites - 1;
@@ -103,7 +103,7 @@ public class Scene {
             distX = 32;
         }
         for (int l = 0; l < numModels; l++) {
-            models[l].setLight(distX, distY, distZ);
+            models[l].setLighting(distX, distY, distZ);
         }
 
     }
@@ -113,7 +113,7 @@ public class Scene {
             distX = 32;
         }
         for (int j1 = 0; j1 < numModels; j1++) {
-            models[j1].setLight(i, j, distX, distY, distZ);
+            models[j1].setLighting(i, j, distX, distY, distZ);
         }
 
     }

@@ -12,9 +12,11 @@ import client.util.DataUtils;
  */
 public class Model {
 
-    private static int sine9[];
-    private static int sine11[];
-    private static int base64Alphabet[];
+    public static final int USE_GOURAUD_LIGHTING = 12345678;
+
+    private static int sine9[] = new int[512];
+    private static int sine11[] = new int[2048];
+    private static int base64Alphabet[] = new int[256];
 
     public int numVertices;
     public int projectedVertX[];
@@ -36,7 +38,7 @@ public class Model {
     public int faceNormalY[];
     private int faceNormalZ[];
     public int depth;
-    public int transformState;
+    public int transformState = 1;
     public boolean visible;
     public int x1;
     public int x2;
@@ -46,14 +48,13 @@ public class Model {
     public int z2;
     public boolean translucent;
     public boolean transparent;
-    public int entityId;
+    public int entityId = -1;
     public int faceTag[];
     private boolean autoCommit;
     public boolean isolated;
     public boolean unlit;
     public boolean unpickable;
     public boolean projected;
-    private int defaultFaceValue;
     public int maxVertices;
     public int vertexX[];
     public int vertexY[];
@@ -84,41 +85,37 @@ public class Model {
     private int shearZX;
     private int shearZY;
     private int transformType;
-    private int diameter;
-    private int lightDirectionX;
-    private int lightDirectionY;
-    private int lightDirectionZ;
-    private int lightDirectionMagnitude;
-    protected int lightDiffuse;
-    public int lightAmbience;
-    private int indexInByteArray;
+    private int diameter = USE_GOURAUD_LIGHTING;
+    private int lightDirectionX = 180;
+    private int lightDirectionY = 155;
+    private int lightDirectionZ = 95;
+    private int lightDirectionMagnitude = 256;
+    protected int lightDiffuse = 512;
+    public int lightAmbience = 32;
+    private int dataIndex;
 
     static {
-        sine9 = new int[512];
-        sine11 = new int[2048];
-        base64Alphabet = new int[256];
         for (int i = 0; i < 256; i++) {
-            sine9[i] = (int) (Math.sin(i * 0.02454369D) * 32768D); // 32768
-                                                                         // is
-                                                                         // 2^15
+            // 32768 is 2^15
+            sine9[i] = (int) (Math.sin(i * 0.02454369D) * 32768D);
             sine9[i + 256] = (int) (Math.cos(i * 0.02454369D) * 32768D);
         }
 
-        for (int j = 0; j < 1024; j++) {
-            sine11[j] = (int) (Math.sin(j * 0.00613592315D) * 32768D);
-            sine11[j + 1024] = (int) (Math.cos(j * 0.00613592315D) * 32768D);
+        for (int i = 0; i < 1024; i++) {
+            sine11[i] = (int) (Math.sin(i * 0.00613592315D) * 32768D);
+            sine11[i + 1024] = (int) (Math.cos(i * 0.00613592315D) * 32768D);
         }
 
-        for (int j1 = 0; j1 < 10; j1++) {
-            base64Alphabet[48 + j1] = j1;
+        for (int i = 0; i < 10; i++) {
+            base64Alphabet[48 + i] = i;
         }
 
-        for (int k1 = 0; k1 < 26; k1++) {
-            base64Alphabet[65 + k1] = k1 + 10;
+        for (int i = 0; i < 26; i++) {
+            base64Alphabet[65 + i] = i + 10;
         }
 
-        for (int l1 = 0; l1 < 26; l1++) {
-            base64Alphabet[97 + l1] = l1 + 36;
+        for (int i = 0; i < 26; i++) {
+            base64Alphabet[97 + i] = i + 36;
         }
 
         base64Alphabet[163] = 62;
@@ -128,94 +125,73 @@ public class Model {
     /**
      * Creates a Model from a byte array.
      *
-     * @param abyte0
-     * @param i
-     * @param flag
+     * @param data
+     * @param offset
      */
-    public Model(byte abyte0[], int i, boolean flag) {
-        transformState = 1;
-        visible = true;
-        translucent = false;
-        transparent = false;
-        entityId = -1;
-        autoCommit = false;
-        isolated = false;
-        unlit = false;
-        unpickable = false;
-        projected = false;
-        defaultFaceValue = 0xbc614e;
-        diameter = 0xbc614e;
-        lightDirectionX = 180;
-        lightDirectionY = 155;
-        lightDirectionZ = 95;
-        lightDirectionMagnitude = 256;
-        lightDiffuse = 512;
-        lightAmbience = 32;
-        int j = DataUtils.getUnsignedShort(abyte0, i);
-        i += 2;
-        int k = DataUtils.getUnsignedShort(abyte0, i);
-        i += 2;
-        initialise(j, k);
-        for (int l = 0; l < j; l++) {
-            vertexX[l] = DataUtils.getSigned2Bytes(abyte0, i);
-            i += 2;
+    public Model(byte data[], int offset) {
+        int numVertices = DataUtils.getUnsignedShort(data, offset);
+        offset += 2;
+        int numFaces = DataUtils.getUnsignedShort(data, offset);
+        offset += 2;
+        initialise(numVertices, numFaces);
+        for (int i = 0; i < numVertices; i++) {
+            vertexX[i] = DataUtils.getSigned2Bytes(data, offset);
+            offset += 2;
         }
 
-        for (int i1 = 0; i1 < j; i1++) {
-            vertexY[i1] = DataUtils.getSigned2Bytes(abyte0, i);
-            i += 2;
+        for (int i = 0; i < numVertices; i++) {
+            vertexY[i] = DataUtils.getSigned2Bytes(data, offset);
+            offset += 2;
         }
 
-        for (int j1 = 0; j1 < j; j1++) {
-            vertexZ[j1] = DataUtils.getSigned2Bytes(abyte0, i);
-            i += 2;
+        for (int i = 0; i < numVertices; i++) {
+            vertexZ[i] = DataUtils.getSigned2Bytes(data, offset);
+            offset += 2;
         }
 
-        numVertices = j;
-        for (int k1 = 0; k1 < k; k1++) {
-            numVerticesPerFace[k1] = abyte0[i++] & 0xff;
+        this.numVertices = numVertices;
+        for (int i = 0; i < numFaces; i++) {
+            numVerticesPerFace[i] = data[offset++] & 0xff;
         }
 
-        for (int l1 = 0; l1 < k; l1++) {
-            faceFillFront[l1] = DataUtils.getSigned2Bytes(abyte0, i);
-            i += 2;
-            if (faceFillFront[l1] == 32767) {
-                faceFillFront[l1] = defaultFaceValue;
+        for (int i = 0; i < numFaces; i++) {
+            faceFillFront[i] = DataUtils.getSigned2Bytes(data, offset);
+            offset += 2;
+            if (faceFillFront[i] == 32767) {
+                faceFillFront[i] = USE_GOURAUD_LIGHTING;
             }
         }
 
-        for (int i2 = 0; i2 < k; i2++) {
-            faceFillBack[i2] = DataUtils.getSigned2Bytes(abyte0, i);
-            i += 2;
-            if (faceFillBack[i2] == 32767) {
-                faceFillBack[i2] = defaultFaceValue;
+        for (int i = 0; i < numFaces; i++) {
+            faceFillBack[i] = DataUtils.getSigned2Bytes(data, offset);
+            offset += 2;
+            if (faceFillBack[i] == 32767) {
+                faceFillBack[i] = USE_GOURAUD_LIGHTING;
             }
         }
 
-        for (int j2 = 0; j2 < k; j2++) {
-            int k2 = abyte0[i++] & 0xff;
+        for (int i = 0; i < numFaces; i++) {
+            int k2 = data[offset++] & 0xff;
             if (k2 == 0) {
-                faceIntensity[j2] = 0;
+                faceIntensity[i] = 0;
             } else {
-                faceIntensity[j2] = defaultFaceValue;
+                faceIntensity[i] = USE_GOURAUD_LIGHTING;
             }
         }
 
-        for (int l2 = 0; l2 < k; l2++) {
-            faceVertices[l2] = new int[numVerticesPerFace[l2]];
-            for (int i3 = 0; i3 < numVerticesPerFace[l2]; i3++) {
-                if (j < 256) {
-                    faceVertices[l2][i3] = abyte0[i++] & 0xff;
+        for (int i = 0; i < numFaces; i++) {
+            faceVertices[i] = new int[numVerticesPerFace[i]];
+            for (int i3 = 0; i3 < numVerticesPerFace[i]; i3++) {
+                if (numVertices < 256) {
+                    faceVertices[i][i3] = data[offset++] & 0xff;
                 } else {
-                    faceVertices[l2][i3] = DataUtils.getUnsignedShort(abyte0, i);
-                    i += 2;
+                    faceVertices[i][i3] = DataUtils.getUnsignedShort(data, offset);
+                    offset += 2;
                 }
             }
-
         }
 
-        numFaces = k;
-        transformState = 1;
+        this.numFaces = numFaces;
     }
 
     /**
@@ -224,36 +200,18 @@ public class Model {
      * @param path
      */
     public Model(String path) {
-        transformState = 1;
-        visible = true;
-        translucent = false;
-        transparent = false;
-        entityId = -1;
-        autoCommit = false;
-        isolated = false;
-        unlit = false;
-        unpickable = false;
-        projected = false;
-        defaultFaceValue = 0xbc614e;
-        diameter = 0xbc614e;
-        lightDirectionX = 180;
-        lightDirectionY = 155;
-        lightDirectionZ = 95;
-        lightDirectionMagnitude = 256;
-        lightDiffuse = 512;
-        lightAmbience = 32;
         byte abyte0[] = null;
         try {
             java.io.InputStream inputstream = DataUtils.streamFromPath(path);
             DataInputStream datainputstream = new DataInputStream(inputstream);
             abyte0 = new byte[3];
-            indexInByteArray = 0;
+            dataIndex = 0;
             for (int i = 0; i < 3; i += datainputstream.read(abyte0, i, 3 - i)) {
                 ;
             }
-            int k = readIntFromByteArray(abyte0);
+            int k = readBase64(abyte0);
             abyte0 = new byte[k];
-            indexInByteArray = 0;
+            dataIndex = 0;
             for (int j = 0; j < k; j += datainputstream.read(abyte0, j, k - j)) {
                 ;
             }
@@ -263,39 +221,39 @@ public class Model {
             numFaces = 0;
             return;
         }
-        int l = readIntFromByteArray(abyte0);
-        int someCount = readIntFromByteArray(abyte0);
+        int l = readBase64(abyte0);
+        int someCount = readBase64(abyte0);
         initialise(l, someCount);
         for (int j3 = 0; j3 < l; j3++) {
-            int j1 = readIntFromByteArray(abyte0);
-            int k1 = readIntFromByteArray(abyte0);
-            int l1 = readIntFromByteArray(abyte0);
-            createVertexWithoutDuplication(j1, k1, l1);
+            int j1 = readBase64(abyte0);
+            int k1 = readBase64(abyte0);
+            int l1 = readBase64(abyte0);
+            addUniqueVertex(j1, k1, l1);
         }
 
         for (int k3 = 0; k3 < someCount; k3++) {
-            int i2 = readIntFromByteArray(abyte0);
-            int j2 = readIntFromByteArray(abyte0);
-            int k2 = readIntFromByteArray(abyte0);
-            int l2 = readIntFromByteArray(abyte0);
-            lightDiffuse = readIntFromByteArray(abyte0);
-            lightAmbience = readIntFromByteArray(abyte0);
-            int i3 = readIntFromByteArray(abyte0);
+            int i2 = readBase64(abyte0);
+            int j2 = readBase64(abyte0);
+            int k2 = readBase64(abyte0);
+            int l2 = readBase64(abyte0);
+            lightDiffuse = readBase64(abyte0);
+            lightAmbience = readBase64(abyte0);
+            int i3 = readBase64(abyte0);
             int ai[] = new int[i2];
             for (int l3 = 0; l3 < i2; l3++) {
-                ai[l3] = readIntFromByteArray(abyte0);
+                ai[l3] = readBase64(abyte0);
             }
 
             int ai1[] = new int[l2];
             for (int i4 = 0; i4 < l2; i4++) {
-                ai1[i4] = readIntFromByteArray(abyte0);
+                ai1[i4] = readBase64(abyte0);
             }
 
-            int j4 = createFace(i2, ai, j2, k2);
+            int j4 = addFace(i2, ai, j2, k2);
             if (i3 == 0) {
                 faceIntensity[j4] = 0;
             } else {
-                faceIntensity[j4] = defaultFaceValue;
+                faceIntensity[j4] = USE_GOURAUD_LIGHTING;
             }
         }
 
@@ -314,29 +272,11 @@ public class Model {
      * @param flag3
      */
     public Model(Model models[], int i, boolean flag, boolean flag1, boolean flag2, boolean flag3) {
-        transformState = 1;
-        visible = true;
-        translucent = false;
-        transparent = false;
-        entityId = -1;
-        autoCommit = false;
-        isolated = false;
-        unlit = false;
-        unpickable = false;
-        projected = false;
-        defaultFaceValue = 0xbc614e;
-        diameter = 0xbc614e;
-        lightDirectionX = 180;
-        lightDirectionY = 155;
-        lightDirectionZ = 95;
-        lightDirectionMagnitude = 256;
-        lightDiffuse = 512;
-        lightAmbience = 32;
         autoCommit = flag;
         isolated = flag1;
         unlit = flag2;
         unpickable = flag3;
-        copyModel(models, i);
+        merge(models, i);
     }
 
     /**
@@ -346,86 +286,43 @@ public class Model {
      * @param i
      */
     public Model(Model models[], int i) {
-        transformState = 1;
-        visible = true;
-        translucent = false;
-        transparent = false;
-        entityId = -1;
-        autoCommit = false;
-        isolated = false;
-        unlit = false;
-        unpickable = false;
-        projected = false;
-        defaultFaceValue = 0xbc614e;
-        diameter = 0xbc614e;
-        lightDirectionX = 180;
-        lightDirectionY = 155;
-        lightDirectionZ = 95;
-        lightDirectionMagnitude = 256;
-        lightDiffuse = 512;
-        lightAmbience = 32;
-        copyModel(models, i);
+        merge(models, i);
     }
 
     /**
-     * Creates a Model.
-     *
-     * @param i
-     * @param j
-     */
-    public Model(int i, int j) {
-        transformState = 1;
-        visible = true;
-        translucent = false;
-        transparent = false;
-        entityId = -1;
-        autoCommit = false;
-        isolated = false;
-        unlit = false;
-        unpickable = false;
-        projected = false;
-        defaultFaceValue = 0xbc614e;
-        diameter = 0xbc614e;
-        lightDirectionX = 180;
-        lightDirectionY = 155;
-        lightDirectionZ = 95;
-        lightDirectionMagnitude = 256;
-        lightDiffuse = 512;
-        lightAmbience = 32;
-        initialise(i, j);
-    }
-
-    /**
-     * Creates a Model and sets some flags.
+     * Creates a Model with some number of vertices and faces.
      *
      * @param maxVertices
      * @param maxFaces
-     * @param flag
-     * @param flag1
-     * @param flag2
-     * @param unpickable
-     * @param flag4
      */
-    public Model(int maxVertices, int maxFaces, boolean flag, boolean flag1, boolean flag2, boolean unpickable, boolean flag4) {
-        transformState = 1;
-        visible = true;
-        translucent = false;
-        transparent = false;
-        entityId = -1;
-        projected = false;
-        defaultFaceValue = 0xbc614e;
-        diameter = 0xbc614e;
-        lightDirectionX = 180;
-        lightDirectionY = 155;
-        lightDirectionZ = 95;
-        lightDirectionMagnitude = 256;
-        lightDiffuse = 512;
-        lightAmbience = 32;
-        autoCommit = flag;
-        isolated = flag1;
-        unlit = flag2;
+    public Model(int maxVertices, int maxFaces) {
+        initialise(maxVertices, maxFaces);
+    }
+
+    /**
+     * Creates a Model with some settings.
+     *
+     * @param maxVertices
+     * @param maxFaces
+     * @param autoCommit
+     * @param isolated
+     * @param unlit
+     * @param unpickable
+     * @param projected
+     */
+    public Model(
+            int maxVertices,
+            int maxFaces,
+            boolean autoCommit,
+            boolean isolated,
+            boolean unlit,
+            boolean unpickable,
+            boolean projected) {
+        this.autoCommit = autoCommit;
+        this.isolated = isolated;
+        this.unlit = unlit;
         this.unpickable = unpickable;
-        projected = flag4;
+        this.projected = projected;
         initialise(maxVertices, maxFaces);
     }
 
@@ -485,7 +382,7 @@ public class Model {
         transformType = 0;
     }
 
-    public void resetSomeArrays() {
+    public void clearProjection() {
         projectedVertX = new int[numVertices];
         projectedVertY = new int[numVertices];
         projectedVertZ = new int[numVertices];
@@ -498,54 +395,66 @@ public class Model {
         numVertices = 0;
     }
 
-    public void reduceCounters(int i, int j) {
-        numFaces -= i;
+    public void removeGeometry(int faces, int vertices) {
+        numFaces -= faces;
         if (numFaces < 0) {
             numFaces = 0;
         }
-        numVertices -= j;
+        numVertices -= vertices;
         if (numVertices < 0) {
             numVertices = 0;
         }
     }
 
     /**
-     * Copies data from the Model at the given index of the given array.
+     * Merges some other Models into this one.
      *
      * @param models
-     * @param i
+     * @param numModels
      */
-    public void copyModel(Model models[], int i) {
-        int j = 0;
-        int k = 0;
-        for (int l = 0; l < i; l++) {
-            j += models[l].numFaces;
-            k += models[l].numVertices;
+    public void merge(Model models[], int numModels) {
+
+        int numFaces = 0;
+        int numVertices = 0;
+
+        for (int i = 0; i < numModels; i++) {
+            numFaces += models[i].numFaces;
+            numVertices += models[i].numVertices;
         }
 
-        initialise(k, j);
-        for (int i1 = 0; i1 < i; i1++) {
-            Model gameModel = models[i1];
-            gameModel.resetTransformation();
+        initialise(numVertices, numFaces);
+
+        for (int modelId = 0; modelId < numModels; modelId++) {
+            Model gameModel = models[modelId];
+            gameModel.commitTransform();
             lightAmbience = gameModel.lightAmbience;
             lightDiffuse = gameModel.lightDiffuse;
             lightDirectionX = gameModel.lightDirectionX;
             lightDirectionY = gameModel.lightDirectionY;
             lightDirectionZ = gameModel.lightDirectionZ;
             lightDirectionMagnitude = gameModel.lightDirectionMagnitude;
-            for (int j1 = 0; j1 < gameModel.numFaces; j1++) {
-                int ai[] = new int[gameModel.numVerticesPerFace[j1]];
-                int ai1[] = gameModel.faceVertices[j1];
-                for (int k1 = 0; k1 < gameModel.numVerticesPerFace[j1]; k1++) {
-                    ai[k1] = createVertexWithoutDuplication(gameModel.vertexX[ai1[k1]], gameModel.vertexY[ai1[k1]],
-                            gameModel.vertexZ[ai1[k1]]);
+
+            for (int faceId = 0; faceId < gameModel.numFaces; faceId++) {
+
+                int faces[] = new int[gameModel.numVerticesPerFace[faceId]];
+                int vertices[] = gameModel.faceVertices[faceId];
+
+                for (int vertId = 0; vertId < gameModel.numVerticesPerFace[faceId]; vertId++) {
+                    faces[vertId] = addUniqueVertex(
+                            gameModel.vertexX[vertices[vertId]],
+                            gameModel.vertexY[vertices[vertId]],
+                            gameModel.vertexZ[vertices[vertId]]);
                 }
 
-                int l1 = createFace(gameModel.numVerticesPerFace[j1], ai, gameModel.faceFillFront[j1],
-                        gameModel.faceFillBack[j1]);
-                faceIntensity[l1] = gameModel.faceIntensity[j1];
-                faceCameraNormalScale[l1] = gameModel.faceCameraNormalScale[j1];
-                faceCameraNormalMagnitude[l1] = gameModel.faceCameraNormalMagnitude[j1];
+                int faceIndex = addFace(
+                        gameModel.numVerticesPerFace[faceId],
+                        faces,
+                        gameModel.faceFillFront[faceId],
+                        gameModel.faceFillBack[faceId]);
+
+                faceIntensity[faceIndex] = gameModel.faceIntensity[faceId];
+                faceCameraNormalScale[faceIndex] = gameModel.faceCameraNormalScale[faceId];
+                faceCameraNormalMagnitude[faceIndex] = gameModel.faceCameraNormalMagnitude[faceId];
             }
 
         }
@@ -563,7 +472,7 @@ public class Model {
      * @param z
      * @return
      */
-    public int createVertexWithoutDuplication(int x, int y, int z) {
+    public int addUniqueVertex(int x, int y, int z) {
 
         // Check if vertex has already been added
         for (int l = 0; l < numVertices; l++) {
@@ -591,7 +500,7 @@ public class Model {
      * @param z
      * @return
      */
-    public int createVertex(int x, int z, int y) {
+    public int addVertex(int x, int z, int y) {
 
         if (numVertices >= maxVertices) {
             return -1;
@@ -604,7 +513,7 @@ public class Model {
         return numVertices++;
     }
 
-    public int createFace(int numVertices, int vertices[], int fillFront, int fillBack) {
+    public int addFace(int numVertices, int vertices[], int fillFront, int fillBack) {
 
         if (numFaces >= maxFaces) {
             return -1;
@@ -619,125 +528,160 @@ public class Model {
         return numFaces++;
     }
 
-    public Model[] createModelArray(int i, int j, int k, int l, int i1, int count, int k1, boolean flag) {
-        resetTransformation();
-        int ai[] = new int[count];
-        int ai1[] = new int[count];
-        for (int l1 = 0; l1 < count; l1++) {
-            ai[l1] = 0;
-            ai1[l1] = 0;
+    public Model[] split(int pieceDx, int pieceDz, int rows, int count, int maxVertices, boolean unpickable) {
+        commitTransform();
+        int numVerticesInPiece[] = new int[count];
+        int numFacesInPiece[] = new int[count];
+        for (int i = 0; i < count; i++) {
+            numVerticesInPiece[i] = 0;
+            numFacesInPiece[i] = 0;
         }
 
-        for (int i2 = 0; i2 < numFaces; i2++) {
+        for (int i = 0; i < numFaces; i++) {
             int j2 = 0;
             int k2 = 0;
-            int i3 = numVerticesPerFace[i2];
-            int ai2[] = faceVertices[i2];
+            int i3 = numVerticesPerFace[i];
+            int ai2[] = faceVertices[i];
             for (int i4 = 0; i4 < i3; i4++) {
                 j2 += vertexX[ai2[i4]];
                 k2 += vertexZ[ai2[i4]];
             }
 
-            int k4 = j2 / (i3 * k) + (k2 / (i3 * l)) * i1;
-            ai[k4] += i3;
-            ai1[k4]++;
+            int k4 = j2 / (i3 * pieceDx) + (k2 / (i3 * pieceDz)) * rows;
+            numVerticesInPiece[k4] += i3;
+            numFacesInPiece[k4]++;
         }
 
         Model models[] = new Model[count];
-        for (int l2 = 0; l2 < count; l2++) {
-            if (ai[l2] > k1) {
-                ai[l2] = k1;
+        for (int i = 0; i < count; i++) {
+            if (numVerticesInPiece[i] > maxVertices) {
+                numVerticesInPiece[i] = maxVertices;
             }
-            models[l2] = new Model(ai[l2], ai1[l2], true, true, true, flag, true);
-            models[l2].lightDiffuse = lightDiffuse;
-            models[l2].lightAmbience = lightAmbience;
+            models[i] = new Model(
+                    numVerticesInPiece[i],
+                    numFacesInPiece[i],
+                    true, true, true, unpickable, true);
+            models[i].lightDiffuse = lightDiffuse;
+            models[i].lightAmbience = lightAmbience;
         }
 
-        for (int j3 = 0; j3 < numFaces; j3++) {
+        for (int i = 0; i < numFaces; i++) {
             int k3 = 0;
             int j4 = 0;
-            int l4 = numVerticesPerFace[j3];
-            int ai3[] = faceVertices[j3];
+            int l4 = numVerticesPerFace[i];
+            int ai3[] = faceVertices[i];
             for (int i5 = 0; i5 < l4; i5++) {
                 k3 += vertexX[ai3[i5]];
                 j4 += vertexZ[ai3[i5]];
             }
 
-            int j5 = k3 / (l4 * k) + (j4 / (l4 * l)) * i1;
-            copySomeDataIntoTheNextIndex(models[j5], ai3, l4, j3);
+            int j5 = k3 / (l4 * pieceDx) + (j4 / (l4 * pieceDz)) * rows;
+            copyModelData(models[j5], ai3, l4, i);
         }
 
-        for (int l3 = 0; l3 < count; l3++) {
-            models[l3].resetSomeArrays();
+        for (int i = 0; i < count; i++) {
+            models[i].clearProjection();
         }
 
         return models;
     }
 
-    public void copySomeDataIntoTheNextIndex(Model gameModel, int ai[], int count, int index) {
-        int ai1[] = new int[count];
-        for (int k = 0; k < count; k++) {
-            int l = ai1[k] = gameModel.createVertexWithoutDuplication(vertexX[ai[k]], vertexY[ai[k]], vertexZ[ai[k]]);
-            gameModel.vertexIntensity[l] = vertexIntensity[ai[k]];
-            gameModel.vertexAmbience[l] = vertexAmbience[ai[k]];
+    public void copyModelData(
+            Model gameModel,
+            int srcVertices[],
+            int count,
+            int faceId) {
+
+        int destVertices[] = new int[count];
+        for (int i = 0; i < count; i++) {
+            int l = destVertices[i] = gameModel.addUniqueVertex(
+                    vertexX[srcVertices[i]],
+                    vertexY[srcVertices[i]],
+                    vertexZ[srcVertices[i]]);
+            gameModel.vertexIntensity[l] = vertexIntensity[srcVertices[i]];
+            gameModel.vertexAmbience[l] = vertexAmbience[srcVertices[i]];
         }
 
-        int nextIndex = gameModel.createFace(count, ai1, faceFillFront[index], faceFillBack[index]);
+        int nextIndex = gameModel.addFace(count, destVertices, faceFillFront[faceId], faceFillBack[faceId]);
         if (!gameModel.unpickable && !unpickable) {
-            gameModel.faceTag[nextIndex] = faceTag[index];
+            gameModel.faceTag[nextIndex] = faceTag[faceId];
         }
-        gameModel.faceIntensity[nextIndex] = faceIntensity[index];
-        gameModel.faceCameraNormalScale[nextIndex] = faceCameraNormalScale[index];
-        gameModel.faceCameraNormalMagnitude[nextIndex] = faceCameraNormalMagnitude[index];
+        gameModel.faceIntensity[nextIndex] = faceIntensity[faceId];
+        gameModel.faceCameraNormalScale[nextIndex] = faceCameraNormalScale[faceId];
+        gameModel.faceCameraNormalMagnitude[nextIndex] = faceCameraNormalMagnitude[faceId];
     }
 
-    public void recalculateLighting(boolean flag, int i, int j, int distX, int distY, int distZ) {
-        lightAmbience = 256 - i * 4;
-        lightDiffuse = (64 - j) * 16 + 128;
+    public void setLighting(
+            boolean useGouraud,
+            int ambient,
+            int diffuse,
+            int lightDirectionX,
+            int lightDirectionY,
+            int lightDirectionZ) {
+
+        lightAmbience = 256 - ambient * 4;
+        lightDiffuse = (64 - diffuse) * 16 + 128;
+
         if (unlit) {
             return;
         }
-        for (int j1 = 0; j1 < numFaces; j1++) {
-            if (flag) {
-                faceIntensity[j1] = defaultFaceValue;
+
+        for (int i = 0; i < numFaces; i++) {
+            if (useGouraud) {
+                faceIntensity[i] = USE_GOURAUD_LIGHTING;
             } else {
-                faceIntensity[j1] = 0;
+                faceIntensity[i] = 0;
             }
         }
 
-        this.lightDirectionX = distX;
-        this.lightDirectionY = distY;
-        this.lightDirectionZ = distZ;
-        lightDirectionMagnitude = (int) Math.sqrt(distX * distX + distY * distY + distZ * distZ);
-        recalculateFaceLighting();
+        this.lightDirectionX = lightDirectionX;
+        this.lightDirectionY = lightDirectionY;
+        this.lightDirectionZ = lightDirectionZ;
+        lightDirectionMagnitude = (int) Math.sqrt(
+                lightDirectionX * lightDirectionX
+                + lightDirectionY * lightDirectionY
+                + lightDirectionZ * lightDirectionZ);
+        light();
     }
 
-    public void setLight(int i, int j, int distX, int distY, int distZ) {
-        lightAmbience = 256 - i * 4;
-        lightDiffuse = (64 - j) * 16 + 128;
+    public void setLighting(
+            int ambient,
+            int diffuse,
+            int lightDirectionX,
+            int lightDirectionY,
+            int lightDirectionZ) {
+
+        lightAmbience = 256 - ambient * 4;
+        lightDiffuse = (64 - diffuse) * 16 + 128;
+
         if (unlit) {
             return;
-        } else {
-            this.lightDirectionX = distX;
-            this.lightDirectionY = distY;
-            this.lightDirectionZ = distZ;
-            lightDirectionMagnitude = (int) Math.sqrt(distX * distX + distY * distY + distZ * distZ);
-            recalculateFaceLighting();
-            return;
         }
+
+        this.lightDirectionX = lightDirectionX;
+        this.lightDirectionY = lightDirectionY;
+        this.lightDirectionZ = lightDirectionZ;
+        lightDirectionMagnitude = (int) Math.sqrt(
+                lightDirectionX * lightDirectionX
+                + lightDirectionY * lightDirectionY
+                + lightDirectionZ * lightDirectionZ);
+        light();
     }
 
-    public void setLight(int distX, int distY, int distZ) {
+    public void setLighting(
+            int lightDirectionX,
+            int lightDirectionY,
+            int lightDirectionZ) {
+
         if (unlit) {
             return;
-        } else {
-            this.lightDirectionX = distX;
-            this.lightDirectionY = distY;
-            this.lightDirectionZ = distZ;
-            lightDirectionMagnitude = (int) Math.sqrt(distX * distX + distY * distY + distZ * distZ);
-            recalculateFaceLighting();
-            return;
         }
+
+        this.lightDirectionX = lightDirectionX;
+        this.lightDirectionY = lightDirectionY;
+        this.lightDirectionZ = lightDirectionZ;
+        lightDirectionMagnitude = (int) Math.sqrt(lightDirectionX * lightDirectionX + lightDirectionY * lightDirectionY + lightDirectionZ * lightDirectionZ);
+        light();
     }
 
     public void setVertexAmbience(int vertex, int ambience) {
@@ -748,7 +692,7 @@ public class Model {
         this.rotX += rotX & 0xff;
         this.rotY += rotY & 0xff;
         this.rotZ += rotZ & 0xff;
-        updateState();
+        determineTransformType();
         transformState = 1;
     }
 
@@ -756,27 +700,27 @@ public class Model {
         rotX = i & 0xff;
         rotY = j & 0xff;
         rotZ = k & 0xff;
-        updateState();
+        determineTransformType();
         transformState = 1;
     }
 
-    public void modTranslation(int translateX, int translateY, int translateZ) {
+    public void translate(int translateX, int translateY, int translateZ) {
         this.translateX += translateX;
         this.translateY += translateY;
         this.translateZ += translateZ;
-        updateState();
+        determineTransformType();
         transformState = 1;
     }
 
-    public void setTranslation(int translateX, int translateY, int translateZ) {
+    public void setTranslate(int translateX, int translateY, int translateZ) {
         this.translateX = translateX;
         this.translateY = translateY;
         this.translateZ = translateZ;
-        updateState();
+        determineTransformType();
         transformState = 1;
     }
 
-    private void updateState() {
+    private void determineTransformType() {
         if (shearXY != 256 || shearXZ != 256 || shearYX != 256 || shearYZ != 256
                 || shearZX != 256 || shearZY != 256) {
             transformType = 4;
@@ -799,7 +743,7 @@ public class Model {
         }
     }
 
-    private void translate(int dx, int dy, int dz) {
+    private void applyTranslate(int dx, int dy, int dz) {
         for (int i = 0; i < numVertices; i++) {
             vertexTransformedX[i] += dx;
             vertexTransformedY[i] += dy;
@@ -807,7 +751,7 @@ public class Model {
         }
     }
 
-    private void rotate(int rotX, int rotY, int rotZ) {
+    private void applyRotation(int rotX, int rotY, int rotZ) {
         for (int i3 = 0; i3 < numVertices; i3++) {
             if (rotZ != 0) {
                 int l = sine9[rotZ];
@@ -834,201 +778,216 @@ public class Model {
 
     }
 
-    private void doSomeVertexTransformation(
-            int yMultiplierToX,
-            int yMultiplierToZ,
-            int zMultiplierToX,
-            int zMultiplierToY,
-            int xMultiplierToZ,
-            int xMultiplierToY) {
+    private void applyShear(
+            int xy,
+            int xz,
+            int yx,
+            int yz,
+            int zx,
+            int zy) {
         for (int i = 0; i < numVertices; i++) {
-            if (yMultiplierToX != 0) {
-                vertexTransformedX[i] += vertexTransformedY[i] * yMultiplierToX >> 8;
+            if (xy != 0) {
+                vertexTransformedX[i] += vertexTransformedY[i] * xy >> 8;
             }
-            if (yMultiplierToZ != 0) {
-                vertexTransformedZ[i] += vertexTransformedY[i] * yMultiplierToZ >> 8;
+            if (xz != 0) {
+                vertexTransformedZ[i] += vertexTransformedY[i] * xz >> 8;
             }
-            if (zMultiplierToX != 0) {
-                vertexTransformedX[i] += vertexTransformedZ[i] * zMultiplierToX >> 8;
+            if (yx != 0) {
+                vertexTransformedX[i] += vertexTransformedZ[i] * yx >> 8;
             }
-            if (zMultiplierToY != 0) {
-                vertexTransformedY[i] += vertexTransformedZ[i] * zMultiplierToY >> 8;
+            if (yz != 0) {
+                vertexTransformedY[i] += vertexTransformedZ[i] * yz >> 8;
             }
-            if (xMultiplierToZ != 0) {
-                vertexTransformedZ[i] += vertexTransformedX[i] * xMultiplierToZ >> 8;
+            if (zx != 0) {
+                vertexTransformedZ[i] += vertexTransformedX[i] * zx >> 8;
             }
-            if (xMultiplierToY != 0) {
-                vertexTransformedY[i] += vertexTransformedX[i] * xMultiplierToY >> 8;
+            if (zy != 0) {
+                vertexTransformedY[i] += vertexTransformedX[i] * zy >> 8;
             }
         }
 
     }
 
-    private void scale(int i, int j, int k) {
+    private void scale(int scaleX, int scaleY, int scaleZ) {
         for (int l = 0; l < numVertices; l++) {
-            vertexTransformedX[l] = vertexTransformedX[l] * i >> 8;
-            vertexTransformedY[l] = vertexTransformedY[l] * j >> 8;
-            vertexTransformedZ[l] = vertexTransformedZ[l] * k >> 8;
+            vertexTransformedX[l] = vertexTransformedX[l] * scaleX >> 8;
+            vertexTransformedY[l] = vertexTransformedY[l] * scaleY >> 8;
+            vertexTransformedZ[l] = vertexTransformedZ[l] * scaleZ >> 8;
         }
 
     }
 
-    private void doSomeBoundsChecking() {
+    private void computeBounds() {
         x1 = y1 = z1 = 0xf423f;
         diameter = x2 = y2 = z2 = 0xfff0bdc1;
         for (int i = 0; i < numFaces; i++) {
             int ai[] = faceVertices[i];
             int k = ai[0];
             int i1 = numVerticesPerFace[i];
-            int j1;
-            int k1 = j1 = vertexTransformedX[k];
-            int l1;
-            int i2 = l1 = vertexTransformedY[k];
-            int j2;
-            int k2 = j2 = vertexTransformedZ[k];
+            int x1;
+            int x2 = x1 = vertexTransformedX[k];
+            int y1;
+            int y2 = y1 = vertexTransformedY[k];
+            int z1;
+            int z2 = z1 = vertexTransformedZ[k];
             for (int j = 0; j < i1; j++) {
                 int l = ai[j];
-                if (vertexTransformedX[l] < j1) {
-                    j1 = vertexTransformedX[l];
-                } else if (vertexTransformedX[l] > k1) {
-                    k1 = vertexTransformedX[l];
+                if (vertexTransformedX[l] < x1) {
+                    x1 = vertexTransformedX[l];
+                } else if (vertexTransformedX[l] > x2) {
+                    x2 = vertexTransformedX[l];
                 }
-                if (vertexTransformedY[l] < l1) {
-                    l1 = vertexTransformedY[l];
-                } else if (vertexTransformedY[l] > i2) {
-                    i2 = vertexTransformedY[l];
+                if (vertexTransformedY[l] < y1) {
+                    y1 = vertexTransformedY[l];
+                } else if (vertexTransformedY[l] > y2) {
+                    y2 = vertexTransformedY[l];
                 }
-                if (vertexTransformedZ[l] < j2) {
-                    j2 = vertexTransformedZ[l];
-                } else if (vertexTransformedZ[l] > k2) {
-                    k2 = vertexTransformedZ[l];
+                if (vertexTransformedZ[l] < z1) {
+                    z1 = vertexTransformedZ[l];
+                } else if (vertexTransformedZ[l] > z2) {
+                    z2 = vertexTransformedZ[l];
                 }
             }
 
             if (!isolated) {
-                faceBoundLeft[i] = j1;
-                faceBoundRight[i] = k1;
-                faceBoundBottom[i] = l1;
-                faceBoundTop[i] = i2;
-                faceBoundNear[i] = j2;
-                faceBoundFar[i] = k2;
+                faceBoundLeft[i] = x1;
+                faceBoundRight[i] = x2;
+                faceBoundBottom[i] = y1;
+                faceBoundTop[i] = y2;
+                faceBoundNear[i] = z1;
+                faceBoundFar[i] = z2;
             }
-            // This looks like bounds checking
-            if (k1 - j1 > diameter) {
-                diameter = k1 - j1;
+            if (x2 - x1 > diameter) {
+                diameter = x2 - x1;
             }
-            if (i2 - l1 > diameter) {
-                diameter = i2 - l1;
+            if (y2 - y1 > diameter) {
+                diameter = y2 - y1;
             }
-            if (k2 - j2 > diameter) {
-                diameter = k2 - j2;
+            if (z2 - z1 > diameter) {
+                diameter = z2 - z1;
             }
-            if (j1 < x1) {
-                x1 = j1;
+            if (x1 < this.x1) {
+                this.x1 = x1;
             }
-            if (k1 > x2) {
-                x2 = k1;
+            if (x2 > this.x2) {
+                this.x2 = x2;
             }
-            if (l1 < y1) {
-                y1 = l1;
+            if (y1 < this.y1) {
+                this.y1 = y1;
             }
-            if (i2 > y2) {
-                y2 = i2;
+            if (y2 > this.y2) {
+                this.y2 = y2;
             }
-            if (j2 < z1) {
-                z1 = j2;
+            if (z1 < this.z1) {
+                this.z1 = z1;
             }
-            if (k2 > z2) {
-                z2 = k2;
+            if (z2 > this.z2) {
+                this.z2 = z2;
             }
         }
 
     }
 
-    public void recalculateFaceLighting() {
+    public void light() {
         if (unlit) {
             return;
         }
         int i = lightDiffuse * lightDirectionMagnitude >> 8;
         for (int j = 0; j < numFaces; j++) {
-            if (faceIntensity[j] != defaultFaceValue) {
-                faceIntensity[j] = (faceNormalX[j] * lightDirectionX + faceNormalY[j] * lightDirectionY + faceNormalZ[j] * lightDirectionZ) / i;
+            if (faceIntensity[j] != USE_GOURAUD_LIGHTING) {
+                faceIntensity[j] =
+                        (faceNormalX[j] * lightDirectionX
+                        + faceNormalY[j] * lightDirectionY
+                        + faceNormalZ[j] * lightDirectionZ) / i;
             }
         }
 
-        int ai[] = new int[numVertices];
-        int ai1[] = new int[numVertices];
-        int ai2[] = new int[numVertices];
-        int ai3[] = new int[numVertices];
+        int normalX[] = new int[numVertices];
+        int normalY[] = new int[numVertices];
+        int normalZ[] = new int[numVertices];
+        int normalMagnitude[] = new int[numVertices];
         for (int k = 0; k < numVertices; k++) {
-            ai[k] = 0;
-            ai1[k] = 0;
-            ai2[k] = 0;
-            ai3[k] = 0;
+            normalX[k] = 0;
+            normalY[k] = 0;
+            normalZ[k] = 0;
+            normalMagnitude[k] = 0;
         }
 
         for (int l = 0; l < numFaces; l++) {
-            if (faceIntensity[l] == defaultFaceValue) {
+            if (faceIntensity[l] == USE_GOURAUD_LIGHTING) {
                 for (int i1 = 0; i1 < numVerticesPerFace[l]; i1++) {
                     int k1 = faceVertices[l][i1];
-                    ai[k1] += faceNormalX[l];
-                    ai1[k1] += faceNormalY[l];
-                    ai2[k1] += faceNormalZ[l];
-                    ai3[k1]++;
+                    normalX[k1] += faceNormalX[l];
+                    normalY[k1] += faceNormalY[l];
+                    normalZ[k1] += faceNormalZ[l];
+                    normalMagnitude[k1]++;
                 }
 
             }
         }
 
         for (int j1 = 0; j1 < numVertices; j1++) {
-            if (ai3[j1] > 0) {
-                vertexIntensity[j1] = (ai[j1] * lightDirectionX + ai1[j1] * lightDirectionY + ai2[j1] * lightDirectionZ) / (i * ai3[j1]);
+            if (normalMagnitude[j1] > 0) {
+                vertexIntensity[j1] =
+                        (normalX[j1] * lightDirectionX
+                        + normalY[j1] * lightDirectionY
+                        + normalZ[j1] * lightDirectionZ)
+                        / (i * normalMagnitude[j1]);
             }
         }
     }
 
-    public void doSomeDistanceCalculations() {
+    public void relight() {
         if (unlit && isolated) {
             return;
         }
         for (int i = 0; i < numFaces; i++) {
             int ai[] = faceVertices[i];
 
-            int j = vertexTransformedX[ai[0]];
-            int k = vertexTransformedY[ai[0]];
-            int l = vertexTransformedZ[ai[0]];
+            int aX = vertexTransformedX[ai[0]];
+            int aY = vertexTransformedY[ai[0]];
+            int aZ = vertexTransformedZ[ai[0]];
 
-            int i1 = vertexTransformedX[ai[1]] - j;
-            int j1 = vertexTransformedY[ai[1]] - k;
-            int k1 = vertexTransformedZ[ai[1]] - l;
+            int bX = vertexTransformedX[ai[1]] - aX;
+            int bY = vertexTransformedY[ai[1]] - aY;
+            int bZ = vertexTransformedZ[ai[1]] - aZ;
 
-            int l1 = vertexTransformedX[ai[2]] - j;
-            int i2 = vertexTransformedY[ai[2]] - k;
-            int j2 = vertexTransformedZ[ai[2]] - l;
+            int cX = vertexTransformedX[ai[2]] - aX;
+            int cY = vertexTransformedY[ai[2]] - aY;
+            int cZ = vertexTransformedZ[ai[2]] - aZ;
 
-            int distX = (j1 * j2) - (i2 * k1);
-            int distY = (k1 * l1) - (j2 * i1);
-            int distZ;
-            for (distZ = i1 * i2 - l1 * j1; distX > 8192 || distY > 8192 || distZ > 8192 || distX < -8192
-                    || distY < -8192 || distZ < -8192; distZ >>= 1) {
-                distX >>= 1;
-                distY >>= 1;
+            int normalX = (bY * cZ) - (cY * bZ);
+            int normalY = (bZ * cX) - (cZ * bX);
+            int normalZ;
+
+            for (normalZ = bX * cY - cX * bY;
+                    normalX > 8192
+                    || normalY > 8192
+                    || normalZ > 8192
+                    || normalX < -8192
+                    || normalY < -8192
+                    || normalZ < -8192; normalZ >>= 1) {
+                normalX >>= 1;
+                normalY >>= 1;
             }
 
-            int distance = (int) (256D * Math.sqrt(distX * distX + distY * distY + distZ * distZ));
-            if (distance <= 0) {
-                distance = 1;
+            int normalMagnitude = (int) (256D * Math.sqrt(
+                    normalX * normalX
+                    + normalY * normalY
+                    + normalZ * normalZ));
+            if (normalMagnitude <= 0) {
+                normalMagnitude = 1;
             }
-            faceNormalX[i] = (distX * 0x10000) / distance;
-            faceNormalY[i] = (distY * 0x10000) / distance;
-            faceNormalZ[i] = (distZ * 65535) / distance;
+            faceNormalX[i] = (normalX * 0x10000) / normalMagnitude;
+            faceNormalY[i] = (normalY * 0x10000) / normalMagnitude;
+            faceNormalZ[i] = (normalZ * 65535) / normalMagnitude;
             faceCameraNormalScale[i] = -1;
         }
 
-        recalculateFaceLighting();
+        light();
     }
 
-    private void transform() {
+    private void applyTransform() {
         if (transformState == 2) {
             transformState = 0;
             for (int i = 0; i < numVertices; i++) {
@@ -1050,25 +1009,25 @@ public class Model {
             }
 
             if (transformType >= 2) {
-                rotate(rotX, rotY, rotZ);
+                applyRotation(rotX, rotY, rotZ);
             }
             if (transformType >= 3) {
                 scale(scaleX, scaleY, scaleZ);
             }
             if (transformType >= 4) {
-                doSomeVertexTransformation(shearXY, shearXZ, shearYX, shearYZ,
+                applyShear(shearXY, shearXZ, shearYX, shearYZ,
                         shearZX, shearZY);
             }
             if (transformType >= 1) {
-                translate(translateX, translateY, translateZ);
+                applyTranslate(translateX, translateY, translateZ);
             }
-            doSomeBoundsChecking();
-            doSomeDistanceCalculations();
+            computeBounds();
+            relight();
         }
     }
 
     public void project(Camera camera, int viewDistance, int clipNear) {
-        transform();
+        applyTransform();
         if (z1 > camera.getFrustumNearZ() ||
                 z2 < camera.getFrustumFarZ() ||
                 x1 > camera.getFrustumMinX() ||
@@ -1133,8 +1092,8 @@ public class Model {
 
     }
 
-    public void resetTransformation() {
-        transform();
+    public void commitTransform() {
+        applyTransform();
         for (int i = 0; i < numVertices; i++) {
             vertexX[i] = vertexTransformedX[i];
             vertexY[i] = vertexTransformedY[i];
@@ -1148,7 +1107,7 @@ public class Model {
         transformType = 0;
     }
 
-    public Model createNewGiantCrystalFromThisModel() {
+    public Model copy() {
         Model models[] = new Model[1];
         models[0] = this;
         Model gameModel = new Model(models, 1);
@@ -1157,37 +1116,41 @@ public class Model {
         return gameModel;
     }
 
-    public Model createNewModelFromThisOne(boolean flag, boolean flag1, boolean flag2, boolean flag3) {
+    public Model copy(
+            boolean autoCommit,
+            boolean isolated,
+            boolean unlit,
+            boolean unpickable) {
         Model models[] = new Model[1];
         models[0] = this;
-        Model gameModel = new Model(models, 1, flag, flag1, flag2, flag3);
+        Model gameModel = new Model(models, 1, autoCommit, isolated, unlit, unpickable);
         gameModel.depth = depth;
         return gameModel;
     }
 
-    public void copyDataFromModel(Model gameModel) {
+    public void copyTransform(Model gameModel) {
         rotX = gameModel.rotX;
         rotY = gameModel.rotY;
         rotZ = gameModel.rotZ;
         translateX = gameModel.translateX;
         translateY = gameModel.translateY;
         translateZ = gameModel.translateZ;
-        updateState();
+        determineTransformType();
         transformState = 1;
     }
 
-    public int readIntFromByteArray(byte abyte0[]) {
-        for (; abyte0[indexInByteArray] == 10 || abyte0[indexInByteArray] == 13; indexInByteArray++) {
+    public int readBase64(byte data[]) {
+        for (; data[dataIndex] == 10 || data[dataIndex] == 13; dataIndex++) {
             ;
         }
-        int i = base64Alphabet[abyte0[indexInByteArray++] & 0xff];
-        int j = base64Alphabet[abyte0[indexInByteArray++] & 0xff];
-        int k = base64Alphabet[abyte0[indexInByteArray++] & 0xff];
-        int l = (i * 4096 + j * 64 + k) - 0x20000;
-        if (l == 0x1e240) {
-            l = defaultFaceValue;
+        int high = base64Alphabet[data[dataIndex++] & 0xff];
+        int mid = base64Alphabet[data[dataIndex++] & 0xff];
+        int low = base64Alphabet[data[dataIndex++] & 0xff];
+        int val = (high * 4096 + mid * 64 + low) - 0x20000;
+        if (val == 0x1e240) {
+            val = USE_GOURAUD_LIGHTING;
         }
-        return l;
+        return val;
     }
 
 }

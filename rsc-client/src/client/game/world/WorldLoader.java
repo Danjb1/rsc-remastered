@@ -195,7 +195,7 @@ public class WorldLoader {
                         elevation = 0;
                     }
 
-                    int vertexId = tmpModel.createVertexWithoutDuplication(
+                    int vertexId = tmpModel.addUniqueVertex(
                             x * World.TILE_WIDTH,
                             elevation,
                             z * World.TILE_DEPTH);
@@ -290,7 +290,7 @@ public class WorldLoader {
                                 ai[0] = z + x * 96 + 96;
                                 ai[1] = z + x * 96;
                                 ai[2] = z + x * 96 + 1;
-                                int l21 = tmpModel.createFace(3, ai, 0xbc614e, groundColour);
+                                int l21 = tmpModel.addFace(3, ai, 0xbc614e, groundColour);
                                 world.setTilePosForFace(l21, x, z);
                                 tmpModel.faceTag[l21] = 0x30d40 + l21;
                             }
@@ -298,7 +298,7 @@ public class WorldLoader {
                                 ai7[0] = z + x * 96 + 1;
                                 ai7[1] = z + x * 96 + 96 + 1;
                                 ai7[2] = z + x * 96 + 96;
-                                int i22 = tmpModel.createFace(3, ai7, 0xbc614e, groundColour1);
+                                int i22 = tmpModel.addFace(3, ai7, 0xbc614e, groundColour1);
                                 world.setTilePosForFace(i22, x, z);
                                 tmpModel.faceTag[i22] = 0x30d40 + i22;
                             }
@@ -307,7 +307,7 @@ public class WorldLoader {
                                 ai[0] = z + x * 96 + 1;
                                 ai[1] = z + x * 96 + 96 + 1;
                                 ai[2] = z + x * 96;
-                                int j22 = tmpModel.createFace(3, ai, 0xbc614e, groundColour);
+                                int j22 = tmpModel.addFace(3, ai, 0xbc614e, groundColour);
                                 world.setTilePosForFace(j22, x, z);
                                 tmpModel.faceTag[j22] = 0x30d40 + j22;
                             }
@@ -315,7 +315,7 @@ public class WorldLoader {
                                 ai7[0] = z + x * 96 + 96;
                                 ai7[1] = z + x * 96;
                                 ai7[2] = z + x * 96 + 96 + 1;
-                                int k22 = tmpModel.createFace(3, ai7, 0xbc614e, groundColour1);
+                                int k22 = tmpModel.addFace(3, ai7, 0xbc614e, groundColour1);
                                 world.setTilePosForFace(k22, x, z);
                                 tmpModel.faceTag[k22] = 0x30d40 + k22;
                             }
@@ -326,7 +326,7 @@ public class WorldLoader {
                         ai1[1] = z + x * 96;
                         ai1[2] = z + x * 96 + 1;
                         ai1[3] = z + x * 96 + 96 + 1;
-                        int l19 = tmpModel.createFace(4, ai1, 0xbc614e, groundColour);
+                        int l19 = tmpModel.addFace(4, ai1, 0xbc614e, groundColour);
                         world.setTilePosForFace(l19, x, z);
                         tmpModel.faceTag[l19] = 0x30d40 + l19;
                     }
@@ -340,13 +340,13 @@ public class WorldLoader {
                     if (world.getGroundTextureOverlay(x, z) > 0
                             && Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                         int l7 = Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getColour();
-                        int j10 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z), z * 128);
-                        int l12 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
-                        int i15 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
+                        int j10 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
+                        int l12 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                        int i15 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                 (z + 1) * 128);
-                        int j17 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                        int j17 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
                         int ai2[] = { j10, l12, i15, j17 };
-                        int i20 = tmpModel.createFace(4, ai2, l7, 0xbc614e);
+                        int i20 = tmpModel.addFace(4, ai2, l7, 0xbc614e);
                         world.setTilePosForFace(i20, x, z);
                         tmpModel.faceTag[i20] = 0x30d40 + i20;
 
@@ -355,13 +355,13 @@ public class WorldLoader {
                         if (world.getGroundTextureOverlay(x, z + 1) > 0 && Resources
                                 .getTileDef(world.getGroundTextureOverlay(x, z + 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
                             int i8 = Resources.getTileDef(world.getGroundTextureOverlay(x, z + 1) - 1).getColour();
-                            int k10 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z), z * 128);
-                            int i13 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
-                            int j15 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
+                            int k10 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
+                            int i13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                            int j15 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                     (z + 1) * 128);
-                            int k17 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                            int k17 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
                             int ai3[] = { k10, i13, j15, k17 };
-                            int j20 = tmpModel.createFace(4, ai3, i8, 0xbc614e);
+                            int j20 = tmpModel.addFace(4, ai3, i8, 0xbc614e);
                             world.setTilePosForFace(j20, x, z);
                             tmpModel.faceTag[j20] = 0x30d40 + j20;
                         }
@@ -369,13 +369,13 @@ public class WorldLoader {
                         if (world.getGroundTextureOverlay(x, z - 1) > 0 && Resources
                                 .getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
                             int j8 = Resources.getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getColour();
-                            int l10 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z), z * 128);
-                            int j13 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
-                            int k15 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
+                            int l10 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
+                            int j13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                            int k15 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                     (z + 1) * 128);
-                            int l17 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                            int l17 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
                             int ai4[] = { l10, j13, k15, l17 };
-                            int k20 = tmpModel.createFace(4, ai4, j8, 0xbc614e);
+                            int k20 = tmpModel.addFace(4, ai4, j8, 0xbc614e);
                             world.setTilePosForFace(k20, x, z);
                             tmpModel.faceTag[k20] = 0x30d40 + k20;
                         }
@@ -383,13 +383,13 @@ public class WorldLoader {
                         if (world.getGroundTextureOverlay(x + 1, z) > 0 && Resources
                                 .getTileDef(world.getGroundTextureOverlay(x + 1, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                             int k8 = Resources.getTileDef(world.getGroundTextureOverlay(x + 1, z) - 1).getColour();
-                            int i11 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z), z * 128);
-                            int k13 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
-                            int l15 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
+                            int i11 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
+                            int k13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                            int l15 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                     (z + 1) * 128);
-                            int i18 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                            int i18 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
                             int ai5[] = { i11, k13, l15, i18 };
-                            int l20 = tmpModel.createFace(4, ai5, k8, 0xbc614e);
+                            int l20 = tmpModel.addFace(4, ai5, k8, 0xbc614e);
                             world.setTilePosForFace(l20, x, z);
                             tmpModel.faceTag[l20] = 0x30d40 + l20;
                         }
@@ -397,13 +397,13 @@ public class WorldLoader {
                         if (world.getGroundTextureOverlay(x - 1, z) > 0 && Resources
                                 .getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                             int l8 = Resources.getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1).getColour();
-                            int j11 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z), z * 128);
-                            int l13 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
-                            int i16 = tmpModel.createVertexWithoutDuplication((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
+                            int j11 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
+                            int l13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                            int i16 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                     (z + 1) * 128);
-                            int j18 = tmpModel.createVertexWithoutDuplication(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                            int j18 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
                             int ai6[] = { j11, l13, i16, j18 };
-                            int i21 = tmpModel.createFace(4, ai6, l8, 0xbc614e);
+                            int i21 = tmpModel.addFace(4, ai6, l8, 0xbc614e);
                             world.setTilePosForFace(i21, x, z);
                             tmpModel.faceTag[i21] = 0x30d40 + i21;
                         }
@@ -411,9 +411,9 @@ public class WorldLoader {
                 }
             }
 
-            tmpModel.recalculateLighting(true, 40, 48, -50, -10, -50);
+            tmpModel.setLighting(true, 40, 48, -50, -10, -50);
 
-            Model[] landscapeModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 233, false);
+            Model[] landscapeModels = tmpModel.split(1536, 1536, 8, 64, 233, false);
             world.setLandscapeModels(landscapeModels);
 
             for (int x = 0; x < World.NUM_TILES_X; x++) {
@@ -449,8 +449,8 @@ public class WorldLoader {
             }
         }
 
-        tmpModel.recalculateLighting(false, 60, 24, -50, -10, -50);
-        Model[] wallModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 338, true);
+        tmpModel.setLighting(false, 60, 24, -50, -10, -50);
+        Model[] wallModels = tmpModel.split(1536, 1536, 8, 64, 338, true);
         world.setWallModels(layer, wallModels);
 
         // Raise wall heights
@@ -657,45 +657,45 @@ public class WorldLoader {
                     if (getDiagonalWalls(x, z) > 12000 && getDiagonalWalls(x, z) < 24000
                             && getRoofTexture(x - 1, z - 1) == 0) {
                         int ai8[] = new int[3];
-                        ai8[0] = tmpModel.createVertexWithoutDuplication(l26, l27, i26);
-                        ai8[1] = tmpModel.createVertexWithoutDuplication(j26, i28, i27);
-                        ai8[2] = tmpModel.createVertexWithoutDuplication(k25, k27, k26);
-                        tmpModel.createFace(3, ai8, i12, 0xbc614e);
+                        ai8[0] = tmpModel.addUniqueVertex(l26, l27, i26);
+                        ai8[1] = tmpModel.addUniqueVertex(j26, i28, i27);
+                        ai8[2] = tmpModel.addUniqueVertex(k25, k27, k26);
+                        tmpModel.addFace(3, ai8, i12, 0xbc614e);
                     } else if (getDiagonalWalls(x, z) > 12000 && getDiagonalWalls(x, z) < 24000
                             && getRoofTexture(x + 1, z + 1) == 0) {
                         int ai9[] = new int[3];
-                        ai9[0] = tmpModel.createVertexWithoutDuplication(k24, j27, i25);
-                        ai9[1] = tmpModel.createVertexWithoutDuplication(k25, k27, k26);
-                        ai9[2] = tmpModel.createVertexWithoutDuplication(j26, i28, i27);
-                        tmpModel.createFace(3, ai9, i12, 0xbc614e);
+                        ai9[0] = tmpModel.addUniqueVertex(k24, j27, i25);
+                        ai9[1] = tmpModel.addUniqueVertex(k25, k27, k26);
+                        ai9[2] = tmpModel.addUniqueVertex(j26, i28, i27);
+                        tmpModel.addFace(3, ai9, i12, 0xbc614e);
                     } else if (getDiagonalWalls(x, z) > 0 && getDiagonalWalls(x, z) < 12000
                             && getRoofTexture(x + 1, z - 1) == 0) {
                         int ai10[] = new int[3];
-                        ai10[0] = tmpModel.createVertexWithoutDuplication(j26, i28, i27);
-                        ai10[1] = tmpModel.createVertexWithoutDuplication(k24, j27, i25);
-                        ai10[2] = tmpModel.createVertexWithoutDuplication(l26, l27, i26);
-                        tmpModel.createFace(3, ai10, i12, 0xbc614e);
+                        ai10[0] = tmpModel.addUniqueVertex(j26, i28, i27);
+                        ai10[1] = tmpModel.addUniqueVertex(k24, j27, i25);
+                        ai10[2] = tmpModel.addUniqueVertex(l26, l27, i26);
+                        tmpModel.addFace(3, ai10, i12, 0xbc614e);
                     } else if (getDiagonalWalls(x, z) > 0 && getDiagonalWalls(x, z) < 12000
                             && getRoofTexture(x - 1, z + 1) == 0) {
                         int ai11[] = new int[3];
-                        ai11[0] = tmpModel.createVertexWithoutDuplication(k25, k27, k26);
-                        ai11[1] = tmpModel.createVertexWithoutDuplication(l26, l27, i26);
-                        ai11[2] = tmpModel.createVertexWithoutDuplication(k24, j27, i25);
-                        tmpModel.createFace(3, ai11, i12, 0xbc614e);
+                        ai11[0] = tmpModel.addUniqueVertex(k25, k27, k26);
+                        ai11[1] = tmpModel.addUniqueVertex(l26, l27, i26);
+                        ai11[2] = tmpModel.addUniqueVertex(k24, j27, i25);
+                        tmpModel.addFace(3, ai11, i12, 0xbc614e);
                     } else if (j27 == k27 && l27 == i28) {
                         int ai12[] = new int[4];
-                        ai12[0] = tmpModel.createVertexWithoutDuplication(k24, j27, i25);
-                        ai12[1] = tmpModel.createVertexWithoutDuplication(k25, k27, k26);
-                        ai12[2] = tmpModel.createVertexWithoutDuplication(l26, l27, i26);
-                        ai12[3] = tmpModel.createVertexWithoutDuplication(j26, i28, i27);
-                        tmpModel.createFace(4, ai12, i12, 0xbc614e);
+                        ai12[0] = tmpModel.addUniqueVertex(k24, j27, i25);
+                        ai12[1] = tmpModel.addUniqueVertex(k25, k27, k26);
+                        ai12[2] = tmpModel.addUniqueVertex(l26, l27, i26);
+                        ai12[3] = tmpModel.addUniqueVertex(j26, i28, i27);
+                        tmpModel.addFace(4, ai12, i12, 0xbc614e);
                     } else if (j27 == i28 && k27 == l27) {
                         int ai13[] = new int[4];
-                        ai13[0] = tmpModel.createVertexWithoutDuplication(j26, i28, i27);
-                        ai13[1] = tmpModel.createVertexWithoutDuplication(k24, j27, i25);
-                        ai13[2] = tmpModel.createVertexWithoutDuplication(k25, k27, k26);
-                        ai13[3] = tmpModel.createVertexWithoutDuplication(l26, l27, i26);
-                        tmpModel.createFace(4, ai13, i12, 0xbc614e);
+                        ai13[0] = tmpModel.addUniqueVertex(j26, i28, i27);
+                        ai13[1] = tmpModel.addUniqueVertex(k24, j27, i25);
+                        ai13[2] = tmpModel.addUniqueVertex(k25, k27, k26);
+                        ai13[3] = tmpModel.addUniqueVertex(l26, l27, i26);
+                        tmpModel.addFace(4, ai13, i12, 0xbc614e);
                     } else {
                         boolean flag1 = true;
                         if (getRoofTexture(x - 1, z - 1) > 0) {
@@ -706,34 +706,34 @@ public class WorldLoader {
                         }
                         if (!flag1) {
                             int ai14[] = new int[3];
-                            ai14[0] = tmpModel.createVertexWithoutDuplication(k25, k27, k26);
-                            ai14[1] = tmpModel.createVertexWithoutDuplication(l26, l27, i26);
-                            ai14[2] = tmpModel.createVertexWithoutDuplication(k24, j27, i25);
-                            tmpModel.createFace(3, ai14, i12, 0xbc614e);
+                            ai14[0] = tmpModel.addUniqueVertex(k25, k27, k26);
+                            ai14[1] = tmpModel.addUniqueVertex(l26, l27, i26);
+                            ai14[2] = tmpModel.addUniqueVertex(k24, j27, i25);
+                            tmpModel.addFace(3, ai14, i12, 0xbc614e);
                             int ai16[] = new int[3];
-                            ai16[0] = tmpModel.createVertexWithoutDuplication(j26, i28, i27);
-                            ai16[1] = tmpModel.createVertexWithoutDuplication(k24, j27, i25);
-                            ai16[2] = tmpModel.createVertexWithoutDuplication(l26, l27, i26);
-                            tmpModel.createFace(3, ai16, i12, 0xbc614e);
+                            ai16[0] = tmpModel.addUniqueVertex(j26, i28, i27);
+                            ai16[1] = tmpModel.addUniqueVertex(k24, j27, i25);
+                            ai16[2] = tmpModel.addUniqueVertex(l26, l27, i26);
+                            tmpModel.addFace(3, ai16, i12, 0xbc614e);
                         } else {
                             int ai15[] = new int[3];
-                            ai15[0] = tmpModel.createVertexWithoutDuplication(k24, j27, i25);
-                            ai15[1] = tmpModel.createVertexWithoutDuplication(k25, k27, k26);
-                            ai15[2] = tmpModel.createVertexWithoutDuplication(j26, i28, i27);
-                            tmpModel.createFace(3, ai15, i12, 0xbc614e);
+                            ai15[0] = tmpModel.addUniqueVertex(k24, j27, i25);
+                            ai15[1] = tmpModel.addUniqueVertex(k25, k27, k26);
+                            ai15[2] = tmpModel.addUniqueVertex(j26, i28, i27);
+                            tmpModel.addFace(3, ai15, i12, 0xbc614e);
                             int ai17[] = new int[3];
-                            ai17[0] = tmpModel.createVertexWithoutDuplication(l26, l27, i26);
-                            ai17[1] = tmpModel.createVertexWithoutDuplication(j26, i28, i27);
-                            ai17[2] = tmpModel.createVertexWithoutDuplication(k25, k27, k26);
-                            tmpModel.createFace(3, ai17, i12, 0xbc614e);
+                            ai17[0] = tmpModel.addUniqueVertex(l26, l27, i26);
+                            ai17[1] = tmpModel.addUniqueVertex(j26, i28, i27);
+                            ai17[2] = tmpModel.addUniqueVertex(k25, k27, k26);
+                            tmpModel.addFace(3, ai17, i12, 0xbc614e);
                         }
                     }
                 }
             }
         }
 
-        tmpModel.recalculateLighting(true, 50, 50, -50, -10, -50);
-        Model[] roofModels = tmpModel.createModelArray(0, 0, 1536, 1536, 8, 64, 169, true);
+        tmpModel.setLighting(true, 50, 50, -50, -10, -50);
+        Model[] roofModels = tmpModel.split(1536, 1536, 8, 64, 169, true);
         world.setRoofModels(layer, roofModels);
 
         // Raise heights of upper storeys?

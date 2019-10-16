@@ -30,12 +30,12 @@ public class ModelUtils {
         int j2 = z1 * 128;
         int k2 = x2 * 128;
         int l2 = z2 * 128;
-        int i3 = model.createVertexWithoutDuplication(i2, -world.getElevation(x1, z1), j2);
-        int j3 = model.createVertexWithoutDuplication(i2, -world.getElevation(x1, z1) - height, j2);
-        int k3 = model.createVertexWithoutDuplication(k2, -world.getElevation(x2, z2) - height, l2);
-        int l3 = model.createVertexWithoutDuplication(k2, -world.getElevation(x2, z2), l2);
+        int i3 = model.addUniqueVertex(i2, -world.getElevation(x1, z1), j2);
+        int j3 = model.addUniqueVertex(i2, -world.getElevation(x1, z1) - height, j2);
+        int k3 = model.addUniqueVertex(k2, -world.getElevation(x2, z2) - height, l2);
+        int l3 = model.addUniqueVertex(k2, -world.getElevation(x2, z2), l2);
         
-        int i4 = model.createFace(4, new int[] { i3, j3, k3, l3 }, frontTexture, backTexture);
+        int i4 = model.addFace(4, new int[] { i3, j3, k3, l3 }, frontTexture, backTexture);
         if (Resources.getDoorDef(wallIndex).getUnknown() == 5) {
             model.faceTag[i4] = 30000 + wallIndex;
         } else {
@@ -112,14 +112,14 @@ public class ModelUtils {
         modelZ2 *= World.TILE_DEPTH;
 
         Model model = new Model(4, 1);
-        int vert1 = model.createVertexWithoutDuplication(modelX1, -world.getAveragedElevation(modelX1, modelZ1), modelZ1);
-        int vert2 = model.createVertexWithoutDuplication(modelX1, -world.getAveragedElevation(modelX1, modelZ1) - height, modelZ1);
-        int vert3 = model.createVertexWithoutDuplication(modelX2, -world.getAveragedElevation(modelX2, modelZ2) - height, modelZ2);
-        int vert4 = model.createVertexWithoutDuplication(modelX2, -world.getAveragedElevation(modelX2, modelZ2), modelZ2);
+        int vert1 = model.addUniqueVertex(modelX1, -world.getAveragedElevation(modelX1, modelZ1), modelZ1);
+        int vert2 = model.addUniqueVertex(modelX1, -world.getAveragedElevation(modelX1, modelZ1) - height, modelZ1);
+        int vert3 = model.addUniqueVertex(modelX2, -world.getAveragedElevation(modelX2, modelZ2) - height, modelZ2);
+        int vert4 = model.addUniqueVertex(modelX2, -world.getAveragedElevation(modelX2, modelZ2), modelZ2);
         int vertices[] = { vert1, vert2, vert3, vert4 };
         
-        model.createFace(4, vertices, frontTex, backTex);
-        model.recalculateLighting(false, 60, 24, -50, -10, -50);
+        model.addFace(4, vertices, frontTex, backTex);
+        model.setLighting(false, 60, 24, -50, -10, -50);
         
         model.entityId = MIN_DOOR_ID + entityId;
         

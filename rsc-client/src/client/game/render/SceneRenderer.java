@@ -11,30 +11,28 @@ import client.res.Texture;
 
 /**
  * Class responsible for rendering a scene.
- * 
+ *
  * <p>This is essentially a 3d software renderer; we could save a lot of
  * complexity by porting to OpenGL instead.
- * 
+ *
  * <p>This class should not be aware of the game at all, and the game should
  * not be aware of what goes on inside this class.
- * 
+ *
  * <p><i>Based on <code>client.Scene</code> from EasyRSC.</i>
  */
 public class SceneRenderer {
 
-    public static final int COLOUR_TRANSPARENT = 12345678;
-
     private static final int MAX_POLYGONS = 15000;
-    
+
     private static final int VIEW_DISTANCE = 9;
 
     private Scene scene;
     private Camera camera;
     private int visiblePolygonCount;
     private Polygon visiblePolygons[] = new Polygon[MAX_POLYGONS];
-    
+
     private MousePicker mousePicker;
-    
+
     private int rampCount = 50;
     private int gradientBase[] = new int[rampCount];
     private int gradientRamps[][] = new int[rampCount][256];
@@ -58,17 +56,17 @@ public class SceneRenderer {
 
     private int clipX;
     private int clipY;
-    
+
     /**
      * Min view distance.
      */
     private int clipNear = 5;
-    
+
     /**
      * Max view distance for 3d models.
      */
     private int clipFar3d = 2400 + (Camera.DEFAULT_HEIGHT * 2);
-    
+
     /**
      * Max view distance for sprites.
      */
@@ -88,7 +86,7 @@ public class SceneRenderer {
         for (int l = 0; l < visiblePolygons.length; l++) {
             visiblePolygons[l] = new Polygon();
         }
-        
+
         setBounds(
                 width / 2, height / 2,
                 width / 2, height / 2,
@@ -97,37 +95,37 @@ public class SceneRenderer {
     }
 
     public void render(Canvas canvas) {
-        
+
         int clipXModified = clipX * clipFar3d >> viewDistance;
         int clipYModified = clipY * clipFar3d >> viewDistance;
         camera.prepareForRendering(clipX, clipY, clipFar3d, clipXModified, clipYModified);
         scene.getModels()[scene.getNumModels()] = scene.getSpriteFaces();
         scene.getSpriteFaces().transformState = 2;
-        
+
         for (int i = 0; i < scene.getNumModels(); i++) {
             scene.getModels()[i].project(camera, viewDistance, clipNear);
         }
-        
+
         scene.getModels()[scene.getNumModels()]
                 .project(camera, viewDistance, clipNear);
         visiblePolygonCount = 0;
-        
+
         // Draw each model in the scene
         for (int i = 0; i < scene.getNumModels(); i++) {
-            
+
             Model gameModel = scene.getModels()[i];
-            
+
             if (!gameModel.visible) {
                 // Model is not visible
                 continue;
             }
-            
+
             // Iterate over every face in the model
             for (int face = 0; face < gameModel.numFaces; face++) {
-                
+
                 int numVertices = gameModel.numVerticesPerFace[face];
                 int vertices[] = gameModel.faceVertices[face];
-                
+
                 // Determine if any vertices are visible
                 boolean visible = false;
                 for (int vertex = 0; vertex < numVertices; vertex++) {
@@ -143,7 +141,7 @@ public class SceneRenderer {
                     // No visible vertices
                     continue;
                 }
-                
+
                 // Verify visibility in x-axis?
                 int viewXCount = 0;
                 for (int vertex = 0; vertex < numVertices; vertex++) {
@@ -179,24 +177,24 @@ public class SceneRenderer {
                 if (viewYCount != 3) {
                     continue;
                 }
-                
+
                 Polygon polygon1 = visiblePolygons[visiblePolygonCount];
                 polygon1.gameModel = gameModel;
                 polygon1.face = face;
                 initialisePolygon3d(visiblePolygonCount);
                 int faceFill;
-                
+
                 if (polygon1.visibility < 0) {
                     faceFill = gameModel.faceFillFront[face];
                 } else {
                     faceFill = gameModel.faceFillBack[face];
                 }
-                
-                if (faceFill == COLOUR_TRANSPARENT) {
+
+                if (faceFill == Model.USE_GOURAUD_LIGHTING) {
                     // Face is transparent
                     continue;
                 }
-                
+
                 int j2 = 0;
                 for (int vertex = 0; vertex < numVertices; vertex++) {
                     j2 += gameModel.projectedVertZ[vertices[vertex]];
@@ -233,53 +231,53 @@ public class SceneRenderer {
             }
 
         }
-        
+
         if (visiblePolygonCount == 0) {
             // Nothing to render!
             return;
         }
-        
+
         // Sort polygons
         polygonsQSort(visiblePolygons, 0, visiblePolygonCount - 1);
         polygonsIntersectSort(100, visiblePolygons, visiblePolygonCount);
-        
+
         // Render our polygons!
         for (int polygonIndex = 0; polygonIndex < visiblePolygonCount; polygonIndex++) {
-            
+
             Polygon polygon = visiblePolygons[polygonIndex];
             Model polygonModel = polygon.gameModel;
             int polyFace = polygon.face;
-            
+
             // Is polygon a sprite?
             if (polygonModel == scene.getSpriteFaces()) {
                 renderSprite(polygonModel, polyFace, canvas);
                 continue;
             }
-                
+
             int plane = 0;
             int light = 0;
             int numVertices = polygonModel.numVerticesPerFace[polyFace];
             int faceVerts[] = polygonModel.faceVertices[polyFace];
-            
+
             // Calculate face lighting
-            if (polygonModel.faceIntensity[polyFace] != COLOUR_TRANSPARENT) {
+            if (polygonModel.faceIntensity[polyFace] != Model.USE_GOURAUD_LIGHTING) {
                 if (polygon.visibility < 0) {
                     light = polygonModel.lightAmbience - polygonModel.faceIntensity[polyFace];
                 } else {
                     light = polygonModel.lightAmbience + polygonModel.faceIntensity[polyFace];
                 }
             }
-            
+
             // Render all vertices
             for (int vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
-                
+
                 int vertexIndexInModel = faceVerts[vertexIndex];
                 vertexX[vertexIndex] = polygonModel.projectedVertX[vertexIndexInModel];
                 vertexY[vertexIndex] = polygonModel.projectedVertY[vertexIndexInModel];
                 vertexZ[vertexIndex] = polygonModel.projectedVertZ[vertexIndexInModel];
-                
+
                 // Calculate vertex lighting for transparent faces
-                if (polygonModel.faceIntensity[polyFace] == COLOUR_TRANSPARENT) {
+                if (polygonModel.faceIntensity[polyFace] == Model.USE_GOURAUD_LIGHTING) {
                     if (polygon.visibility < 0) {
                         light = (polygonModel.lightAmbience - polygonModel.vertexIntensity[vertexIndexInModel])
                                 + polygonModel.vertexAmbience[vertexIndexInModel];
@@ -288,29 +286,29 @@ public class SceneRenderer {
                                 + polygonModel.vertexAmbience[vertexIndexInModel];
                     }
                 }
-                
-                
+
+
                 if (polygonModel.projectedVertZ[vertexIndexInModel] >= clipNear) {
-                    
+
                     planeX[plane] = polygonModel.viewVertX[vertexIndexInModel];
                     planeY[plane] = polygonModel.viewVertY[vertexIndexInModel];
                     vertexShade[plane] = light;
-                    
+
                     if (polygonModel.projectedVertZ[vertexIndexInModel] > scene.fogZDistance) {
                         vertexShade[plane] += (polygonModel.projectedVertZ[vertexIndexInModel] - scene.fogZDistance) / scene.fogZFalloff;
                     }
                     plane++;
-                    
+
                 } else {
-                    
+
                     int vertEnd;
-                    
+
                     if (vertexIndex == 0) {
                         vertEnd = faceVerts[numVertices - 1];
                     } else {
                         vertEnd = faceVerts[vertexIndex - 1];
                     }
-                    
+
                     if (polygonModel.projectedVertZ[vertEnd] >= clipNear) {
                         int k7 = polygonModel.projectedVertZ[vertexIndexInModel] - polygonModel.projectedVertZ[vertEnd];
                         int i5 = polygonModel.projectedVertX[vertexIndexInModel]
@@ -324,13 +322,13 @@ public class SceneRenderer {
                         vertexShade[plane] = light;
                         plane++;
                     }
-                    
+
                     if (vertexIndex == numVertices - 1) {
                         vertEnd = faceVerts[0];
                     } else {
                         vertEnd = faceVerts[vertexIndex + 1];
                     }
-                    
+
                     if (polygonModel.projectedVertZ[vertEnd] >= clipNear) {
                         int l7 = polygonModel.projectedVertZ[vertexIndexInModel] - polygonModel.projectedVertZ[vertEnd];
                         int j5 = polygonModel.projectedVertX[vertexIndexInModel]
@@ -394,12 +392,12 @@ public class SceneRenderer {
         this.baseY = baseY;
         this.width = width;
         this.viewDistance = viewDistance;
-        
+
         scanlines = new Scanline[clipY + baseY];
         for (int i = 0; i < clipY + baseY; i++) {
             scanlines[i] = new Scanline();
         }
-        
+
         mousePicker = new MousePicker(baseX);
     }
 
@@ -528,9 +526,9 @@ public class SceneRenderer {
             int vertexShade[],
             Model gameModel,
             int faceId) {
-        
+
         if (plane == 3) {
-            
+
             int k1 = planeY[0] + baseY;
             int k2 = planeY[1] + baseY;
             int k3 = planeY[2] + baseY;
@@ -545,14 +543,14 @@ public class SceneRenderer {
             int j13 = 0;
             int l13 = 0;
             int j14 = 0;
-            int l14 = COLOUR_TRANSPARENT;
+            int l14 = Model.USE_GOURAUD_LIGHTING;
             int j15 = 0xff439eb2;
-            
+
             if (k3 != k1) {
-                
+
                 j13 = (j7 - k4 << 8) / (k3 - k1);
                 j14 = (j11 - l8 << 8) / (k3 - k1);
-                
+
                 if (k1 < k3) {
                     l12 = k4 << 8;
                     l13 = l8 << 8;
@@ -564,30 +562,30 @@ public class SceneRenderer {
                     l14 = k3;
                     j15 = k1;
                 }
-                
+
                 if (l14 < 0) {
                     l12 -= j13 * l14;
                     l13 -= j14 * l14;
                     l14 = 0;
                 }
-                
+
                 if (j15 > j12) {
                     j15 = j12;
                 }
             }
-            
+
             int l15 = 0;
             int j16 = 0;
             int l16 = 0;
             int j17 = 0;
-            int l17 = COLOUR_TRANSPARENT;
+            int l17 = Model.USE_GOURAUD_LIGHTING;
             int j18 = 0xff439eb2;
-            
+
             if (k2 != k1) {
-                
+
                 j16 = (l5 - k4 << 8) / (k2 - k1);
                 j17 = (j10 - l8 << 8) / (k2 - k1);
-                
+
                 if (k1 < k2) {
                     l15 = k4 << 8;
                     l16 = l8 << 8;
@@ -599,30 +597,30 @@ public class SceneRenderer {
                     l17 = k2;
                     j18 = k1;
                 }
-                
+
                 if (l17 < 0) {
                     l15 -= j16 * l17;
                     l16 -= j17 * l17;
                     l17 = 0;
                 }
-                
+
                 if (j18 > j12) {
                     j18 = j12;
                 }
             }
-            
+
             int l18 = 0;
             int j19 = 0;
             int l19 = 0;
             int j20 = 0;
-            int l20 = COLOUR_TRANSPARENT;
+            int l20 = Model.USE_GOURAUD_LIGHTING;
             int j21 = 0xff439eb2;
-            
+
             if (k3 != k2) {
-                
+
                 j19 = (j7 - l5 << 8) / (k3 - k2);
                 j20 = (j11 - j10 << 8) / (k3 - k2);
-                
+
                 if (k2 < k3) {
                     l18 = l5 << 8;
                     l19 = j10 << 8;
@@ -634,18 +632,18 @@ public class SceneRenderer {
                     l20 = k3;
                     j21 = k2;
                 }
-                
+
                 if (l20 < 0) {
                     l18 -= j19 * l20;
                     l19 -= j20 * l20;
                     l20 = 0;
                 }
-                
+
                 if (j21 > j12) {
                     j21 = j12;
                 }
             }
-            
+
             minY = l14;
             if (l17 < minY) {
                 minY = l17;
@@ -653,7 +651,7 @@ public class SceneRenderer {
             if (l20 < minY) {
                 minY = l20;
             }
-            
+
             maxY = j15;
             if (j18 > maxY) {
                 maxY = j18;
@@ -661,11 +659,11 @@ public class SceneRenderer {
             if (j21 > maxY) {
                 maxY = j21;
             }
-            
+
             int l21 = 0;
-            
+
             for (k = minY; k < maxY; k++) {
-                
+
                 if (k >= l14 && k < j15) {
                     i = j = l12;
                     l = l21 = l13;
@@ -675,7 +673,7 @@ public class SceneRenderer {
                     i = 0xa0000;
                     j = 0xfff60000;
                 }
-                
+
                 if (k >= l17 && k < j18) {
                     if (l15 < i) {
                         i = l15;
@@ -688,7 +686,7 @@ public class SceneRenderer {
                     l15 += j16;
                     l16 += j17;
                 }
-                
+
                 if (k >= l20 && k < j21) {
                     if (l18 < i) {
                         i = l18;
@@ -701,7 +699,7 @@ public class SceneRenderer {
                     l18 += j19;
                     l19 += j20;
                 }
-                
+
                 Scanline cameraVariables_6 = scanlines[k];
                 cameraVariables_6.startX = i;
                 cameraVariables_6.endX = j;
@@ -712,9 +710,9 @@ public class SceneRenderer {
             if (minY < baseY - clipY) {
                 minY = baseY - clipY;
             }
-            
+
         } else if (plane == 4) {
-            
+
             int l1 = planeY[0] + baseY;
             int l2 = planeY[1] + baseY;
             int l3 = planeY[2] + baseY;
@@ -732,13 +730,13 @@ public class SceneRenderer {
             int i15 = 0;
             int k15 = 0;
             int i16 = 0;
-            int k16 = COLOUR_TRANSPARENT;
+            int k16 = Model.USE_GOURAUD_LIGHTING;
             int i17 = 0xff439eb2;
             if (l4 != l1) {
-                
+
                 i15 = (k10 - i6 << 8) / (l4 - l1);
                 i16 = (k13 - k11 << 8) / (l4 - l1);
-                
+
                 if (l1 < l4) {
                     k14 = i6 << 8;
                     k15 = k11 << 8;
@@ -750,13 +748,13 @@ public class SceneRenderer {
                     k16 = l4;
                     i17 = l1;
                 }
-                
+
                 if (k16 < 0) {
                     k14 -= i15 * k16;
                     k15 -= i16 * k16;
                     k16 = 0;
                 }
-                
+
                 if (i17 > i14) {
                     i17 = i14;
                 }
@@ -765,13 +763,13 @@ public class SceneRenderer {
             int i18 = 0;
             int k18 = 0;
             int i19 = 0;
-            int k19 = COLOUR_TRANSPARENT;
+            int k19 = Model.USE_GOURAUD_LIGHTING;
             int i20 = 0xff439eb2;
             if (l2 != l1) {
-                
+
                 i18 = (k7 - i6 << 8) / (l2 - l1);
                 i19 = (k12 - k11 << 8) / (l2 - l1);
-                
+
                 if (l1 < l2) {
                     k17 = i6 << 8;
                     k18 = k11 << 8;
@@ -783,13 +781,13 @@ public class SceneRenderer {
                     k19 = l2;
                     i20 = l1;
                 }
-                
+
                 if (k19 < 0) {
                     k17 -= i18 * k19;
                     k18 -= i19 * k19;
                     k19 = 0;
                 }
-                
+
                 if (i20 > i14) {
                     i20 = i14;
                 }
@@ -798,14 +796,14 @@ public class SceneRenderer {
             int i21 = 0;
             int k21 = 0;
             int i22 = 0;
-            int j22 = COLOUR_TRANSPARENT;
+            int j22 = Model.USE_GOURAUD_LIGHTING;
             int k22 = 0xff439eb2;
-            
+
             if (l3 != l2) {
-                
+
                 i21 = (i9 - k7 << 8) / (l3 - l2);
                 i22 = (i13 - k12 << 8) / (l3 - l2);
-                
+
                 if (l2 < l3) {
                     k20 = k7 << 8;
                     k21 = k12 << 8;
@@ -817,13 +815,13 @@ public class SceneRenderer {
                     j22 = l3;
                     k22 = l2;
                 }
-                
+
                 if (j22 < 0) {
                     k20 -= i21 * j22;
                     k21 -= i22 * j22;
                     j22 = 0;
                 }
-                
+
                 if (k22 > i14) {
                     k22 = i14;
                 }
@@ -832,14 +830,14 @@ public class SceneRenderer {
             int i23 = 0;
             int j23 = 0;
             int k23 = 0;
-            int l23 = COLOUR_TRANSPARENT;
+            int l23 = Model.USE_GOURAUD_LIGHTING;
             int i24 = 0xff439eb2;
-            
+
             if (l4 != l3) {
-                
+
                 i23 = (k10 - i9 << 8) / (l4 - l3);
                 k23 = (k13 - i13 << 8) / (l4 - l3);
-                
+
                 if (l3 < l4) {
                     l22 = i9 << 8;
                     j23 = i13 << 8;
@@ -851,18 +849,18 @@ public class SceneRenderer {
                     l23 = l4;
                     i24 = l3;
                 }
-                
+
                 if (l23 < 0) {
                     l22 -= i23 * l23;
                     j23 -= k23 * l23;
                     l23 = 0;
                 }
-                
+
                 if (i24 > i14) {
                     i24 = i14;
                 }
             }
-            
+
             minY = k16;
             if (k19 < minY) {
                 minY = k19;
@@ -873,7 +871,7 @@ public class SceneRenderer {
             if (l23 < minY) {
                 minY = l23;
             }
-            
+
             maxY = i17;
             if (i20 > maxY) {
                 maxY = i20;
@@ -884,11 +882,11 @@ public class SceneRenderer {
             if (i24 > maxY) {
                 maxY = i24;
             }
-            
+
             int j24 = 0;
-            
+
             for (k = minY; k < maxY; k++) {
-                
+
                 if (k >= k16 && k < i17) {
                     i = j = k14;
                     l = j24 = k15;
@@ -898,7 +896,7 @@ public class SceneRenderer {
                     i = 0xa0000;
                     j = 0xfff60000;
                 }
-                
+
                 if (k >= k19 && k < i20) {
                     if (k17 < i) {
                         i = k17;
@@ -911,7 +909,7 @@ public class SceneRenderer {
                     k17 += i18;
                     k18 += i19;
                 }
-                
+
                 if (k >= j22 && k < k22) {
                     if (k20 < i) {
                         i = k20;
@@ -924,7 +922,7 @@ public class SceneRenderer {
                     k20 += i21;
                     k21 += i22;
                 }
-                
+
                 if (k >= l23 && k < i24) {
                     if (l22 < i) {
                         i = l22;
@@ -937,7 +935,7 @@ public class SceneRenderer {
                     l22 += i23;
                     j23 += k23;
                 }
-                
+
                 Scanline cameraVariables_7 = scanlines[k];
                 cameraVariables_7.startX = i;
                 cameraVariables_7.endX = j;
@@ -948,9 +946,9 @@ public class SceneRenderer {
             if (minY < baseY - clipY) {
                 minY = baseY - clipY;
             }
-            
+
         } else {
-            
+
             maxY = minY = planeY[0] += baseY;
             for (k = 1; k < plane; k++) {
                 int i2;
@@ -964,15 +962,15 @@ public class SceneRenderer {
             if (minY < baseY - clipY) {
                 minY = baseY - clipY;
             }
-            
+
             if (maxY >= baseY + clipY) {
                 maxY = (baseY + clipY) - 1;
             }
-            
+
             if (minY >= maxY) {
                 return;
             }
-            
+
             for (k = minY; k < maxY; k++) {
                 Scanline scanline = scanlines[k];
                 scanline.startX = 0xa0000;
@@ -982,24 +980,24 @@ public class SceneRenderer {
             int j2 = plane - 1;
             int i3 = planeY[0];
             int i4 = planeY[j2];
-            
+
             if (i3 < i4) {
-                
+
                 int i5 = planeX[0] << 8;
                 int j6 = (planeX[j2] - planeX[0] << 8) / (i4 - i3);
                 int l7 = vertexShade[0] << 8;
                 int j9 = (vertexShade[j2] - vertexShade[0] << 8) / (i4 - i3);
-                
+
                 if (i3 < 0) {
                     i5 -= j6 * i3;
                     l7 -= j9 * i3;
                     i3 = 0;
                 }
-                
+
                 if (i4 > maxY) {
                     i4 = maxY;
                 }
-                
+
                 for (k = i3; k <= i4; k++) {
                     Scanline cameraVariables_2 = scanlines[k];
                     cameraVariables_2.startX = cameraVariables_2.endX = i5;
@@ -1009,22 +1007,22 @@ public class SceneRenderer {
                 }
 
             } else if (i3 > i4) {
-                
+
                 int j5 = planeX[j2] << 8;
                 int k6 = (planeX[0] - planeX[j2] << 8) / (i3 - i4);
                 int i8 = vertexShade[j2] << 8;
                 int k9 = (vertexShade[0] - vertexShade[j2] << 8) / (i3 - i4);
-                
+
                 if (i4 < 0) {
                     j5 -= k6 * i4;
                     i8 -= k9 * i4;
                     i4 = 0;
                 }
-                
+
                 if (i3 > maxY) {
                     i3 = maxY;
                 }
-                
+
                 for (k = i4; k <= i3; k++) {
                     Scanline cameraVariables_3 = scanlines[k];
                     cameraVariables_3.startX = cameraVariables_3.endX = j5;
@@ -1033,78 +1031,78 @@ public class SceneRenderer {
                     i8 += k9;
                 }
             }
-            
+
             for (k = 0; k < j2; k++) {
-                
+
                 int k5 = k + 1;
                 int j3 = planeY[k];
                 int j4 = planeY[k5];
-                
+
                 if (j3 < j4) {
-                    
+
                     int l6 = planeX[k] << 8;
                     int j8 = (planeX[k5] - planeX[k] << 8) / (j4 - j3);
                     int l9 = vertexShade[k] << 8;
                     int l10 = (vertexShade[k5] - vertexShade[k] << 8) / (j4 - j3);
-                    
+
                     if (j3 < 0) {
                         l6 -= j8 * j3;
                         l9 -= l10 * j3;
                         j3 = 0;
                     }
-                    
+
                     if (j4 > maxY) {
                         j4 = maxY;
                     }
-                    
+
                     for (int l11 = j3; l11 <= j4; l11++) {
-                        
+
                         Scanline cameraVariables_4 = scanlines[l11];
                         if (l6 < cameraVariables_4.startX) {
                             cameraVariables_4.startX = l6;
                             cameraVariables_4.startS = l9;
                         }
-                        
+
                         if (l6 > cameraVariables_4.endX) {
                             cameraVariables_4.endX = l6;
                             cameraVariables_4.endS = l9;
                         }
-                        
+
                         l6 += j8;
                         l9 += l10;
                     }
 
                 } else if (j3 > j4) {
-                    
+
                     int i7 = planeX[k5] << 8;
                     int k8 = (planeX[k] - planeX[k5] << 8) / (j3 - j4);
                     int i10 = vertexShade[k5] << 8;
                     int i11 = (vertexShade[k] - vertexShade[k5] << 8) / (j3 - j4);
-                    
+
                     if (j4 < 0) {
                         i7 -= k8 * j4;
                         i10 -= i11 * j4;
                         j4 = 0;
                     }
-                    
+
                     if (j3 > maxY) {
                         j3 = maxY;
                     }
-                    
+
                     for (int i12 = j4; i12 <= j3; i12++) {
-                        
+
                         Scanline cameraVariables_5 = scanlines[i12];
-                        
+
                         if (i7 < cameraVariables_5.startX) {
                             cameraVariables_5.startX = i7;
                             cameraVariables_5.startS = i10;
                         }
-                        
+
                         if (i7 > cameraVariables_5.endX) {
                             cameraVariables_5.endX = i7;
                             cameraVariables_5.endS = i10;
                         }
-                        
+
                         i7 += k8;
                         i10 += i11;
                     }
@@ -1119,10 +1117,10 @@ public class SceneRenderer {
         /*
          * Mouse Picking
          */
-        
+
         int mouseX = mousePicker.getMouseX();
         int mouseY = mousePicker.getMouseY();
-        
+
         if (mouseY >= minY && mouseY < maxY) {
             Scanline scanline = scanlines[mouseY];
             if (mouseX >= scanline.startX >> 8 &&
@@ -1135,22 +1133,22 @@ public class SceneRenderer {
     }
 
     private void rasterize(Canvas canvas, int numFaces, int vertexX[], int vertexY[], int vertexZ[], int textureId, Model gameModel) {
-        
+
         if (textureId == -2) {
             // Transparent
             return;
         }
-        
+
         if (textureId >= 0) {
-            
+
             if (textureId >= Resources.textures.length) {
                 // Invalid texture
                 textureId = 0;
             }
-            
+
             Resources.prepareTexture(textureId);
             Texture tex = Resources.textures[textureId];
-            
+
             int x1 = vertexX[0];
             int y1 = vertexY[0];
             int z1 = vertexZ[0];
@@ -1160,13 +1158,13 @@ public class SceneRenderer {
             int dx2 = vertexX[numFaces - 1] - x1;
             int dy2 = vertexY[numFaces - 1] - y1;
             int dz2 = vertexZ[numFaces - 1] - z1;
-            
+
             /*
              * Large textures (>128 pixels wide)
              */
-            
+
             if (tex.isLarge()) {
-                
+
                 int l9 = dx2 * y1 - dy2 * x1 << 12;
                 int k10 = dy2 * z1 - dz2 * y1 << (5 - viewDistance) + 7 + 4;
                 int i11 = dz2 * x1 - dx2 * z1 << (5 - viewDistance) + 7;
@@ -1184,11 +1182,11 @@ public class SceneRenderer {
                 l9 += i11 * i16;
                 k11 += k12 * i16;
                 i13 += i14 * i16;
-                
+
                 /*
                  * Translucent textures
                  */
-                
+
                 if (gameModel.translucent) {
                     for (int i = minY; i < maxY; i++) {
                         Scanline scanline = scanlines[i];
@@ -1227,7 +1225,7 @@ public class SceneRenderer {
                 /*
                  * Solid textures
                  */
-                
+
                 if (!tex.hasTransparency()) {
                     for (int i = minY; i < maxY; i++) {
                         Scanline scanline = scanlines[i];
@@ -1278,7 +1276,7 @@ public class SceneRenderer {
                 /*
                  * Textures with transparency
                  */
-                
+
                 for (int i = minY; i < maxY; i++) {
                     Scanline scanline = scanlines[i];
                     int scanlineStartX = scanline.startX >> 8;
@@ -1316,7 +1314,7 @@ public class SceneRenderer {
             /*
              * Small textures (<128 pixels wide)
              */
-            
+
             int i10 = dx2 * y1 - dy2 * x1 << 11;
             int l10 = dy2 * z1 - dz2 * y1 << (5 - viewDistance) + 6 + 4;
             int j11 = dz2 * x1 - dx2 * z1 << (5 - viewDistance) + 6;
@@ -1339,7 +1337,7 @@ public class SceneRenderer {
             /*
              * Translucent textures
              */
-            
+
             if (gameModel.translucent) {
                 for (int i = minY; i < maxY; i++) {
                     Scanline scanline = scanlines[i];
@@ -1378,7 +1376,7 @@ public class SceneRenderer {
             /*
              * Solid textures
              */
-            
+
             if (!tex.hasTransparency()) {
                 for (int i = minY; i < maxY; i++) {
                     Scanline scanline = scanlines[i];
@@ -1392,7 +1390,7 @@ public class SceneRenderer {
                         j17 += l16;
                         continue;
                     }
-                    
+
                     int i23 = scanline.startS;
                     int k24 = (scanline.endS - i23) / k21;
                     if (scanlineStartX < -clipX) {
@@ -1404,7 +1402,7 @@ public class SceneRenderer {
                         int l19 = clipX;
                         k21 = l19 - scanlineStartX;
                     }
-                    
+
                     canvas.renderScanline_SmallTexture(
                             tex.pixels,
                             0,
@@ -1419,7 +1417,7 @@ public class SceneRenderer {
                             j17 + scanlineStartX,
                             i23,
                             k24);
-                        
+
                     i10 += j11;
                     l11 += l12;
                     j13 += j14;
@@ -1431,7 +1429,7 @@ public class SceneRenderer {
             /*
              * Textures with transparency
              */
-            
+
             for (int i = minY; i < maxY; i++) {
                 Scanline scanline = scanlines[i];
                 int scanlineStartX = scanline.startX >> 8;
@@ -1465,7 +1463,7 @@ public class SceneRenderer {
 
             return;
         }
-        
+
         for (int j1 = 0; j1 < rampCount; j1++) {
             if (gradientBase[j1] == textureId) {
                 currentGradientRamps = gradientRamps[j1];
@@ -1491,7 +1489,7 @@ public class SceneRenderer {
         }
 
         int l2 = baseX + minY * width;
-        
+
         if (gameModel.transparent) {
             for (int i = minY; i < maxY; i++) {
                 Scanline scanline = scanlines[i];
@@ -1518,7 +1516,7 @@ public class SceneRenderer {
             }
             return;
         }
-        
+
         for (int i = minY; i < maxY; i++) {
             Scanline scanline = scanlines[i];
             int scanlineStartX = scanline.startX >> 8;
@@ -1538,9 +1536,9 @@ public class SceneRenderer {
                     int l5 = clipX;
                     i7 = l5 - scanlineStartX;
                 }
-                
+
                 canvas.renderScanline_Gradient(-i7, l2 + scanlineStartX, 0, currentGradientRamps, j8, k9);
-                    
+
                 l2 += width;
             }
         }
@@ -2183,5 +2181,5 @@ public class SceneRenderer {
     public MousePicker getMousePicker() {
         return mousePicker;
     }
-    
+
 }
