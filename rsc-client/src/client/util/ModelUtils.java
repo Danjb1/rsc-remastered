@@ -62,7 +62,7 @@ public class ModelUtils {
 
     private static void setAmbientLighting(World world, int modelIndex1, int modelIndex2, int x, int z, int ambience) {
         Model gameModel = world.getLandscapeModel(modelIndex1 + modelIndex2 * 8);
-        for (int vertex = 0; vertex < gameModel.vertexIndex; vertex++) {
+        for (int vertex = 0; vertex < gameModel.numVertices; vertex++) {
             if (gameModel.vertexX[vertex] == x * 128 && gameModel.vertexZ[vertex] == z * 128) {
                 gameModel.setVertexAmbience(vertex, ambience);
                 return;

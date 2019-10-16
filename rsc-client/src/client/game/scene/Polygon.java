@@ -2,11 +2,6 @@ package client.game.scene;
 
 public class Polygon {
 
-    public Polygon() {
-        skipSomething = false;
-        index2 = -1;
-    }
-
     public int minPlaneX;
     public int minPlaneY;
     public int maxPlaneX;
@@ -23,6 +18,6 @@ public class Polygon {
     public int faceFill;
     public boolean skipSomething;
     public int index;
-    public int index2;
+    public int index2 = -1;
 
 }

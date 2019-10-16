@@ -125,13 +125,13 @@ public class SceneRenderer {
             // Iterate over every face in the model
             for (int face = 0; face < gameModel.numFaces; face++) {
                 
-                int numVertices = gameModel.faceNumVertices[face];
+                int numVertices = gameModel.numVerticesPerFace[face];
                 int vertices[] = gameModel.faceVertices[face];
                 
                 // Determine if any vertices are visible
                 boolean visible = false;
                 for (int vertex = 0; vertex < numVertices; vertex++) {
-                    int i1 = gameModel.projectVertexZ[vertices[vertex]];
+                    int i1 = gameModel.projectedVertZ[vertices[vertex]];
                     if (i1 <= clipNear || i1 >= clipFar3d) {
                         continue;
                     }
@@ -147,7 +147,7 @@ public class SceneRenderer {
                 // Verify visibility in x-axis?
                 int viewXCount = 0;
                 for (int vertex = 0; vertex < numVertices; vertex++) {
-                    int j1 = gameModel.vertexViewX[vertices[vertex]];
+                    int j1 = gameModel.viewVertX[vertices[vertex]];
                     if (j1 > -clipX) {
                         viewXCount |= 1;
                     }
@@ -165,7 +165,7 @@ public class SceneRenderer {
                 // Verify visibility in y-axis?
                 int viewYCount = 0;
                 for (int vertex = 0; vertex < numVertices; vertex++) {
-                    int k1 = gameModel.vertexViewY[vertices[vertex]];
+                    int k1 = gameModel.viewVertY[vertices[vertex]];
                     if (k1 > -clipY) {
                         viewYCount |= 1;
                     }
@@ -199,10 +199,10 @@ public class SceneRenderer {
                 
                 int j2 = 0;
                 for (int vertex = 0; vertex < numVertices; vertex++) {
-                    j2 += gameModel.projectVertexZ[vertices[vertex]];
+                    j2 += gameModel.projectedVertZ[vertices[vertex]];
                 }
 
-                polygon1.depth = j2 / numVertices + gameModel.anInt245;
+                polygon1.depth = j2 / numVertices + gameModel.depth;
                 polygon1.faceFill = faceFill;
                 visiblePolygonCount++;
             }
@@ -214,9 +214,9 @@ public class SceneRenderer {
             for (int face = 0; face < spriteFaces.numFaces; face++) {
                 int faceVertices[] = spriteFaces.faceVertices[face];
                 int vertex0 = faceVertices[0];
-                int vx = spriteFaces.vertexViewX[vertex0];
-                int vy = spriteFaces.vertexViewY[vertex0];
-                int vz = spriteFaces.projectVertexZ[vertex0];
+                int vx = spriteFaces.viewVertX[vertex0];
+                int vy = spriteFaces.viewVertY[vertex0];
+                int vz = spriteFaces.projectedVertZ[vertex0];
                 if (vz > clipNear && vz < clipFar2d) {
                     SpriteEntity spriteEntity = scene.getSpriteEntities()[face];
                     int vw = (spriteEntity.getWidth() << viewDistance) / vz;
@@ -226,7 +226,7 @@ public class SceneRenderer {
                         polygon2.gameModel = spriteFaces;
                         polygon2.face = face;
                         initialisePolygon2d(visiblePolygonCount);
-                        polygon2.depth = (vz + spriteFaces.projectVertexZ[faceVertices[1]]) / 2;
+                        polygon2.depth = (vz + spriteFaces.projectedVertZ[faceVertices[1]]) / 2;
                         visiblePolygonCount++;
                     }
                 }
@@ -258,7 +258,7 @@ public class SceneRenderer {
                 
             int plane = 0;
             int light = 0;
-            int numVertices = polygonModel.faceNumVertices[polyFace];
+            int numVertices = polygonModel.numVerticesPerFace[polyFace];
             int faceVerts[] = polygonModel.faceVertices[polyFace];
             
             // Calculate face lighting
@@ -274,9 +274,9 @@ public class SceneRenderer {
             for (int vertexIndex = 0; vertexIndex < numVertices; vertexIndex++) {
                 
                 int vertexIndexInModel = faceVerts[vertexIndex];
-                vertexX[vertexIndex] = polygonModel.projectVertexX[vertexIndexInModel];
-                vertexY[vertexIndex] = polygonModel.projectVertexY[vertexIndexInModel];
-                vertexZ[vertexIndex] = polygonModel.projectVertexZ[vertexIndexInModel];
+                vertexX[vertexIndex] = polygonModel.projectedVertX[vertexIndexInModel];
+                vertexY[vertexIndex] = polygonModel.projectedVertY[vertexIndexInModel];
+                vertexZ[vertexIndex] = polygonModel.projectedVertZ[vertexIndexInModel];
                 
                 // Calculate vertex lighting for transparent faces
                 if (polygonModel.faceIntensity[polyFace] == COLOUR_TRANSPARENT) {
@@ -290,14 +290,14 @@ public class SceneRenderer {
                 }
                 
                 
-                if (polygonModel.projectVertexZ[vertexIndexInModel] >= clipNear) {
+                if (polygonModel.projectedVertZ[vertexIndexInModel] >= clipNear) {
                     
-                    planeX[plane] = polygonModel.vertexViewX[vertexIndexInModel];
-                    planeY[plane] = polygonModel.vertexViewY[vertexIndexInModel];
+                    planeX[plane] = polygonModel.viewVertX[vertexIndexInModel];
+                    planeY[plane] = polygonModel.viewVertY[vertexIndexInModel];
                     vertexShade[plane] = light;
                     
-                    if (polygonModel.projectVertexZ[vertexIndexInModel] > scene.fogZDistance) {
-                        vertexShade[plane] += (polygonModel.projectVertexZ[vertexIndexInModel] - scene.fogZDistance) / scene.fogZFalloff;
+                    if (polygonModel.projectedVertZ[vertexIndexInModel] > scene.fogZDistance) {
+                        vertexShade[plane] += (polygonModel.projectedVertZ[vertexIndexInModel] - scene.fogZDistance) / scene.fogZFalloff;
                     }
                     plane++;
                     
@@ -311,14 +311,14 @@ public class SceneRenderer {
                         vertEnd = faceVerts[vertexIndex - 1];
                     }
                     
-                    if (polygonModel.projectVertexZ[vertEnd] >= clipNear) {
-                        int k7 = polygonModel.projectVertexZ[vertexIndexInModel] - polygonModel.projectVertexZ[vertEnd];
-                        int i5 = polygonModel.projectVertexX[vertexIndexInModel]
-                                - ((polygonModel.projectVertexX[vertexIndexInModel] - polygonModel.projectVertexX[vertEnd])
-                                        * (polygonModel.projectVertexZ[vertexIndexInModel] - clipNear)) / k7;
-                        int j6 = polygonModel.projectVertexY[vertexIndexInModel]
-                                - ((polygonModel.projectVertexY[vertexIndexInModel] - polygonModel.projectVertexY[vertEnd])
-                                        * (polygonModel.projectVertexZ[vertexIndexInModel] - clipNear)) / k7;
+                    if (polygonModel.projectedVertZ[vertEnd] >= clipNear) {
+                        int k7 = polygonModel.projectedVertZ[vertexIndexInModel] - polygonModel.projectedVertZ[vertEnd];
+                        int i5 = polygonModel.projectedVertX[vertexIndexInModel]
+                                - ((polygonModel.projectedVertX[vertexIndexInModel] - polygonModel.projectedVertX[vertEnd])
+                                        * (polygonModel.projectedVertZ[vertexIndexInModel] - clipNear)) / k7;
+                        int j6 = polygonModel.projectedVertY[vertexIndexInModel]
+                                - ((polygonModel.projectedVertY[vertexIndexInModel] - polygonModel.projectedVertY[vertEnd])
+                                        * (polygonModel.projectedVertZ[vertexIndexInModel] - clipNear)) / k7;
                         planeX[plane] = (i5 << viewDistance) / clipNear;
                         planeY[plane] = (j6 << viewDistance) / clipNear;
                         vertexShade[plane] = light;
@@ -331,14 +331,14 @@ public class SceneRenderer {
                         vertEnd = faceVerts[vertexIndex + 1];
                     }
                     
-                    if (polygonModel.projectVertexZ[vertEnd] >= clipNear) {
-                        int l7 = polygonModel.projectVertexZ[vertexIndexInModel] - polygonModel.projectVertexZ[vertEnd];
-                        int j5 = polygonModel.projectVertexX[vertexIndexInModel]
-                                - ((polygonModel.projectVertexX[vertexIndexInModel] - polygonModel.projectVertexX[vertEnd])
-                                        * (polygonModel.projectVertexZ[vertexIndexInModel] - clipNear)) / l7;
-                        int k6 = polygonModel.projectVertexY[vertexIndexInModel]
-                                - ((polygonModel.projectVertexY[vertexIndexInModel] - polygonModel.projectVertexY[vertEnd])
-                                        * (polygonModel.projectVertexZ[vertexIndexInModel] - clipNear)) / l7;
+                    if (polygonModel.projectedVertZ[vertEnd] >= clipNear) {
+                        int l7 = polygonModel.projectedVertZ[vertexIndexInModel] - polygonModel.projectedVertZ[vertEnd];
+                        int j5 = polygonModel.projectedVertX[vertexIndexInModel]
+                                - ((polygonModel.projectedVertX[vertexIndexInModel] - polygonModel.projectedVertX[vertEnd])
+                                        * (polygonModel.projectedVertZ[vertexIndexInModel] - clipNear)) / l7;
+                        int k6 = polygonModel.projectedVertY[vertexIndexInModel]
+                                - ((polygonModel.projectedVertY[vertexIndexInModel] - polygonModel.projectedVertY[vertEnd])
+                                        * (polygonModel.projectedVertZ[vertexIndexInModel] - clipNear)) / l7;
                         planeX[plane] = (j5 << viewDistance) / clipNear;
                         planeY[plane] = (k6 << viewDistance) / clipNear;
                         vertexShade[plane] = light;
@@ -377,9 +377,9 @@ public class SceneRenderer {
         SpriteEntity spriteEntity = scene.getSpriteEntities()[polyFace];
         int faceverts[] = polygonModel.faceVertices[polyFace];
         int face0 = faceverts[0];
-        int vx = polygonModel.vertexViewX[face0];
-        int vy = polygonModel.vertexViewY[face0];
-        int vz = polygonModel.projectVertexZ[face0];
+        int vx = polygonModel.viewVertX[face0];
+        int vy = polygonModel.viewVertY[face0];
+        int vz = polygonModel.projectedVertZ[face0];
         int w = (spriteEntity.getWidth() << viewDistance) / vz;
         int h = (spriteEntity.getHeight() << viewDistance) / vz;
         int x = vx - w / 2;
@@ -1189,7 +1189,7 @@ public class SceneRenderer {
                  * Translucent textures
                  */
                 
-                if (gameModel.textureTranslucent) {
+                if (gameModel.translucent) {
                     for (int i = minY; i < maxY; i++) {
                         Scanline scanline = scanlines[i];
                         int scanlineStartX = scanline.startX >> 8;
@@ -1340,7 +1340,7 @@ public class SceneRenderer {
              * Translucent textures
              */
             
-            if (gameModel.textureTranslucent) {
+            if (gameModel.translucent) {
                 for (int i = minY; i < maxY; i++) {
                     Scanline scanline = scanlines[i];
                     int scanlineStartX = scanline.startX >> 8;
@@ -1551,17 +1551,17 @@ public class SceneRenderer {
         Model gameModel = polygon.gameModel;
         int face = polygon.face;
         int faceVertices[] = gameModel.faceVertices[face];
-        int faceNumVertices = gameModel.faceNumVertices[face];
-        int faceCameraNormalScale = gameModel.normalScale[face];
-        int vcx = gameModel.projectVertexX[faceVertices[0]];
-        int vcy = gameModel.projectVertexY[faceVertices[0]];
-        int vcz = gameModel.projectVertexZ[faceVertices[0]];
-        int vcx1 = gameModel.projectVertexX[faceVertices[1]] - vcx;
-        int vcy1 = gameModel.projectVertexY[faceVertices[1]] - vcy;
-        int vcz1 = gameModel.projectVertexZ[faceVertices[1]] - vcz;
-        int vcx2 = gameModel.projectVertexX[faceVertices[2]] - vcx;
-        int vcy2 = gameModel.projectVertexY[faceVertices[2]] - vcy;
-        int vcz2 = gameModel.projectVertexZ[faceVertices[2]] - vcz;
+        int faceNumVertices = gameModel.numVerticesPerFace[face];
+        int faceCameraNormalScale = gameModel.faceCameraNormalScale[face];
+        int vcx = gameModel.projectedVertX[faceVertices[0]];
+        int vcy = gameModel.projectedVertY[faceVertices[0]];
+        int vcz = gameModel.projectedVertZ[faceVertices[0]];
+        int vcx1 = gameModel.projectedVertX[faceVertices[1]] - vcx;
+        int vcy1 = gameModel.projectedVertY[faceVertices[1]] - vcy;
+        int vcz1 = gameModel.projectedVertZ[faceVertices[1]] - vcz;
+        int vcx2 = gameModel.projectedVertX[faceVertices[2]] - vcx;
+        int vcy2 = gameModel.projectedVertY[faceVertices[2]] - vcy;
+        int vcz2 = gameModel.projectedVertZ[faceVertices[2]] - vcz;
         int k3 = vcy1 * vcz2 - vcy2 * vcz1;
         int l3 = vcz1 * vcx2 - vcz2 * vcx1;
         int i4 = vcx1 * vcy2 - vcx2 * vcy1;
@@ -1573,8 +1573,8 @@ public class SceneRenderer {
                 l3 >>= 1;
             }
 
-            gameModel.normalScale[face] = faceCameraNormalScale;
-            gameModel.normalMagnitude[face] = (int) (normalMagnitude * Math.sqrt(k3 * k3 + l3 * l3 + i4 * i4));
+            gameModel.faceCameraNormalScale[face] = faceCameraNormalScale;
+            gameModel.faceCameraNormalMagnitude[face] = (int) (normalMagnitude * Math.sqrt(k3 * k3 + l3 * l3 + i4 * i4));
         } else {
             k3 >>= faceCameraNormalScale;
             l3 >>= faceCameraNormalScale;
@@ -1584,26 +1584,26 @@ public class SceneRenderer {
         polygon.normalX = k3;
         polygon.normalY = l3;
         polygon.normalZ = i4;
-        int j4 = gameModel.projectVertexZ[faceVertices[0]];
+        int j4 = gameModel.projectedVertZ[faceVertices[0]];
         int k4 = j4;
-        int l4 = gameModel.vertexViewX[faceVertices[0]];
+        int l4 = gameModel.viewVertX[faceVertices[0]];
         int i5 = l4;
-        int j5 = gameModel.vertexViewY[faceVertices[0]];
+        int j5 = gameModel.viewVertY[faceVertices[0]];
         int k5 = j5;
         for (int l5 = 1; l5 < faceNumVertices; l5++) {
-            int i1 = gameModel.projectVertexZ[faceVertices[l5]];
+            int i1 = gameModel.projectedVertZ[faceVertices[l5]];
             if (i1 > k4) {
                 k4 = i1;
             } else if (i1 < j4) {
                 j4 = i1;
             }
-            i1 = gameModel.vertexViewX[faceVertices[l5]];
+            i1 = gameModel.viewVertX[faceVertices[l5]];
             if (i1 > i5) {
                 i5 = i1;
             } else if (i1 < l4) {
                 l4 = i1;
             }
-            i1 = gameModel.vertexViewY[faceVertices[l5]];
+            i1 = gameModel.viewVertY[faceVertices[l5]];
             if (i1 > k5) {
                 k5 = i1;
             } else if (i1 < j5) {
@@ -1627,39 +1627,39 @@ public class SceneRenderer {
         int l = 0;
         int i1 = 0;
         int j1 = 1;
-        int vx = gameModel.projectVertexX[faceVertices[0]];
-        int vy = gameModel.projectVertexY[faceVertices[0]];
-        int vz = gameModel.projectVertexZ[faceVertices[0]];
-        gameModel.normalMagnitude[face] = 1;
-        gameModel.normalScale[face] = 0;
+        int vx = gameModel.projectedVertX[faceVertices[0]];
+        int vy = gameModel.projectedVertY[faceVertices[0]];
+        int vz = gameModel.projectedVertZ[faceVertices[0]];
+        gameModel.faceCameraNormalMagnitude[face] = 1;
+        gameModel.faceCameraNormalScale[face] = 0;
         polygon.visibility = vx * l + vy * i1 + vz * j1;
         polygon.normalX = l;
         polygon.normalY = i1;
         polygon.normalZ = j1;
-        int j2 = gameModel.projectVertexZ[faceVertices[0]];
+        int j2 = gameModel.projectedVertZ[faceVertices[0]];
         int k2 = j2;
-        int l2 = gameModel.vertexViewX[faceVertices[0]];
+        int l2 = gameModel.viewVertX[faceVertices[0]];
         int i3 = l2;
-        if (gameModel.vertexViewX[faceVertices[1]] < l2) {
-            l2 = gameModel.vertexViewX[faceVertices[1]];
+        if (gameModel.viewVertX[faceVertices[1]] < l2) {
+            l2 = gameModel.viewVertX[faceVertices[1]];
         } else {
-            i3 = gameModel.vertexViewX[faceVertices[1]];
+            i3 = gameModel.viewVertX[faceVertices[1]];
         }
-        int j3 = gameModel.vertexViewY[faceVertices[1]];
-        int k3 = gameModel.vertexViewY[faceVertices[0]];
-        int k = gameModel.projectVertexZ[faceVertices[1]];
+        int j3 = gameModel.viewVertY[faceVertices[1]];
+        int k3 = gameModel.viewVertY[faceVertices[0]];
+        int k = gameModel.projectedVertZ[faceVertices[1]];
         if (k > k2) {
             k2 = k;
         } else if (k < j2) {
             j2 = k;
         }
-        k = gameModel.vertexViewX[faceVertices[1]];
+        k = gameModel.viewVertX[faceVertices[1]];
         if (k > i3) {
             i3 = k;
         } else if (k < l2) {
             l2 = k;
         }
-        k = gameModel.vertexViewY[faceVertices[1]];
+        k = gameModel.viewVertY[faceVertices[1]];
         if (k > k3) {
             k3 = k;
         } else if (k < j3) {
@@ -1698,21 +1698,21 @@ public class SceneRenderer {
         int j = polygon2.face;
         int ai[] = gameModel.faceVertices[i];
         int ai1[] = model_1.faceVertices[j];
-        int k = gameModel.faceNumVertices[i];
-        int l = model_1.faceNumVertices[j];
-        int k2 = model_1.projectVertexX[ai1[0]];
-        int l2 = model_1.projectVertexY[ai1[0]];
-        int i3 = model_1.projectVertexZ[ai1[0]];
+        int k = gameModel.numVerticesPerFace[i];
+        int l = model_1.numVerticesPerFace[j];
+        int k2 = model_1.projectedVertX[ai1[0]];
+        int l2 = model_1.projectedVertY[ai1[0]];
+        int i3 = model_1.projectedVertZ[ai1[0]];
         int j3 = polygon2.normalX;
         int k3 = polygon2.normalY;
         int l3 = polygon2.normalZ;
-        int i4 = model_1.normalMagnitude[j];
+        int i4 = model_1.faceCameraNormalMagnitude[j];
         int j4 = polygon2.visibility;
         boolean flag = false;
         for (int k4 = 0; k4 < k; k4++) {
             int i1 = ai[k4];
-            int i2 = (k2 - gameModel.projectVertexX[i1]) * j3 + (l2 - gameModel.projectVertexY[i1]) * k3
-                    + (i3 - gameModel.projectVertexZ[i1]) * l3;
+            int i2 = (k2 - gameModel.projectedVertX[i1]) * j3 + (l2 - gameModel.projectedVertY[i1]) * k3
+                    + (i3 - gameModel.projectedVertZ[i1]) * l3;
             if ((i2 >= -i4 || j4 >= 0) && (i2 <= i4 || j4 <= 0)) {
                 continue;
             }
@@ -1723,19 +1723,19 @@ public class SceneRenderer {
         if (!flag) {
             return true;
         }
-        k2 = gameModel.projectVertexX[ai[0]];
-        l2 = gameModel.projectVertexY[ai[0]];
-        i3 = gameModel.projectVertexZ[ai[0]];
+        k2 = gameModel.projectedVertX[ai[0]];
+        l2 = gameModel.projectedVertY[ai[0]];
+        i3 = gameModel.projectedVertZ[ai[0]];
         j3 = polygon1.normalX;
         k3 = polygon1.normalY;
         l3 = polygon1.normalZ;
-        i4 = gameModel.normalMagnitude[i];
+        i4 = gameModel.faceCameraNormalMagnitude[i];
         j4 = polygon1.visibility;
         flag = false;
         for (int l4 = 0; l4 < l; l4++) {
             int j1 = ai1[l4];
-            int j2 = (k2 - model_1.projectVertexX[j1]) * j3 + (l2 - model_1.projectVertexY[j1]) * k3
-                    + (i3 - model_1.projectVertexZ[j1]) * l3;
+            int j2 = (k2 - model_1.projectedVertX[j1]) * j3 + (l2 - model_1.projectedVertY[j1]) * k3
+                    + (i3 - model_1.projectedVertZ[j1]) * l3;
             if ((j2 >= -i4 || j4 <= 0) && (j2 <= i4 || j4 >= 0)) {
                 continue;
             }
@@ -1753,19 +1753,19 @@ public class SceneRenderer {
             ai3 = new int[4];
             int i5 = ai[0];
             int k1 = ai[1];
-            ai2[0] = gameModel.vertexViewX[i5] - 20;
-            ai2[1] = gameModel.vertexViewX[k1] - 20;
-            ai2[2] = gameModel.vertexViewX[k1] + 20;
-            ai2[3] = gameModel.vertexViewX[i5] + 20;
-            ai3[0] = ai3[3] = gameModel.vertexViewY[i5];
-            ai3[1] = ai3[2] = gameModel.vertexViewY[k1];
+            ai2[0] = gameModel.viewVertX[i5] - 20;
+            ai2[1] = gameModel.viewVertX[k1] - 20;
+            ai2[2] = gameModel.viewVertX[k1] + 20;
+            ai2[3] = gameModel.viewVertX[i5] + 20;
+            ai3[0] = ai3[3] = gameModel.viewVertY[i5];
+            ai3[1] = ai3[2] = gameModel.viewVertY[k1];
         } else {
             ai2 = new int[k];
             ai3 = new int[k];
             for (int j5 = 0; j5 < k; j5++) {
                 int i6 = ai[j5];
-                ai2[j5] = gameModel.vertexViewX[i6];
-                ai3[j5] = gameModel.vertexViewY[i6];
+                ai2[j5] = gameModel.viewVertX[i6];
+                ai3[j5] = gameModel.viewVertY[i6];
             }
 
         }
@@ -1776,19 +1776,19 @@ public class SceneRenderer {
             ai5 = new int[4];
             int k5 = ai1[0];
             int l1 = ai1[1];
-            ai4[0] = model_1.vertexViewX[k5] - 20;
-            ai4[1] = model_1.vertexViewX[l1] - 20;
-            ai4[2] = model_1.vertexViewX[l1] + 20;
-            ai4[3] = model_1.vertexViewX[k5] + 20;
-            ai5[0] = ai5[3] = model_1.vertexViewY[k5];
-            ai5[1] = ai5[2] = model_1.vertexViewY[l1];
+            ai4[0] = model_1.viewVertX[k5] - 20;
+            ai4[1] = model_1.viewVertX[l1] - 20;
+            ai4[2] = model_1.viewVertX[l1] + 20;
+            ai4[3] = model_1.viewVertX[k5] + 20;
+            ai5[0] = ai5[3] = model_1.viewVertY[k5];
+            ai5[1] = ai5[2] = model_1.viewVertY[l1];
         } else {
             ai4 = new int[l];
             ai5 = new int[l];
             for (int l5 = 0; l5 < l; l5++) {
                 int j6 = ai1[l5];
-                ai4[l5] = model_1.vertexViewX[j6];
-                ai5[l5] = model_1.vertexViewY[j6];
+                ai4[l5] = model_1.viewVertX[j6];
+                ai5[l5] = model_1.viewVertY[j6];
             }
 
         }
@@ -1802,21 +1802,21 @@ public class SceneRenderer {
         int j = entity_1.face;
         int ai[] = gameModel.faceVertices[i];
         int ai1[] = model_1.faceVertices[j];
-        int k = gameModel.faceNumVertices[i];
-        int l = model_1.faceNumVertices[j];
-        int i2 = model_1.projectVertexX[ai1[0]];
-        int j2 = model_1.projectVertexY[ai1[0]];
-        int k2 = model_1.projectVertexZ[ai1[0]];
+        int k = gameModel.numVerticesPerFace[i];
+        int l = model_1.numVerticesPerFace[j];
+        int i2 = model_1.projectedVertX[ai1[0]];
+        int j2 = model_1.projectedVertY[ai1[0]];
+        int k2 = model_1.projectedVertZ[ai1[0]];
         int l2 = entity_1.normalX;
         int i3 = entity_1.normalY;
         int j3 = entity_1.normalZ;
-        int k3 = model_1.normalMagnitude[j];
+        int k3 = model_1.faceCameraNormalMagnitude[j];
         int l3 = entity_1.visibility;
         boolean flag = false;
         for (int i4 = 0; i4 < k; i4++) {
             int i1 = ai[i4];
-            int k1 = (i2 - gameModel.projectVertexX[i1]) * l2 + (j2 - gameModel.projectVertexY[i1]) * i3
-                    + (k2 - gameModel.projectVertexZ[i1]) * j3;
+            int k1 = (i2 - gameModel.projectedVertX[i1]) * l2 + (j2 - gameModel.projectedVertY[i1]) * i3
+                    + (k2 - gameModel.projectedVertZ[i1]) * j3;
             if ((k1 >= -k3 || l3 >= 0) && (k1 <= k3 || l3 <= 0)) {
                 continue;
             }
@@ -1827,19 +1827,19 @@ public class SceneRenderer {
         if (!flag) {
             return true;
         }
-        i2 = gameModel.projectVertexX[ai[0]];
-        j2 = gameModel.projectVertexY[ai[0]];
-        k2 = gameModel.projectVertexZ[ai[0]];
+        i2 = gameModel.projectedVertX[ai[0]];
+        j2 = gameModel.projectedVertY[ai[0]];
+        k2 = gameModel.projectedVertZ[ai[0]];
         l2 = polygon.normalX;
         i3 = polygon.normalY;
         j3 = polygon.normalZ;
-        k3 = gameModel.normalMagnitude[i];
+        k3 = gameModel.faceCameraNormalMagnitude[i];
         l3 = polygon.visibility;
         flag = false;
         for (int j4 = 0; j4 < l; j4++) {
             int j1 = ai1[j4];
-            int l1 = (i2 - model_1.projectVertexX[j1]) * l2 + (j2 - model_1.projectVertexY[j1]) * i3
-                    + (k2 - model_1.projectVertexZ[j1]) * j3;
+            int l1 = (i2 - model_1.projectedVertX[j1]) * l2 + (j2 - model_1.projectedVertY[j1]) * i3
+                    + (k2 - model_1.projectedVertZ[j1]) * j3;
             if ((l1 >= -k3 || l3 <= 0) && (l1 <= k3 || l3 >= 0)) {
                 continue;
             }
