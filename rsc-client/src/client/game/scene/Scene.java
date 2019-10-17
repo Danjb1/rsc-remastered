@@ -11,7 +11,7 @@ public class Scene {
     private static final int MAX_MODELS = 15000;
     private static final int MAX_SPRITES = 1000;
 
-    private Model spriteFaces;
+    private Model sprites;
     private Camera camera;
     private int numModels;
     private Model models[] = new Model[MAX_MODELS];
@@ -29,7 +29,7 @@ public class Scene {
         for (int l = 0; l < spriteEntities.length; l++) {
             spriteEntities[l] = new SpriteEntity();
         }
-        spriteFaces = new Model(MAX_SPRITES * 2, MAX_SPRITES);
+        sprites = new Model(MAX_SPRITES * 2, MAX_SPRITES);
         camera = new Camera();
         
         camera.setCamera(0, 0, 0, 912, 0, 0, 2000);
@@ -70,12 +70,12 @@ public class Scene {
 
     public void clear() {
         numSprites = 0;
-        spriteFaces.clear();
+        sprites.clear();
     }
 
     public void reduceSprites(int i) {
         numSprites -= i;
-        spriteFaces.removeGeometry(i, i * 2);
+        sprites.removeGeometry(i, i * 2);
         if (numSprites < 0) {
             numSprites = 0;
         }
@@ -83,17 +83,17 @@ public class Scene {
 
     public int addSpriteEntity(SpriteEntity spriteEntity, int tag) {
         spriteEntities[numSprites] = spriteEntity;
-        int v1 = spriteFaces.addVertex(
+        int v1 = sprites.addVertex(
                 spriteEntity.getX(),
                 spriteEntity.getY(),
                 spriteEntity.getZ());
-        int v2 = spriteFaces.addVertex(
+        int v2 = sprites.addVertex(
                 spriteEntity.getX(),
                 spriteEntity.getZ() - spriteEntity.getHeight(),
                 spriteEntity.getY());
         int vertices[] = { v1, v2 };
-        spriteFaces.addFace(2, vertices, 0, 0);
-        spriteFaces.faceTag[numSprites] = tag;
+        sprites.addFace(2, vertices, 0, 0);
+        sprites.faceTag[numSprites] = tag;
         numSprites++;
         return numSprites - 1;
     }
@@ -118,8 +118,8 @@ public class Scene {
 
     }
 
-    public Model getSpriteFaces() {
-        return spriteFaces;
+    public Model getSprites() {
+        return sprites;
     }
     
     public Camera getCamera() {

@@ -3,6 +3,7 @@ package client.game.render;
 import client.Canvas;
 import client.game.scene.Camera;
 import client.game.scene.Model;
+import client.game.scene.Model.TransformState;
 import client.game.scene.Polygon;
 import client.game.scene.Scene;
 import client.game.scene.SpriteEntity;
@@ -99,8 +100,8 @@ public class SceneRenderer {
         int clipXModified = clipX * clipFar3d >> viewDistance;
         int clipYModified = clipY * clipFar3d >> viewDistance;
         camera.prepareForRendering(clipX, clipY, clipFar3d, clipXModified, clipYModified);
-        scene.getModels()[scene.getNumModels()] = scene.getSpriteFaces();
-        scene.getSpriteFaces().transformState = 2;
+        scene.getModels()[scene.getNumModels()] = scene.getSprites();
+        scene.getSprites().transformState = TransformState.BILLBOARD;
 
         for (int i = 0; i < scene.getNumModels(); i++) {
             scene.getModels()[i].project(camera, viewDistance, clipNear);
@@ -207,7 +208,7 @@ public class SceneRenderer {
         }
 
         // Render 2d models (sprites)
-        Model spriteFaces = scene.getSpriteFaces();
+        Model spriteFaces = scene.getSprites();
         if (spriteFaces.visible) {
             for (int face = 0; face < spriteFaces.numFaces; face++) {
                 int faceVertices[] = spriteFaces.faceVertices[face];
@@ -249,7 +250,7 @@ public class SceneRenderer {
             int polyFace = polygon.face;
 
             // Is polygon a sprite?
-            if (polygonModel == scene.getSpriteFaces()) {
+            if (polygonModel == scene.getSprites()) {
                 renderSprite(polygonModel, polyFace, canvas);
                 continue;
             }

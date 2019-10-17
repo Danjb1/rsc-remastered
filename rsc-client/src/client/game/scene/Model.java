@@ -20,6 +20,12 @@ public class Model {
 
     private static final int DEFAULT_SCALE = 256;
 
+    public enum TransformState {
+        CLEAN,
+        PENDING,
+        BILLBOARD
+    }
+
     private static int sine9[] = new int[512];
     private static int sine11[] = new int[2048];
     private static int base64Alphabet[] = new int[256];
@@ -45,7 +51,7 @@ public class Model {
     private int shearZX;
     private int shearZY;
     private int transformType;
-    public int transformState = 1;
+    public TransformState transformState = TransformState.PENDING;
 
     // Faces
     public int numFaces;
@@ -57,9 +63,7 @@ public class Model {
     public int faceCameraNormalMagnitude[];
     public int faceCameraNormalScale[];
     public int faceIntensity[];
-    public int faceNormalX[];
-    public int faceNormalY[];
-    private int faceNormalZ[];
+    public Vector3i[] faceNormals;
     public int faceTag[];
     private int faceBoundLeft[];
     private int faceBoundRight[];
@@ -268,7 +272,7 @@ public class Model {
             }
         }
 
-        transformState = 1;
+        transformState = TransformState.PENDING;
     }
 
     /**
@@ -352,8 +356,7 @@ public class Model {
         faceCameraNormalScale = new int[maxFaces];
         faceCameraNormalMagnitude = new int[maxFaces];
         if (!projected) {
-            verticesProjected = new Vector3i[maxVertices];
-            verticesView = new Vector2i[maxVertices];
+            clearProjection();
         }
         if (!unpickable) {
             faceTag = new int[maxFaces];
@@ -364,9 +367,10 @@ public class Model {
             verticesTransformed = new Vector3i[maxVertices];
         }
         if (!unlit || !isolated) {
-            faceNormalX = new int[maxFaces];
-            faceNormalY = new int[maxFaces];
-            faceNormalZ = new int[maxFaces];
+            faceNormals = new Vector3i[maxFaces];
+            for (int i = 0; i < maxFaces; i++) {
+                faceNormals[i] = new Vector3i();
+            }
         }
         if (!isolated) {
             faceBoundLeft = new int[maxFaces];
@@ -390,6 +394,11 @@ public class Model {
     public void clearProjection() {
         verticesProjected = new Vector3i[numVertices];
         verticesView = new Vector2i[numVertices];
+
+        for (int i = 0; i < numVertices; i++) {
+            verticesProjected[i] = new Vector3i();
+            verticesView[i] = new Vector2i();
+        }
     }
 
     public void clear() {
@@ -458,7 +467,7 @@ public class Model {
 
         }
 
-        transformState = 1;
+        transformState = TransformState.PENDING;
     }
 
     /**
@@ -518,7 +527,7 @@ public class Model {
         faceVertices[numFaces] = vertices;
         faceFillFront[numFaces] = fillFront;
         faceFillBack[numFaces] = fillBack;
-        transformState = 1;
+        transformState = TransformState.PENDING;
 
         return numFaces++;
     }
@@ -677,25 +686,25 @@ public class Model {
     public void modRotation(int rotX, int rotY, int rotZ) {
         rotate.add(rotX & 0xff, rotY & 0xff, rotZ & 0xff);
         determineTransformType();
-        transformState = 1;
+        transformState = TransformState.PENDING;
     }
 
     public void setRotation(int rotX, int rotY, int rotZ) {
         rotate.set(rotX & 0xff, rotY & 0xff, rotZ & 0xff);
         determineTransformType();
-        transformState = 1;
+        transformState = TransformState.PENDING;
     }
 
     public void translate(int translateX, int translateY, int translateZ) {
         translate.add(translateX, translateY, translateZ);
         determineTransformType();
-        transformState = 1;
+        transformState = TransformState.PENDING;
     }
 
     public void setTranslate(int translateX, int translateY, int translateZ) {
         translate.set(translateX, translateY, translateZ);
         determineTransformType();
-        transformState = 1;
+        transformState = TransformState.PENDING;
     }
 
     private void determineTransformType() {
@@ -872,9 +881,9 @@ public class Model {
         for (int j = 0; j < numFaces; j++) {
             if (faceIntensity[j] != USE_GOURAUD_LIGHTING) {
                 faceIntensity[j] =
-                        (faceNormalX[j] * lightDirection.x
-                        + faceNormalY[j] * lightDirection.y
-                        + faceNormalZ[j] * lightDirection.z) / i;
+                        (faceNormals[j].x * lightDirection.x
+                        + faceNormals[j].y * lightDirection.y
+                        + faceNormals[j].z * lightDirection.z) / i;
             }
         }
 
@@ -893,9 +902,9 @@ public class Model {
             if (faceIntensity[l] == USE_GOURAUD_LIGHTING) {
                 for (int i1 = 0; i1 < numVerticesPerFace[l]; i1++) {
                     int k1 = faceVertices[l][i1];
-                    normalX[k1] += faceNormalX[l];
-                    normalY[k1] += faceNormalY[l];
-                    normalZ[k1] += faceNormalZ[l];
+                    normalX[k1] += faceNormals[l].x;
+                    normalY[k1] += faceNormals[l].y;
+                    normalZ[k1] += faceNormals[l].z;
                     normalMagnitude[k1]++;
                 }
 
@@ -954,9 +963,9 @@ public class Model {
             if (normalMagnitude <= 0) {
                 normalMagnitude = 1;
             }
-            faceNormalX[i] = (normalX * 0x10000) / normalMagnitude;
-            faceNormalY[i] = (normalY * 0x10000) / normalMagnitude;
-            faceNormalZ[i] = (normalZ * 65535) / normalMagnitude;
+            faceNormals[i].x = (normalX * 0x10000) / normalMagnitude;
+            faceNormals[i].y = (normalY * 0x10000) / normalMagnitude;
+            faceNormals[i].z = (normalZ * 65535) / normalMagnitude;
             faceCameraNormalScale[i] = -1;
         }
 
@@ -964,24 +973,20 @@ public class Model {
     }
 
     private void applyTransform() {
-        if (transformState == 2) {
-            transformState = 0;
+
+        if (transformState == TransformState.BILLBOARD) {
+            transformState = TransformState.CLEAN;
             for (int i = 0; i < numVertices; i++) {
-                verticesTransformed[i].x = vertices[i].x;
-                verticesTransformed[i].y = vertices[i].y;
-                verticesTransformed[i].z = vertices[i].z;
+                verticesTransformed[i].set(vertices[i]);
             }
 
             x1 = y1 = z1 = 0xff676981;
             diameter = x2 = y2 = z2 = 0x98967f;
-            return;
-        }
-        if (transformState == 1) {
-            transformState = 0;
-            for (int j = 0; j < numVertices; j++) {
-                verticesTransformed[j].x = vertices[j].x;
-                verticesTransformed[j].y = vertices[j].y;
-                verticesTransformed[j].z = vertices[j].z;
+
+        } else if (transformState == TransformState.PENDING) {
+            transformState = TransformState.CLEAN;
+            for (int i = 0; i < numVertices; i++) {
+                verticesTransformed[i].set(vertices[i]);
             }
 
             if (transformType >= 2) {
@@ -991,8 +996,8 @@ public class Model {
                 scale(scale.x, scale.y, scale.z);
             }
             if (transformType >= 4) {
-                applyShear(shearXY, shearXZ, shearYX, shearYZ,
-                        shearZX, shearZY);
+                applyShear(
+                        shearXY, shearXZ, shearYX, shearYZ, shearZX, shearZY);
             }
             if (transformType >= 1) {
                 applyTranslate(translate.x, translate.y, translate.z);
@@ -1051,7 +1056,6 @@ public class Model {
                 projectedZ = projectedY * j3 + projectedZ * k3 >> 15;
                 projectedY = k2;
             }
-            verticesView[index] = new Vector2i();
             if (projectedZ >= clipNear) {
                 verticesView[index].x = (projectedX << viewDistance) / projectedZ;
             } else {
@@ -1062,8 +1066,7 @@ public class Model {
             } else {
                 verticesView[index].y = projectedY << viewDistance;
             }
-            verticesProjected[index] =
-                    new Vector3i(projectedX, projectedY, projectedZ);
+            verticesProjected[index].set(projectedX, projectedY, projectedZ);
         }
 
     }
@@ -1106,7 +1109,7 @@ public class Model {
         translate.set(gameModel.translate);
         rotate.set(gameModel.rotate);
         determineTransformType();
-        transformState = 1;
+        transformState = TransformState.PENDING;
     }
 
     public int readBase64(byte data[]) {
