@@ -11,7 +11,7 @@ public class ModelUtils {
 
     /**
      * Adds a wall to the given model.
-     * 
+     *
      * @param world
      * @param model
      * @param wallIndex
@@ -34,7 +34,7 @@ public class ModelUtils {
         int j3 = model.addUniqueVertex(i2, -world.getElevation(x1, z1) - height, j2);
         int k3 = model.addUniqueVertex(k2, -world.getElevation(x2, z2) - height, l2);
         int l3 = model.addUniqueVertex(k2, -world.getElevation(x2, z2), l2);
-        
+
         int i4 = model.addFace(4, new int[] { i3, j3, k3, l3 }, frontTexture, backTexture);
         if (Resources.getDoorDef(wallIndex).getUnknown() == 5) {
             model.faceTag[i4] = 30000 + wallIndex;
@@ -63,7 +63,7 @@ public class ModelUtils {
     private static void setAmbientLighting(World world, int modelIndex1, int modelIndex2, int x, int z, int ambience) {
         Model gameModel = world.getLandscapeModel(modelIndex1 + modelIndex2 * 8);
         for (int vertex = 0; vertex < gameModel.numVertices; vertex++) {
-            if (gameModel.vertexX[vertex] == x * 128 && gameModel.vertexZ[vertex] == z * 128) {
+            if (gameModel.vertices[vertex].x == x * 128 && gameModel.vertices[vertex].z == z * 128) {
                 gameModel.setVertexAmbience(vertex, ambience);
                 return;
             }
@@ -72,24 +72,24 @@ public class ModelUtils {
 
     /**
      * Creates a Door model.
-     * 
+     *
      * @param door
      * @param world
      * @param entityId
      * @return
      */
     public static Model createDoor(Door door, World world, int entityId) {
-        
+
         int modelX1 = door.getX();
         int modelZ1 = door.getZ();
         int modelX2 = modelX1;
         int modelZ2 = modelZ1;
-        
+
         int id = door.getId();
         int frontTex = Resources.getDoorDef(id).getFrontTexture();
         int backTex = Resources.getDoorDef(id).getBackTexture();
         int height = Resources.getDoorDef(id).getHeight();
-        
+
         int orientation = door.getOrientation();
         if (orientation == 0) {
             modelX2 += 1;
@@ -105,7 +105,7 @@ public class ModelUtils {
             modelX2 += 1;
             modelZ2 += 1;
         }
-        
+
         modelX1 *= World.TILE_WIDTH;
         modelZ1 *= World.TILE_DEPTH;
         modelX2 *= World.TILE_WIDTH;
@@ -117,13 +117,13 @@ public class ModelUtils {
         int vert3 = model.addUniqueVertex(modelX2, -world.getAveragedElevation(modelX2, modelZ2) - height, modelZ2);
         int vert4 = model.addUniqueVertex(modelX2, -world.getAveragedElevation(modelX2, modelZ2), modelZ2);
         int vertices[] = { vert1, vert2, vert3, vert4 };
-        
+
         model.addFace(4, vertices, frontTex, backTex);
         model.setLighting(false, 60, 24, -50, -10, -50);
-        
+
         model.entityId = MIN_DOOR_ID + entityId;
-        
+
         return model;
     }
-    
+
 }

@@ -3,6 +3,8 @@ package client.game.scene;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import org.joml.Vector3i;
+
 import client.util.DataUtils;
 
 /**
@@ -19,6 +21,8 @@ public class Model {
     private static int base64Alphabet[] = new int[256];
 
     public int numVertices;
+    public Vector3i[] vertices;
+    public Vector3i[] verticesTransformed;
     public int projectedVertX[];
     public int projectedVertY[];
     public int projectedVertZ[];
@@ -56,12 +60,6 @@ public class Model {
     public boolean unpickable;
     public boolean projected;
     public int maxVertices;
-    public int vertexX[];
-    public int vertexY[];
-    public int vertexZ[];
-    public int vertexTransformedX[];
-    public int vertexTransformedY[];
-    public int vertexTransformedZ[];
     private int maxFaces;
     private int faceBoundLeft[];
     private int faceBoundRight[];
@@ -129,23 +127,27 @@ public class Model {
      * @param offset
      */
     public Model(byte data[], int offset) {
+
         int numVertices = DataUtils.getUnsignedShort(data, offset);
         offset += 2;
+
         int numFaces = DataUtils.getUnsignedShort(data, offset);
         offset += 2;
+
         initialise(numVertices, numFaces);
+
         for (int i = 0; i < numVertices; i++) {
-            vertexX[i] = DataUtils.getSigned2Bytes(data, offset);
+            vertices[i].x = DataUtils.getSigned2Bytes(data, offset);
             offset += 2;
         }
 
         for (int i = 0; i < numVertices; i++) {
-            vertexY[i] = DataUtils.getSigned2Bytes(data, offset);
+            vertices[i].y = DataUtils.getSigned2Bytes(data, offset);
             offset += 2;
         }
 
         for (int i = 0; i < numVertices; i++) {
-            vertexZ[i] = DataUtils.getSigned2Bytes(data, offset);
+            vertices[i].z = DataUtils.getSigned2Bytes(data, offset);
             offset += 2;
         }
 
@@ -200,6 +202,7 @@ public class Model {
      * @param path
      */
     public Model(String path) {
+
         byte abyte0[] = null;
         try {
             java.io.InputStream inputstream = DataUtils.streamFromPath(path);
@@ -221,17 +224,20 @@ public class Model {
             numFaces = 0;
             return;
         }
-        int l = readBase64(abyte0);
-        int someCount = readBase64(abyte0);
-        initialise(l, someCount);
-        for (int j3 = 0; j3 < l; j3++) {
-            int j1 = readBase64(abyte0);
-            int k1 = readBase64(abyte0);
-            int l1 = readBase64(abyte0);
-            addUniqueVertex(j1, k1, l1);
+
+        int numVertices = readBase64(abyte0);
+        int numFaces = readBase64(abyte0);
+
+        initialise(numVertices, numFaces);
+
+        for (int j3 = 0; j3 < numVertices; j3++) {
+            int x = readBase64(abyte0);
+            int y = readBase64(abyte0);
+            int z = readBase64(abyte0);
+            addUniqueVertex(x, y, z);
         }
 
-        for (int k3 = 0; k3 < someCount; k3++) {
+        for (int k3 = 0; k3 < numFaces; k3++) {
             int i2 = readBase64(abyte0);
             int j2 = readBase64(abyte0);
             int k2 = readBase64(abyte0);
@@ -327,9 +333,10 @@ public class Model {
     }
 
     private void initialise(int maxVertices, int maxFaces) {
-        vertexX = new int[maxVertices];
-        vertexY = new int[maxVertices];
-        vertexZ = new int[maxVertices];
+        vertices = new Vector3i[maxVertices];
+        for (int i = 0; i < maxVertices; i++) {
+            vertices[i] = new Vector3i();
+        }
         vertexIntensity = new int[maxVertices];
         vertexAmbience = new byte[maxVertices];
         numVerticesPerFace = new int[maxFaces];
@@ -350,13 +357,9 @@ public class Model {
             faceTag = new int[maxFaces];
         }
         if (autoCommit) {
-            vertexTransformedX = vertexX;
-            vertexTransformedY = vertexY;
-            vertexTransformedZ = vertexZ;
+            verticesTransformed = vertices;
         } else {
-            vertexTransformedX = new int[maxVertices];
-            vertexTransformedY = new int[maxVertices];
-            vertexTransformedZ = new int[maxVertices];
+            verticesTransformed = new Vector3i[maxVertices];
         }
         if (!unlit || !isolated) {
             faceNormalX = new int[maxFaces];
@@ -441,9 +444,9 @@ public class Model {
 
                 for (int vertId = 0; vertId < gameModel.numVerticesPerFace[faceId]; vertId++) {
                     faces[vertId] = addUniqueVertex(
-                            gameModel.vertexX[vertices[vertId]],
-                            gameModel.vertexY[vertices[vertId]],
-                            gameModel.vertexZ[vertices[vertId]]);
+                            gameModel.vertices[vertices[vertId]].x,
+                            gameModel.vertices[vertices[vertId]].y,
+                            gameModel.vertices[vertices[vertId]].z);
                 }
 
                 int faceIndex = addFace(
@@ -476,7 +479,7 @@ public class Model {
 
         // Check if vertex has already been added
         for (int l = 0; l < numVertices; l++) {
-            if (vertexX[l] == x && vertexY[l] == y && vertexZ[l] == z) {
+            if (vertices[l].x == x && vertices[l].y == y && vertices[l].z == z) {
                 return l;
             }
         }
@@ -485,9 +488,7 @@ public class Model {
             return -1;
         }
 
-        vertexX[numVertices] = x;
-        vertexY[numVertices] = y;
-        vertexZ[numVertices] = z;
+        vertices[numVertices] = new Vector3i(x, y, z);
 
         return numVertices++;
     }
@@ -506,9 +507,7 @@ public class Model {
             return -1;
         }
 
-        vertexX[numVertices] = x;
-        vertexY[numVertices] = z;
-        vertexZ[numVertices] = y;
+        vertices[numVertices] = new Vector3i(x, y, z);
 
         return numVertices++;
     }
@@ -543,8 +542,8 @@ public class Model {
             int i3 = numVerticesPerFace[i];
             int ai2[] = faceVertices[i];
             for (int i4 = 0; i4 < i3; i4++) {
-                j2 += vertexX[ai2[i4]];
-                k2 += vertexZ[ai2[i4]];
+                j2 += vertices[ai2[i4]].x;
+                k2 += vertices[ai2[i4]].z;
             }
 
             int k4 = j2 / (i3 * pieceDx) + (k2 / (i3 * pieceDz)) * rows;
@@ -571,8 +570,8 @@ public class Model {
             int l4 = numVerticesPerFace[i];
             int ai3[] = faceVertices[i];
             for (int i5 = 0; i5 < l4; i5++) {
-                k3 += vertexX[ai3[i5]];
-                j4 += vertexZ[ai3[i5]];
+                k3 += vertices[ai3[i5]].x;
+                j4 += vertices[ai3[i5]].z;
             }
 
             int j5 = k3 / (l4 * pieceDx) + (j4 / (l4 * pieceDz)) * rows;
@@ -595,9 +594,9 @@ public class Model {
         int destVertices[] = new int[count];
         for (int i = 0; i < count; i++) {
             int l = destVertices[i] = gameModel.addUniqueVertex(
-                    vertexX[srcVertices[i]],
-                    vertexY[srcVertices[i]],
-                    vertexZ[srcVertices[i]]);
+                    vertices[srcVertices[i]].x,
+                    vertices[srcVertices[i]].y,
+                    vertices[srcVertices[i]].z);
             gameModel.vertexIntensity[l] = vertexIntensity[srcVertices[i]];
             gameModel.vertexAmbience[l] = vertexAmbience[srcVertices[i]];
         }
@@ -745,34 +744,34 @@ public class Model {
 
     private void applyTranslate(int dx, int dy, int dz) {
         for (int i = 0; i < numVertices; i++) {
-            vertexTransformedX[i] += dx;
-            vertexTransformedY[i] += dy;
-            vertexTransformedZ[i] += dz;
+            verticesTransformed[i].x += dx;
+            verticesTransformed[i].y += dy;
+            verticesTransformed[i].z += dz;
         }
     }
 
     private void applyRotation(int rotX, int rotY, int rotZ) {
-        for (int i3 = 0; i3 < numVertices; i3++) {
+        for (int i = 0; i < numVertices; i++) {
             if (rotZ != 0) {
                 int l = sine9[rotZ];
                 int k1 = sine9[rotZ + 256];
-                int j2 = vertexTransformedY[i3] * l + vertexTransformedX[i3] * k1 >> 15;
-                vertexTransformedY[i3] = vertexTransformedY[i3] * k1 - vertexTransformedX[i3] * l >> 15;
-                vertexTransformedX[i3] = j2;
+                int j2 = verticesTransformed[i].y * l + verticesTransformed[i].x * k1 >> 15;
+                verticesTransformed[i].y = verticesTransformed[i].y * k1 - verticesTransformed[i].x * l >> 15;
+                verticesTransformed[i].x = j2;
             }
             if (rotX != 0) {
                 int i1 = sine9[rotX];
                 int l1 = sine9[rotX + 256];
-                int k2 = vertexTransformedY[i3] * l1 - vertexTransformedZ[i3] * i1 >> 15;
-                vertexTransformedZ[i3] = vertexTransformedY[i3] * i1 + vertexTransformedZ[i3] * l1 >> 15;
-                vertexTransformedY[i3] = k2;
+                int k2 = verticesTransformed[i].y * l1 - verticesTransformed[i].z * i1 >> 15;
+                verticesTransformed[i].z = verticesTransformed[i].y * i1 + verticesTransformed[i].z * l1 >> 15;
+                verticesTransformed[i].y = k2;
             }
             if (rotY != 0) {
                 int j1 = sine9[rotY];
                 int i2 = sine9[rotY + 256];
-                int l2 = vertexTransformedZ[i3] * j1 + vertexTransformedX[i3] * i2 >> 15;
-                vertexTransformedZ[i3] = vertexTransformedZ[i3] * i2 - vertexTransformedX[i3] * j1 >> 15;
-                vertexTransformedX[i3] = l2;
+                int l2 = verticesTransformed[i].z * j1 + verticesTransformed[i].x * i2 >> 15;
+                verticesTransformed[i].z = verticesTransformed[i].z * i2 - verticesTransformed[i].x * j1 >> 15;
+                verticesTransformed[i].x = l2;
             }
         }
 
@@ -787,32 +786,30 @@ public class Model {
             int zy) {
         for (int i = 0; i < numVertices; i++) {
             if (xy != 0) {
-                vertexTransformedX[i] += vertexTransformedY[i] * xy >> 8;
+                verticesTransformed[i].x += verticesTransformed[i].y * xy >> 8;
             }
             if (xz != 0) {
-                vertexTransformedZ[i] += vertexTransformedY[i] * xz >> 8;
+                verticesTransformed[i].z += verticesTransformed[i].y * xz >> 8;
             }
             if (yx != 0) {
-                vertexTransformedX[i] += vertexTransformedZ[i] * yx >> 8;
+                verticesTransformed[i].x += verticesTransformed[i].z * yx >> 8;
             }
             if (yz != 0) {
-                vertexTransformedY[i] += vertexTransformedZ[i] * yz >> 8;
+                verticesTransformed[i].y += verticesTransformed[i].z * yz >> 8;
             }
             if (zx != 0) {
-                vertexTransformedZ[i] += vertexTransformedX[i] * zx >> 8;
+                verticesTransformed[i].z += verticesTransformed[i].x * zx >> 8;
             }
             if (zy != 0) {
-                vertexTransformedY[i] += vertexTransformedX[i] * zy >> 8;
+                verticesTransformed[i].y += verticesTransformed[i].x * zy >> 8;
             }
         }
 
     }
 
     private void scale(int scaleX, int scaleY, int scaleZ) {
-        for (int l = 0; l < numVertices; l++) {
-            vertexTransformedX[l] = vertexTransformedX[l] * scaleX >> 8;
-            vertexTransformedY[l] = vertexTransformedY[l] * scaleY >> 8;
-            vertexTransformedZ[l] = vertexTransformedZ[l] * scaleZ >> 8;
+        for (int i = 0; i < numVertices; i++) {
+            verticesTransformed[i].mul(scaleX >> 8);
         }
 
     }
@@ -825,27 +822,27 @@ public class Model {
             int k = ai[0];
             int i1 = numVerticesPerFace[i];
             int x1;
-            int x2 = x1 = vertexTransformedX[k];
+            int x2 = x1 = verticesTransformed[k].x;
             int y1;
-            int y2 = y1 = vertexTransformedY[k];
+            int y2 = y1 = verticesTransformed[k].y;
             int z1;
-            int z2 = z1 = vertexTransformedZ[k];
+            int z2 = z1 = verticesTransformed[k].z;
             for (int j = 0; j < i1; j++) {
                 int l = ai[j];
-                if (vertexTransformedX[l] < x1) {
-                    x1 = vertexTransformedX[l];
-                } else if (vertexTransformedX[l] > x2) {
-                    x2 = vertexTransformedX[l];
+                if (verticesTransformed[l].x < x1) {
+                    x1 = verticesTransformed[l].x;
+                } else if (verticesTransformed[l].x > x2) {
+                    x2 = verticesTransformed[l].x;
                 }
-                if (vertexTransformedY[l] < y1) {
-                    y1 = vertexTransformedY[l];
-                } else if (vertexTransformedY[l] > y2) {
-                    y2 = vertexTransformedY[l];
+                if (verticesTransformed[l].y < y1) {
+                    y1 = verticesTransformed[l].y;
+                } else if (verticesTransformed[l].y > y2) {
+                    y2 = verticesTransformed[l].y;
                 }
-                if (vertexTransformedZ[l] < z1) {
-                    z1 = vertexTransformedZ[l];
-                } else if (vertexTransformedZ[l] > z2) {
-                    z2 = vertexTransformedZ[l];
+                if (verticesTransformed[l].z < z1) {
+                    z1 = verticesTransformed[l].z;
+                } else if (verticesTransformed[l].z > z2) {
+                    z2 = verticesTransformed[l].z;
                 }
             }
 
@@ -944,17 +941,17 @@ public class Model {
         for (int i = 0; i < numFaces; i++) {
             int ai[] = faceVertices[i];
 
-            int aX = vertexTransformedX[ai[0]];
-            int aY = vertexTransformedY[ai[0]];
-            int aZ = vertexTransformedZ[ai[0]];
+            int aX = verticesTransformed[ai[0]].x;
+            int aY = verticesTransformed[ai[0]].y;
+            int aZ = verticesTransformed[ai[0]].z;
 
-            int bX = vertexTransformedX[ai[1]] - aX;
-            int bY = vertexTransformedY[ai[1]] - aY;
-            int bZ = vertexTransformedZ[ai[1]] - aZ;
+            int bX = verticesTransformed[ai[1]].x - aX;
+            int bY = verticesTransformed[ai[1]].y - aY;
+            int bZ = verticesTransformed[ai[1]].z - aZ;
 
-            int cX = vertexTransformedX[ai[2]] - aX;
-            int cY = vertexTransformedY[ai[2]] - aY;
-            int cZ = vertexTransformedZ[ai[2]] - aZ;
+            int cX = verticesTransformed[ai[2]].x - aX;
+            int cY = verticesTransformed[ai[2]].y - aY;
+            int cZ = verticesTransformed[ai[2]].z - aZ;
 
             int normalX = (bY * cZ) - (cY * bZ);
             int normalY = (bZ * cX) - (cZ * bX);
@@ -991,9 +988,9 @@ public class Model {
         if (transformState == 2) {
             transformState = 0;
             for (int i = 0; i < numVertices; i++) {
-                vertexTransformedX[i] = vertexX[i];
-                vertexTransformedY[i] = vertexY[i];
-                vertexTransformedZ[i] = vertexZ[i];
+                verticesTransformed[i].x = vertices[i].x;
+                verticesTransformed[i].y = vertices[i].y;
+                verticesTransformed[i].z = vertices[i].z;
             }
 
             x1 = y1 = z1 = 0xff676981;
@@ -1003,9 +1000,9 @@ public class Model {
         if (transformState == 1) {
             transformState = 0;
             for (int j = 0; j < numVertices; j++) {
-                vertexTransformedX[j] = vertexX[j];
-                vertexTransformedY[j] = vertexY[j];
-                vertexTransformedZ[j] = vertexZ[j];
+                verticesTransformed[j].x = vertices[j].x;
+                verticesTransformed[j].y = vertices[j].y;
+                verticesTransformed[j].z = vertices[j].z;
             }
 
             if (transformType >= 2) {
@@ -1057,9 +1054,9 @@ public class Model {
             k3 = sine11[camera.getYaw() + 1024];
         }
         for (int index = 0; index < numVertices; index++) {
-            int k4 = vertexTransformedX[index] - camera.getX();
-            int l4 = vertexTransformedY[index] - camera.getY();
-            int i5 = vertexTransformedZ[index] - camera.getZ();
+            int k4 = verticesTransformed[index].x - camera.getX();
+            int l4 = verticesTransformed[index].y - camera.getY();
+            int i5 = verticesTransformed[index].z - camera.getZ();
             if (camera.getRoll() != 0) {
                 int i2 = l4 * l2 + k4 * i3 >> 15;
                 l4 = l4 * i3 - k4 * l2 >> 15;
@@ -1095,9 +1092,9 @@ public class Model {
     public void commitTransform() {
         applyTransform();
         for (int i = 0; i < numVertices; i++) {
-            vertexX[i] = vertexTransformedX[i];
-            vertexY[i] = vertexTransformedY[i];
-            vertexZ[i] = vertexTransformedZ[i];
+            vertices[i].x = verticesTransformed[i].x;
+            vertices[i].y = verticesTransformed[i].y;
+            vertices[i].z = verticesTransformed[i].z;
         }
 
         translateX = translateY = translateZ = 0;
