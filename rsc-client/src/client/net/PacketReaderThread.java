@@ -6,41 +6,44 @@ import java.io.IOException;
 import client.packets.Packet;
 import client.packets.PacketDeserializer;
 import client.packets.PacketDeserializers;
-import client.packets.PacketHandler;
-import client.packets.PacketHandlers;
 
 public class PacketReaderThread implements Runnable {
 
     private DataInputStream in;
 
-    private boolean closed;
+    private PacketListener packetListener;
 
-    public PacketReaderThread(DataInputStream in) {
+    private boolean stopped;
+
+    public PacketReaderThread(
+            DataInputStream in, PacketListener packetListener) {
+
         this.in = in;
+        this.packetListener = packetListener;
     }
 
     @Override
     public void run() {
-        while (!closed) {
+        while (!stopped) {
             try {
 
                 short id = in.readShort();
                 PacketDeserializer deserializer = PacketDeserializers.get(id);
 
                 if (deserializer != null) {
-
                     Packet p = deserializer.deserialize(in);
-
-                    PacketHandler handler = PacketHandlers.get(id);
-                    if (handler != null) {
-                        handler.apply(p);
-                    }
+                    packetListener.packetReceived(p);
                 }
 
             } catch (IOException e) {
                 e.printStackTrace();
+                packetListener.packetReadError(e);
             }
         }
+    }
+
+    public void stop() {
+        stopped = true;
     }
 
 }

@@ -19,6 +19,9 @@ import client.game.world.WorldLoader;
 import client.loading.LoadingScreen;
 import client.login.LoginScreen;
 import client.net.Connection;
+import client.packets.Packet;
+import client.packets.PacketHandler;
+import client.packets.PacketHandlers;
 
 /**
  * State responsible for running the game.
@@ -67,7 +70,7 @@ public class Game extends State {
     @Override
     public void start() {
         executor = Executors.newCachedThreadPool();
-        executor.execute(connection.createPacketReaderThread());
+        executor.execute(connection.getPacketReaderThread());
     }
 
     @Override
@@ -81,8 +84,10 @@ public class Game extends State {
         // Key handling
         if (input.wasKeyReleased(KeyEvent.VK_PAGE_UP)) {
             worldLoader.ascend();
+            loadSectors();
         } else if (input.wasKeyReleased(KeyEvent.VK_PAGE_DOWN)) {
             worldLoader.descend();
+            loadSectors();
         }
 
         // Get mouse-picked models / faces from the rendered scene
@@ -110,6 +115,7 @@ public class Game extends State {
             int tileX = world.getTileXForFace(selectedGroundFaceId);
             int tileZ = world.getTileZForFace(selectedGroundFaceId);
             groundTileSelected(tileX, tileZ);
+            loadSectors();
         }
     }
 
@@ -123,14 +129,24 @@ public class Game extends State {
     @Override
     public void tick() {
 
+        handlePackets();
+
         if (player == null) {
             // Not yet logged in
             return;
         }
+    }
 
-        /*
-         * Load next Sectors
-         */
+    private void handlePackets() {
+        for (Packet p : connection.getPacketsReceived()) {
+            PacketHandler handler = PacketHandlers.get(p.id);
+            if (handler != null) {
+                handler.apply(p, this);
+            }
+        }
+    }
+
+    private void loadSectors() {
 
         if (player.x < 16 * World.TILE_WIDTH) {
             worldLoader.loadSector(world.getSectorX() - 1, world.getSectorZ());
@@ -152,7 +168,6 @@ public class Game extends State {
     }
 
     public void loggedIn() {
-        // TODO: call this upon receiving LoginSuccessPacket
         // Player position is relative to the World origin
         player = new Mob();
         player.x = 66 * World.TILE_WIDTH;

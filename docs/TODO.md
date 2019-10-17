@@ -6,6 +6,7 @@
     - Entity definitions
     - Resource loaders
     - Packet definitions
+    - Utils
 
 ## Client
 
@@ -13,7 +14,6 @@
  - Zooming
  - Don't render upper-storey walls that have no floors (e.g. chimneys)
  - Don't render roofs or upper storeys if player is indoors
- - Process deserialized packets
  - Send disconnect when closing
 
 ## Server
