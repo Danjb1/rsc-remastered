@@ -3,12 +3,14 @@ package client.game.scene;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import org.joml.Vector2i;
 import org.joml.Vector3i;
 
 import client.util.DataUtils;
+import client.util.VectorUtils;
 
 /**
- * Class respresenting a 3d model.
+ * Class representing a 3d model.
  *
  * @author Dan Bryce
  */
@@ -16,21 +18,38 @@ public class Model {
 
     public static final int USE_GOURAUD_LIGHTING = 12345678;
 
+    private static final int DEFAULT_SCALE = 256;
+
     private static int sine9[] = new int[512];
     private static int sine11[] = new int[2048];
     private static int base64Alphabet[] = new int[256];
 
+    // Vertices
     public int numVertices;
+    public int maxVertices;
     public Vector3i[] vertices;
     public Vector3i[] verticesTransformed;
-    public int projectedVertX[];
-    public int projectedVertY[];
-    public int projectedVertZ[];
-    public int viewVertX[];
-    public int viewVertY[];
+    public Vector3i[] verticesProjected;
+    public Vector2i[] verticesView;
     public int vertexIntensity[];
     public byte vertexAmbience[];
+
+    // Transform
+    private Vector3i translate;
+    private Vector3i rotate;
+    private Vector3i scale;
+    private int shearXY;
+    private int shearXZ;
+    private int shearYX;
+    private int shearYZ;
+    private int shearZX;
+    private int shearZY;
+    private int transformType;
+    public int transformState = 1;
+
+    // Faces
     public int numFaces;
+    private int maxFaces;
     public int numVerticesPerFace[];
     public int faceVertices[][];
     public int faceFillFront[];
@@ -41,55 +60,41 @@ public class Model {
     public int faceNormalX[];
     public int faceNormalY[];
     private int faceNormalZ[];
-    public int depth;
-    public int transformState = 1;
-    public boolean visible;
-    public int x1;
-    public int x2;
-    public int y1;
-    public int y2;
-    public int z1;
-    public int z2;
-    public boolean translucent;
-    public boolean transparent;
-    public int entityId = -1;
     public int faceTag[];
-    private boolean autoCommit;
-    public boolean isolated;
-    public boolean unlit;
-    public boolean unpickable;
-    public boolean projected;
-    public int maxVertices;
-    private int maxFaces;
     private int faceBoundLeft[];
     private int faceBoundRight[];
     private int faceBoundBottom[];
     private int faceBoundTop[];
     private int faceBoundNear[];
     private int faceBoundFar[];
-    private int translateX;
-    private int translateY;
-    private int translateZ;
-    private int rotX;
-    private int rotY;
-    private int rotZ;
-    private int scaleX;
-    private int scaleY;
-    private int scaleZ;
-    private int shearXY;
-    private int shearXZ;
-    private int shearYX;
-    private int shearYZ;
-    private int shearZX;
-    private int shearZY;
-    private int transformType;
+
+    // Properties
+    public int entityId = -1;
+    public int depth;
+    public boolean visible;
+    public boolean translucent;
+    public boolean transparent;
+    private boolean autoCommit;
+    public boolean isolated;
+    public boolean unlit;
+    public boolean unpickable;
+    public boolean projected;
+
+    // Bounds
+    public int x1;
+    public int x2;
+    public int y1;
+    public int y2;
+    public int z1;
+    public int z2;
+
+    // Lighting
     private int diameter = USE_GOURAUD_LIGHTING;
-    private int lightDirectionX = 180;
-    private int lightDirectionY = 155;
-    private int lightDirectionZ = 95;
-    private int lightDirectionMagnitude = 256;
+    private Vector3i lightDirection = new Vector3i(180, 155, 95);
     protected int lightDiffuse = 512;
     public int lightAmbience = 32;
+
+    // Base64 Input
     private int dataIndex;
 
     static {
@@ -347,11 +352,8 @@ public class Model {
         faceCameraNormalScale = new int[maxFaces];
         faceCameraNormalMagnitude = new int[maxFaces];
         if (!projected) {
-            projectedVertX = new int[maxVertices];
-            projectedVertY = new int[maxVertices];
-            projectedVertZ = new int[maxVertices];
-            viewVertX = new int[maxVertices];
-            viewVertY = new int[maxVertices];
+            verticesProjected = new Vector3i[maxVertices];
+            verticesView = new Vector2i[maxVertices];
         }
         if (!unpickable) {
             faceTag = new int[maxFaces];
@@ -378,19 +380,16 @@ public class Model {
         numVertices = 0;
         this.maxVertices = maxVertices;
         this.maxFaces = maxFaces;
-        translateX = translateY = translateZ = 0;
-        rotX = rotY = rotZ = 0;
-        scaleX = scaleY = scaleZ = 256;
+        translate = new Vector3i(0, 0, 0);
+        rotate = new Vector3i(0, 0, 0);
+        scale = new Vector3i(DEFAULT_SCALE, DEFAULT_SCALE, DEFAULT_SCALE);
         shearXY = shearXZ = shearYX = shearYZ = shearZX = shearZY = 256;
         transformType = 0;
     }
 
     public void clearProjection() {
-        projectedVertX = new int[numVertices];
-        projectedVertY = new int[numVertices];
-        projectedVertZ = new int[numVertices];
-        viewVertX = new int[numVertices];
-        viewVertY = new int[numVertices];
+        verticesProjected = new Vector3i[numVertices];
+        verticesView = new Vector2i[numVertices];
     }
 
     public void clear() {
@@ -432,10 +431,7 @@ public class Model {
             gameModel.commitTransform();
             lightAmbience = gameModel.lightAmbience;
             lightDiffuse = gameModel.lightDiffuse;
-            lightDirectionX = gameModel.lightDirectionX;
-            lightDirectionY = gameModel.lightDirectionY;
-            lightDirectionZ = gameModel.lightDirectionZ;
-            lightDirectionMagnitude = gameModel.lightDirectionMagnitude;
+            lightDirection = gameModel.lightDirection;
 
             for (int faceId = 0; faceId < gameModel.numFaces; faceId++) {
 
@@ -633,13 +629,9 @@ public class Model {
             }
         }
 
-        this.lightDirectionX = lightDirectionX;
-        this.lightDirectionY = lightDirectionY;
-        this.lightDirectionZ = lightDirectionZ;
-        lightDirectionMagnitude = (int) Math.sqrt(
-                lightDirectionX * lightDirectionX
-                + lightDirectionY * lightDirectionY
-                + lightDirectionZ * lightDirectionZ);
+        lightDirection.x = lightDirectionX;
+        lightDirection.y = lightDirectionY;
+        lightDirection.z = lightDirectionZ;
         light();
     }
 
@@ -657,13 +649,9 @@ public class Model {
             return;
         }
 
-        this.lightDirectionX = lightDirectionX;
-        this.lightDirectionY = lightDirectionY;
-        this.lightDirectionZ = lightDirectionZ;
-        lightDirectionMagnitude = (int) Math.sqrt(
-                lightDirectionX * lightDirectionX
-                + lightDirectionY * lightDirectionY
-                + lightDirectionZ * lightDirectionZ);
+        lightDirection.x = lightDirectionX;
+        lightDirection.y = lightDirectionY;
+        lightDirection.z = lightDirectionZ;
         light();
     }
 
@@ -676,10 +664,9 @@ public class Model {
             return;
         }
 
-        this.lightDirectionX = lightDirectionX;
-        this.lightDirectionY = lightDirectionY;
-        this.lightDirectionZ = lightDirectionZ;
-        lightDirectionMagnitude = (int) Math.sqrt(lightDirectionX * lightDirectionX + lightDirectionY * lightDirectionY + lightDirectionZ * lightDirectionZ);
+        lightDirection.x = lightDirectionX;
+        lightDirection.y = lightDirectionY;
+        lightDirection.z = lightDirectionZ;
         light();
     }
 
@@ -688,33 +675,25 @@ public class Model {
     }
 
     public void modRotation(int rotX, int rotY, int rotZ) {
-        this.rotX += rotX & 0xff;
-        this.rotY += rotY & 0xff;
-        this.rotZ += rotZ & 0xff;
+        rotate.add(rotX & 0xff, rotY & 0xff, rotZ & 0xff);
         determineTransformType();
         transformState = 1;
     }
 
-    public void setRotation(int i, int j, int k) {
-        rotX = i & 0xff;
-        rotY = j & 0xff;
-        rotZ = k & 0xff;
+    public void setRotation(int rotX, int rotY, int rotZ) {
+        rotate.set(rotX & 0xff, rotY & 0xff, rotZ & 0xff);
         determineTransformType();
         transformState = 1;
     }
 
     public void translate(int translateX, int translateY, int translateZ) {
-        this.translateX += translateX;
-        this.translateY += translateY;
-        this.translateZ += translateZ;
+        translate.add(translateX, translateY, translateZ);
         determineTransformType();
         transformState = 1;
     }
 
     public void setTranslate(int translateX, int translateY, int translateZ) {
-        this.translateX = translateX;
-        this.translateY = translateY;
-        this.translateZ = translateZ;
+        translate.set(translateX, translateY, translateZ);
         determineTransformType();
         transformState = 1;
     }
@@ -725,15 +704,15 @@ public class Model {
             transformType = 4;
             return;
         }
-        if (scaleX != 256 || scaleY != 256 || scaleZ != 256) {
+        if (scale.x != DEFAULT_SCALE || scale.y != DEFAULT_SCALE || scale.z != DEFAULT_SCALE) {
             transformType = 3;
             return;
         }
-        if (rotX != 0 || rotY != 0 || rotZ != 0) {
+        if (rotate.x != 0 || rotate.y != 0 || rotate.z != 0) {
             transformType = 2;
             return;
         }
-        if (translateX != 0 || translateY != 0 || translateZ != 0) {
+        if (translate.x != 0 || translate.y != 0 || translate.z != 0) {
             transformType = 1;
             return;
         } else {
@@ -889,13 +868,13 @@ public class Model {
         if (unlit) {
             return;
         }
-        int i = lightDiffuse * lightDirectionMagnitude >> 8;
+        int i = lightDiffuse * VectorUtils.magnitude(lightDirection) >> 8;
         for (int j = 0; j < numFaces; j++) {
             if (faceIntensity[j] != USE_GOURAUD_LIGHTING) {
                 faceIntensity[j] =
-                        (faceNormalX[j] * lightDirectionX
-                        + faceNormalY[j] * lightDirectionY
-                        + faceNormalZ[j] * lightDirectionZ) / i;
+                        (faceNormalX[j] * lightDirection.x
+                        + faceNormalY[j] * lightDirection.y
+                        + faceNormalZ[j] * lightDirection.z) / i;
             }
         }
 
@@ -926,9 +905,9 @@ public class Model {
         for (int j1 = 0; j1 < numVertices; j1++) {
             if (normalMagnitude[j1] > 0) {
                 vertexIntensity[j1] =
-                        (normalX[j1] * lightDirectionX
-                        + normalY[j1] * lightDirectionY
-                        + normalZ[j1] * lightDirectionZ)
+                        (normalX[j1] * lightDirection.x
+                        + normalY[j1] * lightDirection.y
+                        + normalZ[j1] * lightDirection.z)
                         / (i * normalMagnitude[j1]);
             }
         }
@@ -1006,17 +985,17 @@ public class Model {
             }
 
             if (transformType >= 2) {
-                applyRotation(rotX, rotY, rotZ);
+                applyRotation(rotate.x, rotate.y, rotate.z);
             }
             if (transformType >= 3) {
-                scale(scaleX, scaleY, scaleZ);
+                scale(scale.x, scale.y, scale.z);
             }
             if (transformType >= 4) {
                 applyShear(shearXY, shearXZ, shearYX, shearYZ,
                         shearZX, shearZY);
             }
             if (transformType >= 1) {
-                applyTranslate(translateX, translateY, translateZ);
+                applyTranslate(translate.x, translate.y, translate.z);
             }
             computeBounds();
             relight();
@@ -1054,37 +1033,37 @@ public class Model {
             k3 = sine11[camera.getYaw() + 1024];
         }
         for (int index = 0; index < numVertices; index++) {
-            int k4 = verticesTransformed[index].x - camera.getX();
-            int l4 = verticesTransformed[index].y - camera.getY();
-            int i5 = verticesTransformed[index].z - camera.getZ();
+            int projectedX = verticesTransformed[index].x - camera.getX();
+            int projectedY = verticesTransformed[index].y - camera.getY();
+            int projectedZ = verticesTransformed[index].z - camera.getZ();
             if (camera.getRoll() != 0) {
-                int i2 = l4 * l2 + k4 * i3 >> 15;
-                l4 = l4 * i3 - k4 * l2 >> 15;
-                k4 = i2;
+                int i2 = projectedY * l2 + projectedX * i3 >> 15;
+                projectedY = projectedY * i3 - projectedX * l2 >> 15;
+                projectedX = i2;
             }
             if (camera.getPitch() != 0) {
-                int j2 = i5 * l3 + k4 * i4 >> 15;
-                i5 = i5 * i4 - k4 * l3 >> 15;
-                k4 = j2;
+                int j2 = projectedZ * l3 + projectedX * i4 >> 15;
+                projectedZ = projectedZ * i4 - projectedX * l3 >> 15;
+                projectedX = j2;
             }
             if (camera.getYaw() != 0) {
-                int k2 = l4 * k3 - i5 * j3 >> 15;
-                i5 = l4 * j3 + i5 * k3 >> 15;
-                l4 = k2;
+                int k2 = projectedY * k3 - projectedZ * j3 >> 15;
+                projectedZ = projectedY * j3 + projectedZ * k3 >> 15;
+                projectedY = k2;
             }
-            if (i5 >= clipNear) {
-                viewVertX[index] = (k4 << viewDistance) / i5;
+            verticesView[index] = new Vector2i();
+            if (projectedZ >= clipNear) {
+                verticesView[index].x = (projectedX << viewDistance) / projectedZ;
             } else {
-                viewVertX[index] = k4 << viewDistance;
+                verticesView[index].x = projectedX << viewDistance;
             }
-            if (i5 >= clipNear) {
-                viewVertY[index] = (l4 << viewDistance) / i5;
+            if (projectedZ >= clipNear) {
+                verticesView[index].y = (projectedY << viewDistance) / projectedZ;
             } else {
-                viewVertY[index] = l4 << viewDistance;
+                verticesView[index].y = projectedY << viewDistance;
             }
-            projectedVertX[index] = k4;
-            projectedVertY[index] = l4;
-            projectedVertZ[index] = i5;
+            verticesProjected[index] =
+                    new Vector3i(projectedX, projectedY, projectedZ);
         }
 
     }
@@ -1092,14 +1071,12 @@ public class Model {
     public void commitTransform() {
         applyTransform();
         for (int i = 0; i < numVertices; i++) {
-            vertices[i].x = verticesTransformed[i].x;
-            vertices[i].y = verticesTransformed[i].y;
-            vertices[i].z = verticesTransformed[i].z;
+            vertices[i] = verticesTransformed[i];
         }
 
-        translateX = translateY = translateZ = 0;
-        rotX = rotY = rotZ = 0;
-        scaleX = scaleY = scaleZ = 256;
+        translate.set(0, 0, 0);
+        rotate.set(0, 0, 0);
+        scale.set(DEFAULT_SCALE, DEFAULT_SCALE, DEFAULT_SCALE);
         shearXY = shearXZ = shearYX = shearYZ = shearZX = shearZY = 256;
         transformType = 0;
     }
@@ -1126,12 +1103,8 @@ public class Model {
     }
 
     public void copyTransform(Model gameModel) {
-        rotX = gameModel.rotX;
-        rotY = gameModel.rotY;
-        rotZ = gameModel.rotZ;
-        translateX = gameModel.translateX;
-        translateY = gameModel.translateY;
-        translateZ = gameModel.translateZ;
+        translate.set(gameModel.translate);
+        rotate.set(gameModel.rotate);
         determineTransformType();
         transformState = 1;
     }
