@@ -76,7 +76,7 @@ It is my understanding that these files contain the game data from *mudclient204
 
 ### Resources
 
- - [RuneScape Classic Dump](https://github.com/tomfitzhenry/RuneScape-classic-dump) - A collection of lots of useful files and tools, including mudclient JARs, game data, source code, Landscape Editor, Map Generator and Sprite Editor.
+ - [RuneScape Classic Dump](http://rscdump.com/) - A collection of lots of useful files and tools, including mudclient JARs, game data, source code, Landscape Editor, Map Generator and Sprite Editor.
  - [Game Updates](http://RuneScape.wikia.com/wiki/Game_updates) - Complete archive of RuneScape news and updates.
  - [RSWiki](https://rswiki.moparisthebest.com) - Useful information about game data and protocols.
 
