@@ -33,7 +33,7 @@ Here are some of the known client versions:
 | **[mudclient134](http://rscdump.com/mudclient134.jar)** | |
 | **[mudclient135](http://rscdump.com/mudclient135.jar)** | [Source](https://bitbucket.org/_mthd0/rsc/src) |
 | **[mudclient136](http://rscdump.com/mudclient136.jar)** | |
-| **mudclient140 | [Source](https://bitbucket.org/Hikilaka/mudclient-140/src) |
+| **mudclient140** | [Source](https://bitbucket.org/Hikilaka/mudclient-140/src) |
 | **[mudclient149](http://rscdump.com/mudclient149.jar)** | |
 | **[mudclient175](http://rscdump.com/mudclient175.jar)** | |
 | **[mudclient187](http://rscdump.com/mudclient187.jar)** | |
