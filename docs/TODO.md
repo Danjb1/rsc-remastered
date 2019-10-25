@@ -10,6 +10,8 @@
 
 ## Client
 
+ - Grab resources from 235 client
+    - Consider changing the current resource structure
  - Camera rotation
  - Zooming
  - Don't render upper-storey walls that have no floors (e.g. chimneys)

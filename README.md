@@ -1,10 +1,20 @@
-# OpenRSC
+# RSC Remastered
+
+*(Formerly OpenRSC)*
 
 An open-source re-implementation of RuneScape Classic for private use.
 
 [![Screenshot](docs/screenshot.png)](https://youtu.be/o6hY1LMLiSU)
 
-See **[ABOUT.md](docs/ABOUT.md)** for more information.
+## :dart: Aim
+
+The primary aim of this project is to **deobfuscate**, **refactor** and **modernize** the RuneScape Classic client.
+
+While other projects have had great success in deobfuscating the source code, it is still very messy and difficult to understand, due to the nature of the decompilation process. The original game was also constrained by the need to run on old hardware and primitive web browsers.
+
+Refactoring it can make it significantly easier to read and maintain the code, as shown by [this example](docs/example_refactor.md). This could pave the way for all sorts of future enhancements, and perhaps ports to other platforms.
+
+ > See **[about](docs/about.md)** for more information.
 
 ## :chart_with_upwards_trend: Progress
 
