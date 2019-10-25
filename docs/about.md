@@ -40,22 +40,17 @@ RSC Remastered currently uses resources originating from EasyRSC.
  - [News Archive](http://RuneScape.wikia.com/wiki/Game_updates) - Complete archive of RuneScape news and updates.
  - [Jagex Archive Loader](https://gitlab.openrsc.com/Logg/Game/blob/22a0b131f4d6c2e3787f6af36394dc4a439c36d9/Tools/Map%20Generator/src/com/hikilaka/file/JagArchiveLoader.java) - Java class that can load Jagex archives.
  - [Jagex Archive Documentation](https://sites.google.com/site/commiesRuneScapedocumentation/cache/archives) - In-depth explanation of the Jagex Archive format.
-
-
-### Client Versions
-
- - [RSC 40, 127, 204, 233](https://bitbucket.org/eggsampler/rsc/src) - An assortment of partially-refactored client versions by the great eXemplar, with game data and documentation.
- - [RSC 135](https://bitbucket.org/_mthd0/rsc/src) - Partially-refactored *mudclient135*, with game data.
- - [RSC 140](https://bitbucket.org/Hikilaka/mudclient-140/src) - Partially-refactored *mudclient140*, with game data (and [accompanying server](https://bitbucket.org/Hikilaka/140-gameserver/src)).
+ - [eXemplar's Collection](https://bitbucket.org/eggsampler/rsc/src) - An assortment of documents and projects by the great eXemplar.
 
 ### Active Projects
 
  - [OpenRSC](https://openrsc.com/home) - An open-source RSC replica.
  - [RSC+](https://github.com/OrN/rscplus) - A really nice RuneScape Classic client mod with lots of features.
 
-### Old Projects
+### Archived Projects
 
  - [EasyRSC](https://www.rune-server.ee/runescape-development/rs-classic/tutorials/574938-easyrsc-eclipse.html) - Partially-refactored and modified client, with game data and a simple server implementation.
  - [OpenRSCD](https://github.com/Zlacki/OpenRSCD) - C++ server and eXemplar's largely-refactored *mudclient204*.
  - [MoparClassic](https://github.com/Lothy/MoparClassic) - Java / Scala server.
+ - [RSC 140 Server](https://bitbucket.org/Hikilaka/140-gameserver/src) - A Java-based server designed to work with *mudclient140*.
  - [RSC 204 Server](https://bitbucket.org/kjensenxz/rsc/src) - A JavaScript server designed to work with *mudclient204*.
