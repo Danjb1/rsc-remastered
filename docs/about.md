@@ -46,6 +46,8 @@ RSC Remastered currently uses resources originating from EasyRSC.
 
  - [OpenRSC](https://openrsc.com/home) - An open-source RSC replica.
  - [RSC+](https://github.com/OrN/rscplus) - A really nice RuneScape Classic client mod with lots of features.
+ - [2003Scape](https://github.com/2003scape) - JavaScript client and server for *mudclient204*.
+ - [RSCGo](https://github.com/spkaeros/RSCGo) - Simple RSC server written in Go.
 
 ### Archived Projects
 

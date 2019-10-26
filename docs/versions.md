@@ -48,7 +48,7 @@ Here are some of the known client versions:
 | **[mudclient199](http://rscdump.com/mudclient199.jar)** | |
 | **[mudclient201](http://rscdump.com/mudclient201.jar)** | |
 | **[mudclient202](https://github.com/tomfitzhenry/runescape-classic-dump/tree/master/rs1/rs1/v202)** | |
-| **[mudclient204](https://github.com/tomfitzhenry/RuneScape-classic-dump/blob/master/eXemplar's-collection/exemplar/rs1/rs1/mudclients/mudclient204.jar)** | [Source](https://bitbucket.org/eggsampler/rsc/src/master/204/) |
+| **[mudclient204](https://github.com/tomfitzhenry/RuneScape-classic-dump/blob/master/eXemplar's-collection/exemplar/rs1/rs1/mudclients/mudclient204.jar)** | [Source](https://bitbucket.org/eggsampler/rsc/src/master/204/) - [Mirror](https://github.com/2003scape/mudclient204) |
 | **[mudclient233](https://bitbucket.org/eggsampler/rsc/src/63e3a5c9482c27b3555b38b6a6b9453d2f1771c4/jars)** | [Source](https://bitbucket.org/eggsampler/rsc/src/master/233/) |
 | **mudclient235** | The final version ([Source](https://github.com/rsc-g15/rsc-235-deob)) |
 
