@@ -516,10 +516,10 @@ public class SoftwareRenderer {
     }
 
     private void generateScanlines(
-            int i,
-            int j,
-            int k,
-            int l,
+            int startX,
+            int endX,
+            int y,
+            int startS,
             int plane,
             int planeX[],
             int planeY[],
@@ -529,182 +529,183 @@ public class SoftwareRenderer {
 
         if (plane == 3) {
 
-            int k1 = planeY[0] + baseY;
-            int k2 = planeY[1] + baseY;
-            int k3 = planeY[2] + baseY;
-            int k4 = planeX[0];
-            int l5 = planeX[1];
-            int j7 = planeX[2];
-            int l8 = vertexShade[0];
-            int j10 = vertexShade[1];
-            int j11 = vertexShade[2];
-            int j12 = (baseY + clipY) - 1;
-            int l12 = 0;
-            int j13 = 0;
-            int l13 = 0;
-            int j14 = 0;
-            int l14 = Model.USE_GOURAUD_LIGHTING;
-            int j15 = 0xff439eb2;
+            int planeY0 = planeY[0] + baseY;
+            int planeY1 = planeY[1] + baseY;
+            int planeY2 = planeY[2] + baseY;
+            int planeX0 = planeX[0];
+            int planeX1 = planeX[1];
+            int planeX2 = planeX[2];
+            int vertexShade0 = vertexShade[0];
+            int vertexShade1 = vertexShade[1];
+            int vertexShade2 = vertexShade[2];
+            int limitY = (baseY + clipY) - 1;
 
-            if (k3 != k1) {
+            int planeXModified1 = 0;
+            int gradientPlane_2_0 = 0;
+            int vertexShadeModified1 = 0;
+            int shadeGradient_2_0 = 0;
+            int specialValue1 = Model.USE_GOURAUD_LIGHTING;
+            int specialValue2 = 0xff439eb2;
 
-                j13 = (j7 - k4 << 8) / (k3 - k1);
-                j14 = (j11 - l8 << 8) / (k3 - k1);
+            if (planeY2 != planeY0) {
 
-                if (k1 < k3) {
-                    l12 = k4 << 8;
-                    l13 = l8 << 8;
-                    l14 = k1;
-                    j15 = k3;
+                gradientPlane_2_0 = (planeX2 - planeX0 << 8) / (planeY2 - planeY0);
+                shadeGradient_2_0 = (vertexShade2 - vertexShade0 << 8) / (planeY2 - planeY0);
+
+                if (planeY0 < planeY2) {
+                    planeXModified1 = planeX0 << 8;
+                    vertexShadeModified1 = vertexShade0 << 8;
+                    specialValue1 = planeY0;
+                    specialValue2 = planeY2;
                 } else {
-                    l12 = j7 << 8;
-                    l13 = j11 << 8;
-                    l14 = k3;
-                    j15 = k1;
+                    planeXModified1 = planeX2 << 8;
+                    vertexShadeModified1 = vertexShade2 << 8;
+                    specialValue1 = planeY2;
+                    specialValue2 = planeY0;
                 }
 
-                if (l14 < 0) {
-                    l12 -= j13 * l14;
-                    l13 -= j14 * l14;
-                    l14 = 0;
+                if (specialValue1 < 0) {
+                    planeXModified1 -= gradientPlane_2_0 * specialValue1;
+                    vertexShadeModified1 -= shadeGradient_2_0 * specialValue1;
+                    specialValue1 = 0;
                 }
 
-                if (j15 > j12) {
-                    j15 = j12;
+                if (specialValue2 > limitY) {
+                    specialValue2 = limitY;
                 }
             }
 
-            int l15 = 0;
-            int j16 = 0;
-            int l16 = 0;
-            int j17 = 0;
-            int l17 = Model.USE_GOURAUD_LIGHTING;
-            int j18 = 0xff439eb2;
+            int planeXModified2 = 0;
+            int planeGradient_1_0 = 0;
+            int vertexShadeModified2 = 0;
+            int shadeGradient_1_0 = 0;
+            int specialValue3 = Model.USE_GOURAUD_LIGHTING;
+            int specialValue4 = 0xff439eb2;
 
-            if (k2 != k1) {
+            if (planeY1 != planeY0) {
 
-                j16 = (l5 - k4 << 8) / (k2 - k1);
-                j17 = (j10 - l8 << 8) / (k2 - k1);
+                planeGradient_1_0 = (planeX1 - planeX0 << 8) / (planeY1 - planeY0);
+                shadeGradient_1_0 = (vertexShade1 - vertexShade0 << 8) / (planeY1 - planeY0);
 
-                if (k1 < k2) {
-                    l15 = k4 << 8;
-                    l16 = l8 << 8;
-                    l17 = k1;
-                    j18 = k2;
+                if (planeY0 < planeY1) {
+                    planeXModified2 = planeX0 << 8;
+                    vertexShadeModified2 = vertexShade0 << 8;
+                    specialValue3 = planeY0;
+                    specialValue4 = planeY1;
                 } else {
-                    l15 = l5 << 8;
-                    l16 = j10 << 8;
-                    l17 = k2;
-                    j18 = k1;
+                    planeXModified2 = planeX1 << 8;
+                    vertexShadeModified2 = vertexShade1 << 8;
+                    specialValue3 = planeY1;
+                    specialValue4 = planeY0;
                 }
 
-                if (l17 < 0) {
-                    l15 -= j16 * l17;
-                    l16 -= j17 * l17;
-                    l17 = 0;
+                if (specialValue3 < 0) {
+                    planeXModified2 -= planeGradient_1_0 * specialValue3;
+                    vertexShadeModified2 -= shadeGradient_1_0 * specialValue3;
+                    specialValue3 = 0;
                 }
 
-                if (j18 > j12) {
-                    j18 = j12;
+                if (specialValue4 > limitY) {
+                    specialValue4 = limitY;
                 }
             }
 
-            int l18 = 0;
-            int j19 = 0;
-            int l19 = 0;
-            int j20 = 0;
-            int l20 = Model.USE_GOURAUD_LIGHTING;
-            int j21 = 0xff439eb2;
+            int planeXModified3 = 0;
+            int planeGradient_2_1 = 0;
+            int vertexShadeModified3 = 0;
+            int shadeGradient_2_1 = 0;
+            int specialValue5 = Model.USE_GOURAUD_LIGHTING;
+            int specialValue6 = 0xff439eb2;
 
-            if (k3 != k2) {
+            if (planeY2 != planeY1) {
 
-                j19 = (j7 - l5 << 8) / (k3 - k2);
-                j20 = (j11 - j10 << 8) / (k3 - k2);
+                planeGradient_2_1 = (planeX2 - planeX1 << 8) / (planeY2 - planeY1);
+                shadeGradient_2_1 = (vertexShade2 - vertexShade1 << 8) / (planeY2 - planeY1);
 
-                if (k2 < k3) {
-                    l18 = l5 << 8;
-                    l19 = j10 << 8;
-                    l20 = k2;
-                    j21 = k3;
+                if (planeY1 < planeY2) {
+                    planeXModified3 = planeX1 << 8;
+                    vertexShadeModified3 = vertexShade1 << 8;
+                    specialValue5 = planeY1;
+                    specialValue6 = planeY2;
                 } else {
-                    l18 = j7 << 8;
-                    l19 = j11 << 8;
-                    l20 = k3;
-                    j21 = k2;
+                    planeXModified3 = planeX2 << 8;
+                    vertexShadeModified3 = vertexShade2 << 8;
+                    specialValue5 = planeY2;
+                    specialValue6 = planeY1;
                 }
 
-                if (l20 < 0) {
-                    l18 -= j19 * l20;
-                    l19 -= j20 * l20;
-                    l20 = 0;
+                if (specialValue5 < 0) {
+                    planeXModified3 -= planeGradient_2_1 * specialValue5;
+                    vertexShadeModified3 -= shadeGradient_2_1 * specialValue5;
+                    specialValue5 = 0;
                 }
 
-                if (j21 > j12) {
-                    j21 = j12;
+                if (specialValue6 > limitY) {
+                    specialValue6 = limitY;
                 }
             }
 
-            minY = l14;
-            if (l17 < minY) {
-                minY = l17;
+            minY = specialValue1;
+            if (specialValue3 < minY) {
+                minY = specialValue3;
             }
-            if (l20 < minY) {
-                minY = l20;
-            }
-
-            maxY = j15;
-            if (j18 > maxY) {
-                maxY = j18;
-            }
-            if (j21 > maxY) {
-                maxY = j21;
+            if (specialValue5 < minY) {
+                minY = specialValue5;
             }
 
-            int l21 = 0;
+            maxY = specialValue2;
+            if (specialValue4 > maxY) {
+                maxY = specialValue4;
+            }
+            if (specialValue6 > maxY) {
+                maxY = specialValue6;
+            }
 
-            for (k = minY; k < maxY; k++) {
+            int endS = 0;
 
-                if (k >= l14 && k < j15) {
-                    i = j = l12;
-                    l = l21 = l13;
-                    l12 += j13;
-                    l13 += j14;
+            for (y = minY; y < maxY; y++) {
+
+                if (y >= specialValue1 && y < specialValue2) {
+                    startX = endX = planeXModified1;
+                    startS = endS = vertexShadeModified1;
+                    planeXModified1 += gradientPlane_2_0;
+                    vertexShadeModified1 += shadeGradient_2_0;
                 } else {
-                    i = 0xa0000;
-                    j = 0xfff60000;
+                    startX = 0xa0000;
+                    endX = 0xfff60000;
                 }
 
-                if (k >= l17 && k < j18) {
-                    if (l15 < i) {
-                        i = l15;
-                        l = l16;
+                if (y >= specialValue3 && y < specialValue4) {
+                    if (planeXModified2 < startX) {
+                        startX = planeXModified2;
+                        startS = vertexShadeModified2;
                     }
-                    if (l15 > j) {
-                        j = l15;
-                        l21 = l16;
+                    if (planeXModified2 > endX) {
+                        endX = planeXModified2;
+                        endS = vertexShadeModified2;
                     }
-                    l15 += j16;
-                    l16 += j17;
+                    planeXModified2 += planeGradient_1_0;
+                    vertexShadeModified2 += shadeGradient_1_0;
                 }
 
-                if (k >= l20 && k < j21) {
-                    if (l18 < i) {
-                        i = l18;
-                        l = l19;
+                if (y >= specialValue5 && y < specialValue6) {
+                    if (planeXModified3 < startX) {
+                        startX = planeXModified3;
+                        startS = vertexShadeModified3;
                     }
-                    if (l18 > j) {
-                        j = l18;
-                        l21 = l19;
+                    if (planeXModified3 > endX) {
+                        endX = planeXModified3;
+                        endS = vertexShadeModified3;
                     }
-                    l18 += j19;
-                    l19 += j20;
+                    planeXModified3 += planeGradient_2_1;
+                    vertexShadeModified3 += shadeGradient_2_1;
                 }
 
-                Scanline cameraVariables_6 = scanlines[k];
-                cameraVariables_6.startX = i;
-                cameraVariables_6.endX = j;
-                cameraVariables_6.startS = l;
-                cameraVariables_6.endS = l21;
+                Scanline scanline = scanlines[y];
+                scanline.startX = startX;
+                scanline.endX = endX;
+                scanline.startS = startS;
+                scanline.endS = endS;
             }
 
             if (minY < baseY - clipY) {
@@ -885,62 +886,62 @@ public class SoftwareRenderer {
 
             int j24 = 0;
 
-            for (k = minY; k < maxY; k++) {
+            for (y = minY; y < maxY; y++) {
 
-                if (k >= k16 && k < i17) {
-                    i = j = k14;
-                    l = j24 = k15;
+                if (y >= k16 && y < i17) {
+                    startX = endX = k14;
+                    startS = j24 = k15;
                     k14 += i15;
                     k15 += i16;
                 } else {
-                    i = 0xa0000;
-                    j = 0xfff60000;
+                    startX = 0xa0000;
+                    endX = 0xfff60000;
                 }
 
-                if (k >= k19 && k < i20) {
-                    if (k17 < i) {
-                        i = k17;
-                        l = k18;
+                if (y >= k19 && y < i20) {
+                    if (k17 < startX) {
+                        startX = k17;
+                        startS = k18;
                     }
-                    if (k17 > j) {
-                        j = k17;
+                    if (k17 > endX) {
+                        endX = k17;
                         j24 = k18;
                     }
                     k17 += i18;
                     k18 += i19;
                 }
 
-                if (k >= j22 && k < k22) {
-                    if (k20 < i) {
-                        i = k20;
-                        l = k21;
+                if (y >= j22 && y < k22) {
+                    if (k20 < startX) {
+                        startX = k20;
+                        startS = k21;
                     }
-                    if (k20 > j) {
-                        j = k20;
+                    if (k20 > endX) {
+                        endX = k20;
                         j24 = k21;
                     }
                     k20 += i21;
                     k21 += i22;
                 }
 
-                if (k >= l23 && k < i24) {
-                    if (l22 < i) {
-                        i = l22;
-                        l = j23;
+                if (y >= l23 && y < i24) {
+                    if (l22 < startX) {
+                        startX = l22;
+                        startS = j23;
                     }
-                    if (l22 > j) {
-                        j = l22;
+                    if (l22 > endX) {
+                        endX = l22;
                         j24 = j23;
                     }
                     l22 += i23;
                     j23 += k23;
                 }
 
-                Scanline cameraVariables_7 = scanlines[k];
-                cameraVariables_7.startX = i;
-                cameraVariables_7.endX = j;
-                cameraVariables_7.startS = l;
-                cameraVariables_7.endS = j24;
+                Scanline scanline = scanlines[y];
+                scanline.startX = startX;
+                scanline.endX = endX;
+                scanline.startS = startS;
+                scanline.endS = j24;
             }
 
             if (minY < baseY - clipY) {
@@ -950,9 +951,9 @@ public class SoftwareRenderer {
         } else {
 
             maxY = minY = planeY[0] += baseY;
-            for (k = 1; k < plane; k++) {
+            for (y = 1; y < plane; y++) {
                 int i2;
-                if ((i2 = planeY[k] += baseY) < minY) {
+                if ((i2 = planeY[y] += baseY) < minY) {
                     minY = i2;
                 } else if (i2 > maxY) {
                     maxY = i2;
@@ -971,8 +972,8 @@ public class SoftwareRenderer {
                 return;
             }
 
-            for (k = minY; k < maxY; k++) {
-                Scanline scanline = scanlines[k];
+            for (y = minY; y < maxY; y++) {
+                Scanline scanline = scanlines[y];
                 scanline.startX = 0xa0000;
                 scanline.endX = 0xfff60000;
             }
@@ -998,10 +999,10 @@ public class SoftwareRenderer {
                     i4 = maxY;
                 }
 
-                for (k = i3; k <= i4; k++) {
-                    Scanline cameraVariables_2 = scanlines[k];
-                    cameraVariables_2.startX = cameraVariables_2.endX = i5;
-                    cameraVariables_2.startS = cameraVariables_2.endS = l7;
+                for (y = i3; y <= i4; y++) {
+                    Scanline scanline = scanlines[y];
+                    scanline.startX = scanline.endX = i5;
+                    scanline.startS = scanline.endS = l7;
                     i5 += j6;
                     l7 += j9;
                 }
@@ -1023,27 +1024,27 @@ public class SoftwareRenderer {
                     i3 = maxY;
                 }
 
-                for (k = i4; k <= i3; k++) {
-                    Scanline cameraVariables_3 = scanlines[k];
-                    cameraVariables_3.startX = cameraVariables_3.endX = j5;
-                    cameraVariables_3.startS = cameraVariables_3.endS = i8;
+                for (y = i4; y <= i3; y++) {
+                    Scanline scanline = scanlines[y];
+                    scanline.startX = scanline.endX = j5;
+                    scanline.startS = scanline.endS = i8;
                     j5 += k6;
                     i8 += k9;
                 }
             }
 
-            for (k = 0; k < j2; k++) {
+            for (y = 0; y < j2; y++) {
 
-                int k5 = k + 1;
-                int j3 = planeY[k];
+                int k5 = y + 1;
+                int j3 = planeY[y];
                 int j4 = planeY[k5];
 
                 if (j3 < j4) {
 
-                    int l6 = planeX[k] << 8;
-                    int j8 = (planeX[k5] - planeX[k] << 8) / (j4 - j3);
-                    int l9 = vertexShade[k] << 8;
-                    int l10 = (vertexShade[k5] - vertexShade[k] << 8) / (j4 - j3);
+                    int l6 = planeX[y] << 8;
+                    int j8 = (planeX[k5] - planeX[y] << 8) / (j4 - j3);
+                    int l9 = vertexShade[y] << 8;
+                    int l10 = (vertexShade[k5] - vertexShade[y] << 8) / (j4 - j3);
 
                     if (j3 < 0) {
                         l6 -= j8 * j3;
@@ -1057,15 +1058,15 @@ public class SoftwareRenderer {
 
                     for (int l11 = j3; l11 <= j4; l11++) {
 
-                        Scanline cameraVariables_4 = scanlines[l11];
-                        if (l6 < cameraVariables_4.startX) {
-                            cameraVariables_4.startX = l6;
-                            cameraVariables_4.startS = l9;
+                        Scanline scanline = scanlines[l11];
+                        if (l6 < scanline.startX) {
+                            scanline.startX = l6;
+                            scanline.startS = l9;
                         }
 
-                        if (l6 > cameraVariables_4.endX) {
-                            cameraVariables_4.endX = l6;
-                            cameraVariables_4.endS = l9;
+                        if (l6 > scanline.endX) {
+                            scanline.endX = l6;
+                            scanline.endS = l9;
                         }
 
                         l6 += j8;
@@ -1075,9 +1076,9 @@ public class SoftwareRenderer {
                 } else if (j3 > j4) {
 
                     int i7 = planeX[k5] << 8;
-                    int k8 = (planeX[k] - planeX[k5] << 8) / (j3 - j4);
+                    int k8 = (planeX[y] - planeX[k5] << 8) / (j3 - j4);
                     int i10 = vertexShade[k5] << 8;
-                    int i11 = (vertexShade[k] - vertexShade[k5] << 8) / (j3 - j4);
+                    int i11 = (vertexShade[y] - vertexShade[k5] << 8) / (j3 - j4);
 
                     if (j4 < 0) {
                         i7 -= k8 * j4;
@@ -1091,16 +1092,16 @@ public class SoftwareRenderer {
 
                     for (int i12 = j4; i12 <= j3; i12++) {
 
-                        Scanline cameraVariables_5 = scanlines[i12];
+                        Scanline scanline = scanlines[i12];
 
-                        if (i7 < cameraVariables_5.startX) {
-                            cameraVariables_5.startX = i7;
-                            cameraVariables_5.startS = i10;
+                        if (i7 < scanline.startX) {
+                            scanline.startX = i7;
+                            scanline.startS = i10;
                         }
 
-                        if (i7 > cameraVariables_5.endX) {
-                            cameraVariables_5.endX = i7;
-                            cameraVariables_5.endS = i10;
+                        if (i7 > scanline.endX) {
+                            scanline.endX = i7;
+                            scanline.endS = i10;
                         }
 
                         i7 += k8;
@@ -1491,32 +1492,34 @@ public class SoftwareRenderer {
         int rowStart = baseX + minY * width;
 
         if (gameModel.transparent) {
+
+            // Render gradients with transparency
             for (int i = minY; i < maxY; i++) {
                 Scanline scanline = scanlines[i];
                 int scanlineStartX = scanline.startX >> 8;
                 int k4 = scanline.endX >> 8;
-                int k6 = k4 - scanlineStartX;
-                if (k6 <= 0) {
+                int length = k4 - scanlineStartX;
+                if (length <= 0) {
                     rowStart += width;
                 } else {
-                    int l7 = scanline.startS;
-                    int i9 = (scanline.endS - l7) / k6;
+                    int gradientIndex = scanline.startS;
+                    int stride = (scanline.endS - gradientIndex) / length;
                     if (scanlineStartX < -clipX) {
-                        l7 += (-clipX - scanlineStartX) * i9;
+                        gradientIndex += (-clipX - scanlineStartX) * stride;
                         scanlineStartX = -clipX;
-                        k6 = k4 - scanlineStartX;
+                        length = k4 - scanlineStartX;
                     }
                     if (k4 > clipX) {
-                        int l4 = clipX;
-                        k6 = l4 - scanlineStartX;
+                        length = clipX - scanlineStartX;
                     }
-                    canvas.renderScanline_TranslucentGradient(-k6, rowStart + scanlineStartX, 0, currentGradientRamps, l7, i9);
+                    canvas.renderScanline_TranslucentGradient(length, rowStart + scanlineStartX, currentGradientRamps, gradientIndex, stride * 4);
                     rowStart += width;
                 }
             }
             return;
         }
 
+        // Render gradients (e.g. terrain)
         for (int i = minY; i < maxY; i++) {
             Scanline scanline = scanlines[i];
             int scanlineStartX = scanline.startX >> 8;
@@ -1537,7 +1540,7 @@ public class SoftwareRenderer {
                     length = l5 - scanlineStartX;
                 }
 
-                canvas.renderScanline_Gradient(length, rowStart + scanlineStartX, currentGradientRamps, gradientIndex, stride << 2);
+                canvas.renderScanline_Gradient(length, rowStart + scanlineStartX, currentGradientRamps, gradientIndex, stride * 4);
 
                 rowStart += width;
             }

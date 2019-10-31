@@ -1178,56 +1178,31 @@ public class Canvas {
 
     }
 
-    public void renderScanline_TranslucentGradient(int i, int j, int k, int ai1[], int l, int i1) {
+    /*
+     * No idea what this is used for.
+     */
+    public void renderScanline_TranslucentGradient(int length, int pxIndex, int gradient[], int gradientIndex, int stride) {
 
-        if (i >= 0) {
+        if (length < 0) {
             return;
         }
-        i1 <<= 2;
-        k = ai1[l >> 8 & 0xff];
-        l += i1;
-        int j1 = i / 16;
-        for (int k1 = j1; k1 < 0; k1++) {
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            k = ai1[l >> 8 & 0xff];
-            l += i1;
-        }
 
-        j1 = -(i % 16);
-        for (int l1 = 0; l1 < j1; l1++) {
-            pixels[j++] = k + (pixels[j] >> 1 & 0x7f7f7f);
-            if ((l1 & 3) == 3) {
-                k = ai1[l >> 8 & 0xff];
-                l += i1;
-                l += i1;
+        int color = 0;
+
+        for (int i = 0; i < length; i++) {
+
+            // Colour changes every 4 pixels
+            if (i % 4 == 0) {
+                color = gradient[gradientIndex >> 8 & 0xff];
+                gradientIndex += stride;
             }
-        }
 
+            pixels[pxIndex++] = color + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+        }
     }
 
     /*
-     * Used for grass!
+     * Used for terrain!
      */
     public void renderScanline_Gradient(int length, int pxIndex, int gradient[], int gradientIndex, int stride) {
 
@@ -1235,16 +1210,17 @@ public class Canvas {
             return;
         }
 
-        int color = gradient[gradientIndex >> 8 & 0xff];
+        int color = 0;
 
         for (int i = 0; i < length; i++) {
-            pixels[pxIndex++] = color;
 
-            // Every 4 pixels
+            // Colour changes every 4 pixels
             if (i % 4 == 0) {
                 color = gradient[gradientIndex >> 8 & 0xff];
                 gradientIndex += stride;
             }
+
+            pixels[pxIndex++] = color;
         }
     }
 
