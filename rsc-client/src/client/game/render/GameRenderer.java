@@ -17,7 +17,7 @@ import client.game.world.World;
  *
  * <ul>
  *  <li>Build the scene</li>
- *  <li>Tell the SceneRenderer to render the scene</li>
+ *  <li>Tell the SoftwareRenderer to render the scene</li>
  *  <li>Draw the UI on top</li>
  * </ul>
  *
@@ -33,7 +33,7 @@ public class GameRenderer extends StateRenderer {
     private Scene scene;
     private Camera camera;
 
-    private SceneRenderer sceneRenderer;
+    private SoftwareRenderer softwareRenderer;
     private MousePicker mousePicker;
 
     public GameRenderer(Game game) {
@@ -47,8 +47,8 @@ public class GameRenderer extends StateRenderer {
         int width = RuneClient.WINDOW_WIDTH;
         int height = RuneClient.WINDOW_HEIGHT;
 
-        sceneRenderer = new SceneRenderer(scene, width, height);
-        mousePicker = sceneRenderer.getMousePicker();
+        softwareRenderer = new SoftwareRenderer(scene, width, height);
+        mousePicker = softwareRenderer.getMousePicker();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class GameRenderer extends StateRenderer {
         mousePicker.setMousePos(input.getMouseX(), input.getMouseY());
 
         // Render the scene
-        sceneRenderer.render(canvas);
+        softwareRenderer.render(canvas);
     }
 
     private void buildScene() {

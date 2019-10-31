@@ -13,15 +13,14 @@ import client.res.Texture;
 /**
  * Class responsible for rendering a scene.
  *
- * <p>This is essentially a 3d software renderer; we could save a lot of
- * complexity by porting to OpenGL instead.
+ * <p>This is essentially a 3d software renderer; consider porting to OpenGL.
  *
  * <p>This class should not be aware of the game at all, and the game should
  * not be aware of what goes on inside this class.
  *
  * <p><i>Based on <code>client.Scene</code> from EasyRSC.</i>
  */
-public class SceneRenderer {
+public class SoftwareRenderer {
 
     private static final int MAX_POLYGONS = 15000;
 
@@ -80,7 +79,7 @@ public class SceneRenderer {
         public int endS;
     }
 
-    public SceneRenderer(Scene scene, int width, int height) {
+    public SoftwareRenderer(Scene scene, int width, int height) {
         this.scene = scene;
         this.camera = scene.getCamera();
 
@@ -1489,7 +1488,7 @@ public class SceneRenderer {
             }
         }
 
-        int l2 = baseX + minY * width;
+        int rowStart = baseX + minY * width;
 
         if (gameModel.transparent) {
             for (int i = minY; i < maxY; i++) {
@@ -1498,7 +1497,7 @@ public class SceneRenderer {
                 int k4 = scanline.endX >> 8;
                 int k6 = k4 - scanlineStartX;
                 if (k6 <= 0) {
-                    l2 += width;
+                    rowStart += width;
                 } else {
                     int l7 = scanline.startS;
                     int i9 = (scanline.endS - l7) / k6;
@@ -1511,8 +1510,8 @@ public class SceneRenderer {
                         int l4 = clipX;
                         k6 = l4 - scanlineStartX;
                     }
-                    canvas.renderScanline_TranslucentGradient(-k6, l2 + scanlineStartX, 0, currentGradientRamps, l7, i9);
-                    l2 += width;
+                    canvas.renderScanline_TranslucentGradient(-k6, rowStart + scanlineStartX, 0, currentGradientRamps, l7, i9);
+                    rowStart += width;
                 }
             }
             return;
@@ -1522,25 +1521,25 @@ public class SceneRenderer {
             Scanline scanline = scanlines[i];
             int scanlineStartX = scanline.startX >> 8;
             int k5 = scanline.endX >> 8;
-            int i7 = k5 - scanlineStartX;
-            if (i7 <= 0) {
-                l2 += width;
+            int length = k5 - scanlineStartX;
+            if (length <= 0) {
+                rowStart += width;
             } else {
-                int j8 = scanline.startS;
-                int k9 = (scanline.endS - j8) / i7;
+                int gradientIndex = scanline.startS;
+                int stride = (scanline.endS - gradientIndex) / length;
                 if (scanlineStartX < -clipX) {
-                    j8 += (-clipX - scanlineStartX) * k9;
+                    gradientIndex += (-clipX - scanlineStartX) * stride;
                     scanlineStartX = -clipX;
-                    i7 = k5 - scanlineStartX;
+                    length = k5 - scanlineStartX;
                 }
                 if (k5 > clipX) {
                     int l5 = clipX;
-                    i7 = l5 - scanlineStartX;
+                    length = l5 - scanlineStartX;
                 }
 
-                canvas.renderScanline_Gradient(-i7, l2 + scanlineStartX, 0, currentGradientRamps, j8, k9);
+                canvas.renderScanline_Gradient(length, rowStart + scanlineStartX, currentGradientRamps, gradientIndex, stride << 2);
 
-                l2 += width;
+                rowStart += width;
             }
         }
     }

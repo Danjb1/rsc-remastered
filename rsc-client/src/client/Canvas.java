@@ -1229,51 +1229,23 @@ public class Canvas {
     /*
      * Used for grass!
      */
-    public void renderScanline_Gradient(int i, int j, int k, int currentGradientRamps[], int l, int i1) {
+    public void renderScanline_Gradient(int length, int pxIndex, int gradient[], int gradientIndex, int stride) {
 
-        if (i >= 0) {
+        if (length < 0) {
             return;
         }
-        i1 <<= 2;
-        k = currentGradientRamps[l >> 8 & 0xff];
-        l += i1;
-        int j1 = i / 16;
-        for (int k1 = j1; k1 < 0; k1++) {
-            pixels[j++] = k;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            k = currentGradientRamps[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            k = currentGradientRamps[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            k = currentGradientRamps[l >> 8 & 0xff];
-            l += i1;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            pixels[j++] = k;
-            k = currentGradientRamps[l >> 8 & 0xff];
-            l += i1;
-        }
 
-        j1 = -(i % 16);
-        for (int l1 = 0; l1 < j1; l1++) {
-            pixels[j++] = k;
-            if ((l1 & 3) == 3) {
-                k = currentGradientRamps[l >> 8 & 0xff];
-                l += i1;
+        int color = gradient[gradientIndex >> 8 & 0xff];
+
+        for (int i = 0; i < length; i++) {
+            pixels[pxIndex++] = color;
+
+            // Every 4 pixels
+            if (i % 4 == 0) {
+                color = gradient[gradientIndex >> 8 & 0xff];
+                gradientIndex += stride;
             }
         }
-
     }
 
     public void drawLineX(int x1, int y, int x2, int colour) {
