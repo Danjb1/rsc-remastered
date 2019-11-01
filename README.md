@@ -16,9 +16,13 @@ Refactoring it can make it significantly easier to read and maintain the code, a
 
  > See **[about](docs/about.md)** for more information.
 
-## :chart_with_upwards_trend: Progress
+## :hammer: Build
 
-The initial goal is to be able to fully render the Runescape world and freely move around it. Later, gameplay and server-side functionality can be added.
+The project should work out-of-the-box with Eclipse.
+
+The client and server should be built separately. Be sure to include the provided `libs` and the `res` folder!
+
+## :chart_with_upwards_trend: Progress
 
 :heavy_check_mark: Loading screen\
 :heavy_check_mark:️ Title screen\
@@ -29,8 +33,10 @@ The initial goal is to be able to fully render the Runescape world and freely mo
 :x: Door rendering\
 :x: Model rendering (e.g. trees, fountains)\
 :x: Mob rendering\
+:x️: User interface\
 :x: Camera rotation\
-:x: Zooming
+
+> See **[ideas](docs/ideas.md)** for planned enhancements.
 
 ## :video_game: Controls
 
