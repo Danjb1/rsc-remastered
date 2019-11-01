@@ -1,13 +1,9 @@
 package client.game.render;
 
 import client.Canvas;
-import client.Input;
-import client.RuneClient;
 import client.StateRenderer;
 import client.game.Game;
-import client.game.scene.Camera;
 import client.game.scene.Scene;
-import client.game.world.Door;
 import client.game.world.World;
 
 /**
@@ -25,13 +21,17 @@ import client.game.world.World;
  */
 public class GameRenderer extends StateRenderer {
 
-    private static final int FOG_DISTANCE = 2300;
+    private static final int SPRITE_ID_MENUS = 2000;
+    private static final int SPRITE_ID_INVENTORY = 2001;
+
+    private static final int MENUS_OFFSET_X = 200;
+    private static final int MENUS_OFFSET_Y = 3;
+    private static final int INVENTORY_MENU_OFFSET_X = 248;
 
     private Game game;
-    private Input input;
     private World world;
+    private SceneBuilder sceneBuilder;
     private Scene scene;
-    private Camera camera;
 
     private SoftwareRenderer softwareRenderer;
     private MousePicker mousePicker;
@@ -39,96 +39,55 @@ public class GameRenderer extends StateRenderer {
     public GameRenderer(Game game) {
         this.game = game;
 
-        input = game.getInput();
         world = game.getWorld();
         scene = game.getScene();
-        camera = scene.getCamera();
 
-        int width = RuneClient.WINDOW_WIDTH;
-        int height = RuneClient.WINDOW_HEIGHT;
-
-        softwareRenderer = new SoftwareRenderer(scene, width, height);
+        sceneBuilder = new SceneBuilder(scene, world);
+        softwareRenderer = new SoftwareRenderer(scene,
+                game.getLauncher().getWidth(),
+                game.getLauncher().getHeight());
         mousePicker = softwareRenderer.getMousePicker();
     }
 
     @Override
     public void render(Canvas canvas) {
+        renderWorld(canvas);
+        renderUi(canvas);
+    }
+
+    private void renderWorld(Canvas canvas) {
 
         // Don't render until the world is loaded
         if (!world.isLoaded()) {
             return;
         }
 
-        // Build the scene
-        buildScene();
-        updateCamera();
-
-        // Prepare for mouse picking
-        mousePicker.setMousePos(input.getMouseX(), input.getMouseY());
-
         // Render the scene
+        sceneBuilder.build();
         softwareRenderer.render(canvas);
-    }
-
-    private void buildScene() {
-
-        int layer = world.getCurrentLayer();
-
-        /*
-         * Buildings
-         */
-        for (int i = 0; i < 64; i++) {
-
-            scene.removeModel(world.getRoofModel(layer, i));
-            if (layer == 0) {
-                // Remove roofs from upper storeys
-                scene.removeModel(world.getWallModel(1, i));
-                scene.removeModel(world.getRoofModel(1, i));
-                scene.removeModel(world.getWallModel(2, i));
-                scene.removeModel(world.getRoofModel(2, i));
-
-                // Add roof of current layer
-                // TODO: Don't add roofs or upper storeys if player is indoors!
-                scene.addModel(world.getRoofModel(layer, i));
-
-                // Add upper storeys
-                scene.addModel(world.getWallModel(1, i));
-                scene.addModel(world.getRoofModel(1, i));
-                scene.addModel(world.getWallModel(2, i));
-                scene.addModel(world.getRoofModel(2, i));
-            }
-        }
-
-        /*
-         * Doors
-         */
-        for (int i = 0; i < world.getNumDoors(); i++) {
-            Door door = world.getDoor(i);
-            if (world.containsTileRelativeToOrigin(door.getX(), door.getZ())) {
-                scene.addModel(door.getModel());
-            }
-        }
-    }
-
-    private void updateCamera() {
-
-        int x = game.getCurrentPlayer().x + game.getScreenRotationX();
-        int z = game.getCurrentPlayer().z + game.getScreenRotationZ();
-        int y = -world.getAveragedElevation(x, z);
-
-        int pitch = 912;
-        int yaw = game.getCameraRotation() * 4;
-        int roll = 0;
-        int height = game.getCameraHeight() * 2;
-
-        camera.setCamera(x, y, z, pitch, yaw, roll, height);
-
-        // Update fog distance based on camera height
-        scene.fogZDistance = FOG_DISTANCE + (game.getCameraHeight() * 2);
     }
 
     public MousePicker getMousePicker() {
         return mousePicker;
+    }
+
+    private void renderUi(Canvas canvas) {
+        renderMenus(canvas);
+        renderInventoryMenu(canvas);
+    }
+
+    private void renderMenus(Canvas canvas) {
+        canvas.drawSprite(
+                game.getLauncher().getWidth() - MENUS_OFFSET_X,
+                MENUS_OFFSET_Y,
+                SPRITE_ID_MENUS);
+    }
+
+    private void renderInventoryMenu(Canvas canvas) {
+        canvas.drawSprite(
+                game.getLauncher().getWidth() - INVENTORY_MENU_OFFSET_X,
+                MENUS_OFFSET_Y,
+                SPRITE_ID_INVENTORY);
     }
 
 }

@@ -30,7 +30,8 @@ public class LoginScreenRenderer extends StateRenderer {
 
     @Override
     public void render(Canvas canvas) {
-        int x = canvas.getWidth() / 2 - LOGO_SPRITE_WIDTH / 2
+        int x = canvas.getWidth() / 2
+                - LOGO_SPRITE_WIDTH / 2
                 - LOGO_SPRITE_OFFSET_X;
         canvas.drawSprite(x, 50, SPRITE_ID_LOGO);
     }

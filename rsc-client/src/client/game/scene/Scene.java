@@ -32,7 +32,7 @@ public class Scene {
         sprites = new Model(MAX_SPRITES * 2, MAX_SPRITES);
         camera = new Camera();
         
-        camera.setCamera(0, 0, 0, 912, 0, 0, 2000);
+        camera.set(0, 0, 0, 912, 0, 0, 2000);
         
         setLight(-50, -10, -50);
     }

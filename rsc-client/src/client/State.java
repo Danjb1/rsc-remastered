@@ -22,4 +22,8 @@ public abstract class State {
         return input;
     }
 
+    public RuneClient getLauncher() {
+        return launcher;
+    }
+
 }

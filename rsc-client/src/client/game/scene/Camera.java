@@ -2,16 +2,20 @@ package client.game.scene;
 
 /**
  * Class representing the camera within the game world.
- * 
+ *
  * @author Dan Bryce
  */
 public class Camera {
 
     public static final int DEFAULT_HEIGHT = 550;
-    
+
+    public static final int DEFAULT_PITCH = 912;
+
+    public static final int DEFAULT_FOG_DISTANCE = 2300;
+
     private static int sin2048Cache[] = new int[2048];
     private static int sin512Cache[] = new int[512];
-    
+
     static {
         for (int i1 = 0; i1 < 256; i1++) {
             sin512Cache[i1] = (int) (Math.sin(i1 * 0.02454369D) * 32768D);
@@ -22,7 +26,7 @@ public class Camera {
             sin2048Cache[j1 + 1024] = (int) (Math.cos(j1 * 0.00613592315D) * 32768D);
         }
     }
-    
+
     private int x;
     private int y;
     private int z;
@@ -36,7 +40,7 @@ public class Camera {
     private int frustumMaxY;
     private int frustumFarZ;
     private int frustumNearZ;
-    
+
     public void prepareForRendering(int clipX, int clipY, int clipFar3d, int clipXModified, int clipYModified) {
         frustumMaxX = 0;
         frustumMinX = 0;
@@ -60,7 +64,7 @@ public class Camera {
         frustumNearZ += z;
     }
 
-    public void setCamera(int x, int y, int z, int pitch, int yaw, int roll, int cameraHeight) {
+    public void set(int x, int y, int z, int pitch, int yaw, int roll, int cameraHeight) {
         pitch &= 0x3ff;
         yaw &= 0x3ff;
         roll &= 0x3ff;
@@ -97,15 +101,15 @@ public class Camera {
     }
 
     public void setFrustum(int x, int y, int z) {
-        
+
         /*
          * Transform the camera position according to its rotation
          */
-        
+
         int yawVar = -yaw + 1024 & 0x3ff;
         int pitchVar = -pitch + 1024 & 0x3ff;
         int rollVar = -roll + 1024 & 0x3ff;
-        
+
         if (rollVar != 0) {
             int k1 = sin2048Cache[rollVar];
             int j2 = sin2048Cache[rollVar + 1024];
@@ -113,7 +117,7 @@ public class Camera {
             y = y * j2 - x * k1 >> 15;
             x = i3;
         }
-        
+
         if (yawVar != 0) {
             int l1 = sin2048Cache[yawVar];
             int k2 = sin2048Cache[yawVar + 1024];
@@ -121,7 +125,7 @@ public class Camera {
             z = y * l1 + z * k2 >> 15;
             y = j3;
         }
-        
+
         if (pitchVar != 0) {
             int i2 = sin2048Cache[pitchVar];
             int l2 = sin2048Cache[pitchVar + 1024];
@@ -129,11 +133,11 @@ public class Camera {
             z = z * l2 - x * i2 >> 15;
             x = k3;
         }
-        
+
         /*
          * Bounds checking
          */
-        
+
         if (x < frustumMaxX) {
             frustumMaxX = x;
         }
@@ -153,75 +157,75 @@ public class Camera {
             frustumNearZ = z;
         }
     }
-    
+
     public int getX() {
         return x;
     }
-    
+
     public int getY() {
         return y;
     }
-    
+
     public int getZ() {
         return z;
     }
-    
+
     public void setX(int x) {
         this.x = x;
     }
-    
+
     public void setY(int y) {
         this.y = y;
     }
-    
+
     public void setZ(int z) {
         this.z = z;
     }
-    
+
     public int getPitch() {
         return pitch;
     }
-    
+
     public int getRoll() {
         return roll;
     }
-    
+
     public int getYaw() {
         return yaw;
     }
-    
+
     public void setPitch(int pitch) {
         this.pitch = pitch;
     }
-    
+
     public void setRoll(int roll) {
         this.roll = roll;
     }
-    
+
     public void setYaw(int yaw) {
         this.yaw = yaw;
     }
-    
+
     public int getFrustumMinX() {
         return frustumMinX;
     }
-    
+
     public int getFrustumMaxX() {
         return frustumMaxX;
     }
-    
+
     public int getFrustumMinY() {
         return frustumMinY;
     }
-    
+
     public int getFrustumMaxY() {
         return frustumMaxY;
     }
-    
+
     public int getFrustumFarZ() {
         return frustumFarZ;
     }
-    
+
     public int getFrustumNearZ() {
         return frustumNearZ;
     }

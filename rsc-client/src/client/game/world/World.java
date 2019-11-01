@@ -70,6 +70,11 @@ public class World {
     private static final int NUM_LAYERS = 4;
 
     /**
+     * Index of the layer at ground level.
+     */
+    public static final int LAYER_GROUND = 0;
+
+    /**
      * The Scene that should hold the loaded world models.
      */
     private Scene scene;

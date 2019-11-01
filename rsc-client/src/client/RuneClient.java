@@ -21,8 +21,8 @@ import client.loading.LoadingScreen;
  */
 public class RuneClient {
 
-    public static final int WINDOW_WIDTH = 1280;
-    public static final int WINDOW_HEIGHT = 720;
+    private static final int WINDOW_WIDTH = 1280;
+    private static final int WINDOW_HEIGHT = 720;
     private static final String WINDOW_TITLE = "OpenRSC";
 
     private static final int MS_PER_FRAME = 16; // 60fps
@@ -157,6 +157,14 @@ public class RuneClient {
 
     public State getState() {
         return state;
+    }
+
+    public int getWidth() {
+        return WINDOW_WIDTH;
+    }
+
+    public int getHeight() {
+        return WINDOW_HEIGHT;
     }
 
 }

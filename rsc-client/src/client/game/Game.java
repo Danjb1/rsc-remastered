@@ -52,8 +52,8 @@ public class Game extends State {
     // 64  = East
     // 0   = South
     private int cameraRotation = 128;
-    private int screenRotationX;
-    private int screenRotationY;
+    private int cameraPositionX;
+    private int cameraPositionZ;
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
 
     public Game(RuneClient launcher, Connection connection) {
@@ -80,6 +80,11 @@ public class Game extends State {
 
     @Override
     public void pollInput() {
+        handleKeys();
+        handleMouse();
+    }
+
+    private void handleKeys() {
 
         // Camera rotation
         if (input.isKeyDown(KeyEvent.VK_LEFT)) {
@@ -96,6 +101,9 @@ public class Game extends State {
             worldLoader.descend();
             loadSectors();
         }
+    }
+
+    private void handleMouse() {
 
         // Get mouse-picked models / faces from the rendered scene
         MousePicker mousePicker = renderer.getMousePicker();
@@ -142,6 +150,8 @@ public class Game extends State {
             // Not yet logged in
             return;
         }
+
+        updateCamera();
     }
 
     private void handlePackets() {
@@ -151,6 +161,23 @@ public class Game extends State {
                 handler.apply(p, this);
             }
         }
+    }
+
+    private void updateCamera() {
+
+        int x = player.x + cameraPositionX;
+        int z = player.z + cameraPositionZ;
+        int y = -world.getAveragedElevation(x, z);
+
+        int pitch = Camera.DEFAULT_PITCH;
+        int yaw = cameraRotation * 4;
+        int roll = 0;
+        int height = cameraHeight * 2;
+
+        scene.getCamera().set(x, y, z, pitch, yaw, roll, height);
+
+        // Update fog distance based on camera height
+        scene.fogZDistance = Camera.DEFAULT_FOG_DISTANCE + (cameraHeight * 2);
     }
 
     private void loadSectors() {
@@ -200,26 +227,6 @@ public class Game extends State {
 
     public Mob getCurrentPlayer() {
         return player;
-    }
-
-    public int getCameraHeight() {
-        return cameraHeight;
-    }
-
-    public int getCameraRotation() {
-        return cameraRotation;
-    }
-
-    public int getScreenRotationX() {
-        return screenRotationX;
-    }
-
-    public int getScreenRotationZ() {
-        return screenRotationY;
-    }
-
-    public void setCameraRotation(int cameraRotation) {
-        this.cameraRotation = cameraRotation;
     }
 
 }
