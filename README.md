@@ -34,7 +34,7 @@ The client and server should be built separately. Be sure to include the provide
 :x: Model rendering (e.g. trees, fountains)\
 :x: Mob rendering\
 :x: User interface\
-:x: Camera rotation\
+:x: Camera rotation
 
 > See **[ideas](docs/ideas.md)** for planned enhancements.
 
