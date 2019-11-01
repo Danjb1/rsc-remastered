@@ -33,7 +33,7 @@ The client and server should be built separately. Be sure to include the provide
 :x: Door rendering\
 :x: Model rendering (e.g. trees, fountains)\
 :x: Mob rendering\
-:x️: User interface\
+:x: User interface\
 :x: Camera rotation\
 
 > See **[ideas](docs/ideas.md)** for planned enhancements.
