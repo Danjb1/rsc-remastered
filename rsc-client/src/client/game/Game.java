@@ -81,7 +81,14 @@ public class Game extends State {
     @Override
     public void pollInput() {
 
-        // Key handling
+        // Camera rotation
+        if (input.isKeyDown(KeyEvent.VK_LEFT)) {
+            cameraRotation++;
+        } else if (input.isKeyDown(KeyEvent.VK_RIGHT)) {
+            cameraRotation--;
+        }
+
+        // Change levels
         if (input.wasKeyReleased(KeyEvent.VK_PAGE_UP)) {
             worldLoader.ascend();
             loadSectors();

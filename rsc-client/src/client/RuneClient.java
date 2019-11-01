@@ -119,7 +119,7 @@ public class RuneClient {
 
         synchronized (input) {
             state.pollInput();
-            input.clear();
+            input.consume();
         }
     }
 

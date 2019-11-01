@@ -36,6 +36,7 @@ RSC Remastered currently uses resources originating from EasyRSC.
 
 ### Resources
 
+ - [Client Versions](./versions.md)
  - [RuneScape Classic Dump](http://rscdump.com/) ([searchable version](https://github.com/tomfitzhenry/RuneScape-classic-dump)) - A collection of lots of useful files and tools, including mudclient JARs, game data, source code, Landscape Editor, Map Generator and Sprite Editor.
  - [News Archive](http://RuneScape.wikia.com/wiki/Game_updates) - Complete archive of RuneScape news and updates.
  - [Jagex Archive Loader](https://gitlab.openrsc.com/Logg/Game/blob/22a0b131f4d6c2e3787f6af36394dc4a439c36d9/Tools/Map%20Generator/src/com/hikilaka/file/JagArchiveLoader.java) - Java class that can load Jagex archives.

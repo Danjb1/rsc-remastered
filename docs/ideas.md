@@ -2,6 +2,10 @@
 
 RSC Remastered aims to remain faithful to the original game, but some quality of life improvements may be added to make the game more enjoyable. These will always be optional.
 
+## Original Features
+
+ - Reset view to north
+
 ## [RSC+ Features](https://www.youtube.com/watch?v=rwxdNGl9_4A)
 
  - High resolution support

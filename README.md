@@ -26,15 +26,15 @@ The client and server should be built separately. Be sure to include the provide
 
 :heavy_check_mark: Loading screen\
 :heavy_check_mark:️ Title screen\
+:heavy_check_mark:️ Dynamic world loading\
+:heavy_check_mark:️ Camera rotation\
 :heavy_check_mark:️ Landscape rendering\
 :heavy_check_mark:️ Wall rendering\
 :heavy_check_mark:️ Roof rendering\
-:heavy_check_mark:️ Dynamic world loading\
 :x: Door rendering\
 :x: Model rendering (e.g. trees, fountains)\
 :x: Mob rendering\
-:x: User interface\
-:x: Camera rotation
+:x: User interface
 
 > See **[ideas](docs/ideas.md)** for planned enhancements.
 
