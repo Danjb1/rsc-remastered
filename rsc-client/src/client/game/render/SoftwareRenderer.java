@@ -1211,8 +1211,20 @@ public class SoftwareRenderer {
                                 int l17 = clipX;
                                 k20 = l17 - scanlineStartX;
                             }
-                            canvas.renderScanline_LargeTranslucentTexture(tex.pixels, 0, 0, l9 + k14 * scanlineStartX, k11 + i15 * scanlineStartX,
-                                    i13 + k15 * scanlineStartX, k10, i12, k13, k20, i17 + scanlineStartX, i22, k23 << 2);
+                            canvas.renderScanline_LargeTranslucentTexture(
+                                    tex.pixels,
+                                    0,
+                                    0,
+                                    l9 + k14 * scanlineStartX,
+                                    k11 + i15 * scanlineStartX,
+                                    i13 + k15 * scanlineStartX,
+                                    k10,
+                                    i12,
+                                    k13,
+                                    k20,
+                                    i17 + scanlineStartX,
+                                    i22,
+                                    k23 << 2);
                             l9 += i11;
                             k11 += k12;
                             i13 += i14;
@@ -1300,8 +1312,21 @@ public class SoftwareRenderer {
                             int l18 = clipX;
                             i21 = l18 - scanlineStartX;
                         }
-                        canvas.renderScanline_LargeTextureWithTransparency(0, 0, 0, tex.pixels, l9 + k14 * scanlineStartX,
-                                k11 + i15 * scanlineStartX, i13 + k15 * scanlineStartX, k10, i12, k13, i21, i17 + scanlineStartX, k22, i24);
+                        canvas.renderScanline_LargeTextureWithTransparency(
+                                0,
+                                0,
+                                0,
+                                tex.pixels,
+                                l9 + k14 * scanlineStartX,
+                                k11 + i15 * scanlineStartX,
+                                i13 + k15 * scanlineStartX,
+                                k10,
+                                i12,
+                                k13,
+                                i21,
+                                i17 + scanlineStartX,
+                                k22,
+                                i24);
                         l9 += i11;
                         k11 += k12;
                         i13 += i14;
@@ -1362,8 +1387,20 @@ public class SoftwareRenderer {
                             int j19 = clipX;
                             j21 = j19 - scanlineStartX;
                         }
-                        canvas.renderScanline_SmallTranslucentTexture(tex.pixels, 0, 0, i10 + l14 * scanlineStartX, l11 + j15 * scanlineStartX,
-                                j13 + l15 * scanlineStartX, l10, j12, l13, j21, j17 + scanlineStartX, l22, j24);
+                        canvas.renderScanline_SmallTranslucentTexture(
+                                tex.pixels,
+                                0,
+                                0,
+                                i10 + l14 * scanlineStartX,
+                                l11 + j15 * scanlineStartX,
+                                j13 + l15 * scanlineStartX,
+                                l10,
+                                j12,
+                                l13,
+                                j21,
+                                j17 + scanlineStartX,
+                                l22,
+                                j24);
                         i10 += j11;
                         l11 += l12;
                         j13 += j14;
@@ -1453,8 +1490,18 @@ public class SoftwareRenderer {
                         int j20 = clipX;
                         l21 = j20 - scanlineStartX;
                     }
-                    canvas.renderScanline_SmallTextureWithTransparency(0, 0, 0, tex.pixels, i10 + l14 * scanlineStartX,
-                            l11 + j15 * scanlineStartX, j13 + l15 * scanlineStartX, l10, j12, l13, l21, j17 + scanlineStartX, j23, l24);
+                    canvas.renderScanline_SmallTextureWithTransparency(
+                            tex.pixels,
+                            i10 + l14 * scanlineStartX,
+                            l11 + j15 * scanlineStartX,
+                            j13 + l15 * scanlineStartX,
+                            l10,
+                            j12,
+                            l13,
+                            l21,
+                            j17 + scanlineStartX,
+                            j23,
+                            l24);
                     i10 += j11;
                     l11 += l12;
                     j13 += j14;
@@ -1512,7 +1559,12 @@ public class SoftwareRenderer {
                     if (k4 > clipX) {
                         length = clipX - scanlineStartX;
                     }
-                    canvas.renderScanline_TranslucentGradient(length, rowStart + scanlineStartX, currentGradientRamps, gradientIndex, stride * 4);
+                    canvas.renderScanline_TranslucentGradient(
+                            length,
+                            rowStart + scanlineStartX,
+                            currentGradientRamps,
+                            gradientIndex,
+                            stride * 4);
                     rowStart += width;
                 }
             }
@@ -1540,7 +1592,12 @@ public class SoftwareRenderer {
                     length = l5 - scanlineStartX;
                 }
 
-                canvas.renderScanline_Gradient(length, rowStart + scanlineStartX, currentGradientRamps, gradientIndex, stride * 4);
+                canvas.renderScanline_Gradient(
+                        length,
+                        rowStart + scanlineStartX,
+                        currentGradientRamps,
+                        gradientIndex,
+                        stride * 4);
 
                 rowStart += width;
             }
