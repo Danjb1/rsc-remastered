@@ -10,7 +10,7 @@ import server.res.ResourceLoader;
 
 public class WorldLoader {
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "unused" })
     public void loadWorld(World world) {
 
         ZipFile tileArchive = ResourceLoader.loadZipData("Landscape.tar.gz");
