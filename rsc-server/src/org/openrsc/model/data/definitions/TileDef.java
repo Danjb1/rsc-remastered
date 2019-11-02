@@ -1,4 +1,4 @@
-package server.entityhandling.defs;
+package org.openrsc.model.data.definitions;
 
 public class TileDef {
     public int colour;

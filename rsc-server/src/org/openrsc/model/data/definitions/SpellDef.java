@@ -1,4 +1,4 @@
-package server.entityhandling.defs;
+package org.openrsc.model.data.definitions;
 
 import java.util.HashMap;
 import java.util.Map.Entry;

@@ -1,4 +1,4 @@
-package server.entityhandling.locs;
+package org.openrsc.model.data.locations;
 
 public class NpcLoc {
     /**

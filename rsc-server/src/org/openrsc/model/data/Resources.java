@@ -1,12 +1,12 @@
-package server.res;
+package org.openrsc.model.data;
 
-import server.entityhandling.defs.DoorDef;
-import server.entityhandling.defs.GameObjectDef;
-import server.entityhandling.defs.ItemDef;
-import server.entityhandling.defs.NpcDef;
-import server.entityhandling.defs.PrayerDef;
-import server.entityhandling.defs.SpellDef;
-import server.entityhandling.defs.TileDef;
+import org.openrsc.model.data.definitions.DoorDef;
+import org.openrsc.model.data.definitions.GameObjectDef;
+import org.openrsc.model.data.definitions.ItemDef;
+import org.openrsc.model.data.definitions.NpcDef;
+import org.openrsc.model.data.definitions.PrayerDef;
+import org.openrsc.model.data.definitions.SpellDef;
+import org.openrsc.model.data.definitions.TileDef;
 
 /**
  * Class responsible for holding the game's resources.

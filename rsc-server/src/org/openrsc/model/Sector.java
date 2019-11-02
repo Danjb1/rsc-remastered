@@ -1,4 +1,4 @@
-package server.game.model;
+package org.openrsc.model;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

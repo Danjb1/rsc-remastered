@@ -1,4 +1,4 @@
-package server.entityhandling.defs;
+package org.openrsc.model.data.definitions;
 
 public class ItemDropDef {
     public int id;

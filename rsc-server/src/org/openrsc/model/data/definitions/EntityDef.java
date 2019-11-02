@@ -1,4 +1,4 @@
-package server.entityhandling.defs;
+package org.openrsc.model.data.definitions;
 
 /**
  * The abstract class EntityDef implements methods for return values which are
