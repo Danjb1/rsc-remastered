@@ -27,6 +27,9 @@ public class World {
     @SuppressWarnings("unused")
 	private Sector[][] sectors = new Sector[SECTORS_X][SECTORS_Z];
 
+    // TODO Use the data for tile collision
+	List<GameObjectLoc> gameObjectLocs;
+    
     public World() {
 		Logger.getLogger(getClass().getName()).info("Loading...");
     	loadDefinitions();
@@ -62,11 +65,7 @@ public class World {
 		}
 
         // Read game object spawns.
-        // TODO Use the data for tile collision
-		List<GameObjectLoc> gameObjectLocs = (List<GameObjectLoc>) ResourceLoader.loadGzipData("locs/GameObjectLoc.xml.gz");
-		for (GameObjectLoc gameObject : gameObjectLocs) {
-			// world.registerGameObject(new GameObject(gameObject));
-		}
+		this.gameObjectLocs = (List<GameObjectLoc>) ResourceLoader.loadGzipData("locs/GameObjectLoc.xml.gz");
 
 		// TODO These arent implemented yet
         // Read ground item spawns.
@@ -74,6 +73,7 @@ public class World {
 		for (ItemLoc item : itemLocs) {
 			// world.registerItem(new Item(item));
 		}
+		itemLocs.clear(); // Unload
 
         // Read npc spawns.
 		List<NpcLoc> npcLocs = (List<NpcLoc>) ResourceLoader.loadGzipData("locs/NpcLoc.xml.gz");
@@ -82,6 +82,7 @@ public class World {
 			int movementRadius = new Location(npc.startX(), npc.startY()).getDistance(new Location(npc.maxX(), npc.maxY()));
 			n.setMovementRadius(movementRadius);
 		}
+		npcLocs.clear(); // Unload
 		
     }
 
