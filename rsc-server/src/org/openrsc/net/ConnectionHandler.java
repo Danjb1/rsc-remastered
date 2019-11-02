@@ -23,7 +23,7 @@ import org.openrsc.util.GameUtils;
  * The <code>ConnectionHandler</code> handles incoming packet data.
  */
 public class ConnectionHandler extends SimpleChannelHandler {
-
+    
 	private ArrayList<String> connections = new ArrayList<String>();
 
 	/**

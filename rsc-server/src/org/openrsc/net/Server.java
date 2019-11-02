@@ -3,8 +3,6 @@ package org.openrsc.net;
 import static org.jboss.netty.channel.Channels.pipeline;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,16 +20,13 @@ import org.openrsc.task.TaskEngine;
  */
 public class Server {
 
-	private final Executor BOSS_EXECUTOR = Executors.newCachedThreadPool(); // The boss thread.
-	private final Executor WORK_EXECUTOR = Executors.newFixedThreadPool(10); // The I/O worker threads.
-
 	/**
 	 * Creates a new instance.
 	 * Calling this constructor is same with calling NioServerSocketChannelFactory(Executor, Executor, int) with 2 * the number of available processors in the machine.
 	 * The number of available processors is obtained by Runtime.availableProcessors().
 	 * https://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/nio/NioServerSocketChannelFactory.html
 	 */
-	private final ServerBootstrap SERVER_BOOTSTRAP = new ServerBootstrap(new NioServerSocketChannelFactory(BOSS_EXECUTOR, WORK_EXECUTOR));
+	private final ServerBootstrap SERVER_BOOTSTRAP = new ServerBootstrap(new NioServerSocketChannelFactory(Config.NETTY_BOSS_EXECUTOR, Config.NETTY_WORK_EXECUTOR, Config.NETTY_MAXIMUM_WORKER_COUNT));
 
 	private final TaskEngine taskEngine;
 	

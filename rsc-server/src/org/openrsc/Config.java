@@ -1,7 +1,10 @@
 package org.openrsc;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 /**
- * API configurations.
+ * Engine configurations.
  */
 public class Config {
 
@@ -14,6 +17,27 @@ public class Config {
 	 * The maximum number of connections per address.
 	 */
 	public static final int CONNECTION_LIMIT = 3;
+
+	/**
+	 * The Executor which will execute the boss threads.
+	 */
+	public static final Executor NETTY_BOSS_EXECUTOR = Executors.newCachedThreadPool();
+
+	/**
+	 * The Executor which will execute the I/O worker threads.
+	 */
+	public static final Executor NETTY_WORK_EXECUTOR = Executors.newCachedThreadPool();
+
+	/**
+	 * The maximum number of I/O worker threads
+	 */
+	public static final int NETTY_MAXIMUM_WORKER_COUNT = Runtime.getRuntime().availableProcessors() * 2;
+
+	/**
+	 * Disconnect the user after {@value #IDLE_DISCONNECT} minutes if the client has
+	 * not been making action requests.
+	 */
+	public static final int IDLE_DISCONNECT = 5;
 
 	/**
 	 * The maximum server workload.
@@ -33,11 +57,5 @@ public class Config {
 	 * exact difference.
 	 */
 	public static final boolean MANHATTAN_DISTANCE = true;
-
-	/**
-	 * Disconnect the user after {@value #IDLE_DISCONNECT} minutes if the client has
-	 * not been making action requests.
-	 */
-	public static final int IDLE_DISCONNECT = 5;
 
 }
