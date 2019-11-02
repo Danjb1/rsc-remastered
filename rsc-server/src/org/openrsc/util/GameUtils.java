@@ -20,33 +20,8 @@ public class GameUtils {
     private static final char VALID_CHARS[] = { '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', '{', ']', '}',
             ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?', ' ', '|', '`', '~', '\\' };
 
-	public enum OperatingSystem {
-		WINDOWS, LINUX, MAC;
-	}
-
 	public GameUtils() {
 		// ..
-	}
-
-	/**
-	 * @return The operating system of the local machine.
-	 */
-	public static OperatingSystem getOperatingSystem() {
-		String osName = System.getProperty("os.name");
-		if (osName.toLowerCase().contains("windows")) {
-			// Logger.getLogger(Platform.class.getName()).log(Level.INFO, "User is running " + osName);
-			return OperatingSystem.WINDOWS;
-		}
-		if (osName.toLowerCase().contains("mac") || osName.toLowerCase().contains("os x") || (osName.toLowerCase().contains("darwin"))) {
-			// Logger.getLogger(Platform.class.getName()).log(Level.INFO, "User is running " + osName);
-			return OperatingSystem.MAC;
-		}
-		try {
-			// Logger.getLogger(Platform.class.getName()).log(Level.INFO, "User is running " + execute("lsb_release -si") + "");
-			return OperatingSystem.LINUX;
-		} catch (Exception e) {
-			throw new RuntimeException("Unable to determine operating system.", e);
-		}
 	}
 
 	/**
@@ -70,30 +45,6 @@ public class GameUtils {
 		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
 	}
 
-	/**
-	 * @return The total amount of memory on the local machine.
-	 */
-	public static String getSystemMemory() {
-		try {
-			// Try to access memory size using reflection.
-			OperatingSystemMXBean bean = ManagementFactory.getOperatingSystemMXBean();
-			Method method = bean.getClass().getMethod("getTotalPhysicalMemorySize", new Class<?>[0]);
-			method.setAccessible(true);
-			return formatSize((Long) method.invoke(bean, new Object[0]));
-		} catch (Exception e) {
-			// e.printStackTrace();
-		}
-		// return Runtime.getRuntime().totalMemory();
-		return "NaN";
-	}
-
-	/**
-	 * The amount of memory being used by the application.
-	 */
-	public static String getMemoryUsage() {
-		//return (MemoryUtils.getDirectMemoryUsage() / 1000000) + "MB";
-		return formatSize(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
-	}
 	/**
 	 * Request a garbage collection, to free unallocated memory.
 	 */
@@ -121,20 +72,6 @@ public class GameUtils {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Updates the given String of text, by enabling a backspace feature, and by
-	 * clipping the said text at the given maximum length.
-	 */
-	public static String formatInputString(String input, int keyCode, char keyChar, int clipLength, int backspaceKey) {
-		if (keyCode == backspaceKey && input.length() > 0) {
-			return input.substring(0, input.length() - 1);
-		}
-		if (isValidCharacter(keyChar) && input.length() + 1 <= clipLength) {
-			return input += keyChar;
-		}
-		return input;
 	}
 
 	/**
