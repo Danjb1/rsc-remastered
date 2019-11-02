@@ -1,7 +1,5 @@
 package server;
 
-import java.io.IOException;
-
 import server.entityhandling.defs.DoorDef;
 import server.entityhandling.defs.GameObjectDef;
 import server.entityhandling.defs.ItemDef;
@@ -14,12 +12,11 @@ import server.game.world.WorldLoader;
 import server.res.ResourceLoader;
 import server.res.Resources;
 
-public class RuneServer {
+public class LoadTest {
 
-    public RuneServer() throws IOException {
-    }
+	
+	public static void main(String[] args) {
 
-    public void load() {
         // Load resources
         Resources.doors       = (DoorDef[])       ResourceLoader.loadGzipData("defs/DoorDef.xml.gz");
         Resources.gameObjects = (GameObjectDef[]) ResourceLoader.loadGzipData("defs/GameObjectDef.xml.gz");
@@ -33,6 +30,6 @@ public class RuneServer {
         World world = new World();
         WorldLoader worldLoader = new WorldLoader();
         worldLoader.loadWorld(world);
-    }
+	}
 
 }
