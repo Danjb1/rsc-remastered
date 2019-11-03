@@ -20,13 +20,13 @@ public class PacketDecoder extends FrameDecoder {
 			// received and appended to the buffer.
 			return null;
 		}
-		
+
 		// Mark the current buffer position before reading the length field
 		// because the whole frame might not be in the buffer yet.
 		// We will reset the buffer position to the marked position if
 		// there's not enough bytes in the buffer.
 		buffer.markReaderIndex();
-		
+
 		// Read the length field. 
 		final int length = buffer.readInt();
 
@@ -41,7 +41,7 @@ public class PacketDecoder extends FrameDecoder {
 			buffer.resetReaderIndex();
 			return null;
 		}
-		
+
 		// Read the opcode.
 		final int opcode = buffer.readInt() & 0xff;
 

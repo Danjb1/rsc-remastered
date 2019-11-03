@@ -12,7 +12,7 @@ public enum Privilege {
 	ADMINISTRATOR(2),
 
 	ROOT(3),
-	
+
 	GITHUB_CONTRIBUTOR(4);
 
 	/**

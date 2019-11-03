@@ -43,22 +43,22 @@ public class Player extends Mob {
 	 * The account display name.
 	 */
 	private final String displayName;
-	
+
 	/**
 	 * The account privilege.
 	 */
 	private Privilege privilege;
-	
+
 	/**
 	 * The user's game mode.
 	 */
 	private GameMode gameMode;
-	
+
 	/**
 	 * Premium membership status.
 	 */
 	private boolean isPremium = false;
-	
+
 	/**
 	 */
 	private boolean isMuted = false;
@@ -76,7 +76,7 @@ public class Player extends Mob {
 	private Set<Npc> localNpcList = null;
 
 	private long lastYellTime = 0L;
-	
+
 	/**
 	 * Npc pet slot.
 	 */
@@ -102,7 +102,7 @@ public class Player extends Mob {
 			PacketManager.execute(this, packet);
 			packetQueue.remove(packet);
 		}
-		
+
 		// Idle logout timer.
 		if (currentTime - lastPacketReceived > (60_000 * Config.IDLE_DISCONNECT)) {
 			System.out.println("[" + displayName + "]Disconnected - Idle logout.");
@@ -149,7 +149,7 @@ public class Player extends Mob {
 	public void addQueuedPacket(Packet packet) {
 		this.packetQueue.add(packet);
 	}
-	
+
 	/**
 	 */
 	public void interrupt() {

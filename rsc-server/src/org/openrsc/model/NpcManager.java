@@ -18,17 +18,17 @@ public class NpcManager {
 	 * An incremental value. Used to generate a unique id for each entity.
 	 */
 	private final AtomicInteger uid = new AtomicInteger(0);
-	
+
 	/**
 	 * A list of registered entities.
 	 */
 	private final Set<Npc> currentList = new HashSet<Npc>();
-	
+
 	/**
 	 * A list of entities which are pending insertion.
 	 */
 	private final Queue<Npc> insertQueue = new LinkedList<>();
-	
+
 	/**
 	 * A list of entities which are pending removal.
 	 */
@@ -64,7 +64,7 @@ public class NpcManager {
 		for (Npc npc : currentList) {
 
 			// Execute the tick update.
-				npc.tick(currentTime);
+			npc.tick(currentTime);
 
 		}
 
@@ -79,7 +79,7 @@ public class NpcManager {
 		Npc npc = new Npc(type, uid.getAndIncrement(), x, z);
 		return npc;
 	}
-	
+
 	/**
 	 * Adds a npc to the insertion queue.
 	 * 

@@ -14,7 +14,7 @@ import org.openrsc.model.player.Player;
 public class Npc extends Mob {
 
 	private int type;
-	
+
 	/**
 	 * Where the Npc was spawned. Used for respawn, and retreating.
 	 */
@@ -24,7 +24,7 @@ public class Npc extends Mob {
 	 * How far the npc can walk from their origin location.
 	 */
 	private int movementRadius = 0;
-	
+
 	/**
 	 * A retreat flag.
 	 */
@@ -63,7 +63,7 @@ public class Npc extends Mob {
 	@Override
 	public void tick(final long currentTime) {
 	}
-	
+
 	@Override
 	public boolean isDead() {
 		return false;
@@ -124,7 +124,7 @@ public class Npc extends Mob {
 	public int getMovementRadius() {
 		return movementRadius;
 	}
-	
+
 	/**
 	 * Limit the "AI" travel distance from the origin.
 	 * @param movementRadius The maximum travel distance.
@@ -153,9 +153,9 @@ public class Npc extends Mob {
 	public boolean isRetreating() {
 		return retreatToOrigin;
 	}
-	
+
 	public int getLocalPlayerCount() {
 		return playerList.size();
 	}
-	
+
 }

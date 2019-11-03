@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.openrsc.Config;
+import org.openrsc.net.Server;
 import org.openrsc.task.util.BlockingExecutorService;
 
 /**
@@ -44,12 +46,9 @@ public class TaskEngine implements Runnable {
 	 */
 	private Thread thread;
 
-	public TaskEngine(int threadCount) {
-		if (threadCount == 1) {
-			this.taskService = new BlockingExecutorService(Executors.newSingleThreadExecutor());
-			return;
-		}
-		this.taskService = new BlockingExecutorService(Executors.newFixedThreadPool(threadCount));
+	@SuppressWarnings("unused")
+	public TaskEngine() {
+		this.taskService = Config.TASK_ENGINE_THREAD_COUNT == 1 ? new BlockingExecutorService(Executors.newSingleThreadExecutor()) : new BlockingExecutorService(Executors.newFixedThreadPool(Config.TASK_ENGINE_THREAD_COUNT));
 	}
 
 	/**
@@ -185,7 +184,7 @@ public class TaskEngine implements Runnable {
 	 */
 	private void handleError(Throwable t) {
 		Logger.getLogger(getClass().getName()).log(Level.SEVERE, "An error has occured in an executor service.", t);
-		System.exit(1);
+		Server.getInstance().shutdown(true);
 	}
 
 }

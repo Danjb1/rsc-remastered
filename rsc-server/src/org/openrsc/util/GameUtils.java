@@ -1,14 +1,11 @@
 package org.openrsc.util;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GameUtils {
 
@@ -53,7 +50,7 @@ public class GameUtils {
 		if (cleanup > 0) {
 			return formatSize(cleanup);
 		}
-		return "NaN";
+		return "0";
 	}
 
 	/**
@@ -129,46 +126,6 @@ public class GameUtils {
 	 */
 	public static String formatSize(File file) {
 		return formatSize(file.length());
-	}
-
-	/**
-	 * String to Binary.
-	 */
-	public static String binaryEncode(String s) {
-		byte[] sdata = s.getBytes(StandardCharsets.UTF_8);
-		StringBuilder sb = new StringBuilder(sdata.length * (Byte.SIZE + 1));
-		for (int i = 0; i < sdata.length; i++) {
-			if (i != 0) {
-				sb.append(' ');
-			}
-			byte b = sdata[i];
-			for (int j = 0; j < Byte.SIZE; j++) {
-				sb.append('0' + ((b >> (Byte.SIZE - j - 1))) & 1);
-			}
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * Binary to String.
-	 */
-	public static String binaryDecode(String bs) {
-		byte[] sdata = new byte[(bs.length() + 1) / (Byte.SIZE + 1)];
-		Pattern bytegets = Pattern.compile("([01]{8})(?: |$)");
-		Matcher bytegetsFinder = bytegets.matcher(bs);
-		int offset = 0, i = 0;
-		while (bytegetsFinder.find()) {
-			if (bytegetsFinder.start() != offset) {
-				throw new IllegalArgumentException();
-			}
-			sdata[i++] = (byte) Integer.parseInt(bytegetsFinder.group(1), 2);
-
-			offset = bytegetsFinder.end();
-		}
-		if (offset != bs.length()) {
-			throw new IllegalArgumentException();
-		}
-		return new String(sdata, StandardCharsets.UTF_8);
 	}
 
 }

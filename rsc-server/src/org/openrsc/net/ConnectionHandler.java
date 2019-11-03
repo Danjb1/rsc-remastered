@@ -71,7 +71,7 @@ public class ConnectionHandler extends SimpleChannelHandler {
 
 		// Keep the player from idle logout.
 		player.updateLastPacketReceivedTime();
-		
+
 		// Queued packet.
 		// Execute in the next game tick.
 		if (PacketManager.get(opcode).addToQueue()) {

@@ -28,7 +28,7 @@ public class CommandHandler {
 			//PlayerManager.getInstance().sendGlobalMessage("[Yell]" + player.getDisplayName() + ": " + command.substring(5));
 			return;
 		}
-		
+
 	}
 
 }

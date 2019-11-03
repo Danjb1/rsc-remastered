@@ -162,6 +162,15 @@ public class World {
 		//        }
 	}
 
+	/**
+	 * Executed when the server shuts down.
+	 */
+	public void onShutdown() {
+		Logger.getLogger(getClass().getName()).info("Shutting down..");
+		PlayerManager.getInstance().onShutdown();
+		NpcManager.getInstance().onShutdown();
+	}
+
 	public static World getInstance() {
 		return INSTANCE;
 	}

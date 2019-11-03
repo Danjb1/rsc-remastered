@@ -34,6 +34,11 @@ public class Config {
 	public static final int NETTY_MAXIMUM_WORKER_COUNT = Runtime.getRuntime().availableProcessors() * 2;
 
 	/**
+	 * The number of worker threads the task engine will use to process game tasks/events.
+	 */
+	public static final int TASK_ENGINE_THREAD_COUNT = 8;
+
+	/**
 	 * Disconnect the user after {@value #IDLE_DISCONNECT} minutes if the client has
 	 * not been making action requests.
 	 */

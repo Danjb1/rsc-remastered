@@ -9,7 +9,7 @@ public abstract class Mob {
 	 * A unique id generated for the mob's current session.
 	 */
 	private final int sessionId;
-	
+
 	/**
 	 * The mob's current location.
 	 */
@@ -19,45 +19,45 @@ public abstract class Mob {
 	 * The mob's last known location.
 	 */
 	private Location travelBack = new Location(-1, -1);
-	
+
 	// FIXME Figure out is Dan has a plan for these variables.
-    public int admin;
-    public long nameLong;
-    public String name;
-    public int serverIndex;
-    public int mobIntUnknown;
-    public int x;
-    public int z;
-    public int type;
-    public int stepCount;
-    public int currentSprite;
-    public int nextAnimation;
-    public int movingStep;
-    public int waypointCurrent;
-    public int waypointsX[] = new int[10];
-    public int waypointsZ[] = new int[10];
-    public int animationCount[] = new int[12];
-    public String lastMessage;
-    public int lastMessageTimeout;
-    public int anInt162;
-    public int anInt163;
-    public int damageTaken;
-    public int healthCurrent;
-    public int healthMax;
-    public int combatTimer;
-    public int level = -1;
-    public int colourHairType;
-    public int colourTopType;
-    public int colourBottomType;
-    public int colourSkinType;
-    public int attackingCameraInt;
-    public int attackingMobIndex;
-    public int attackingNpcIndex;
-    public int projectileRange;
-    public boolean unusedBool;
-    public int unusedInt = -1;
-    public int anInt179;
-	
+	public int admin;
+	public long nameLong;
+	public String name;
+	public int serverIndex;
+	public int mobIntUnknown;
+	public int x;
+	public int z;
+	public int type;
+	public int stepCount;
+	public int currentSprite;
+	public int nextAnimation;
+	public int movingStep;
+	public int waypointCurrent;
+	public int waypointsX[] = new int[10];
+	public int waypointsZ[] = new int[10];
+	public int animationCount[] = new int[12];
+	public String lastMessage;
+	public int lastMessageTimeout;
+	public int anInt162;
+	public int anInt163;
+	public int damageTaken;
+	public int healthCurrent;
+	public int healthMax;
+	public int combatTimer;
+	public int level = -1;
+	public int colourHairType;
+	public int colourTopType;
+	public int colourBottomType;
+	public int colourSkinType;
+	public int attackingCameraInt;
+	public int attackingMobIndex;
+	public int attackingNpcIndex;
+	public int projectileRange;
+	public boolean unusedBool;
+	public int unusedInt = -1;
+	public int anInt179;
+
 	public Mob(int sessionId) {
 		this(sessionId, 0, 0);
 	}
@@ -67,7 +67,7 @@ public abstract class Mob {
 		this.location = new Location(x, z);
 		this.travelBack = new Location(x, z);
 	}
-	
+
 	/**
 	 * We use this to keep the Mob's last known location.
 	 */
@@ -84,7 +84,7 @@ public abstract class Mob {
 	 * @return True, if the mob is dead.
 	 */
 	public abstract boolean isDead();
-	
+
 	public int getLastX() {
 		return travelBack.getX();
 	}
@@ -114,14 +114,14 @@ public abstract class Mob {
 	public int getX() {
 		return location.getX();
 	}
-	
+
 	/**
 	 * The z coordinate of the entity's location.
 	 */
 	public int getZ() {
 		return location.getZ();
 	}
-	
+
 	/**
 	 * Sets the entity's location.
 	 * 

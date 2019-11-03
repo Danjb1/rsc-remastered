@@ -1,5 +1,8 @@
 package org.openrsc.model;
 
+/**
+ * Represents an in-game location.
+ */
 public class Location {
 
 	private int x;
