@@ -8,6 +8,9 @@ import org.openrsc.model.event.Event;
 import org.openrsc.task.Task;
 import org.openrsc.task.TaskEngine;
 
+/**
+ * The game tick event task.
+ */
 public class GameTickTaskEvent extends Event {
 
 	public GameTickTaskEvent() {

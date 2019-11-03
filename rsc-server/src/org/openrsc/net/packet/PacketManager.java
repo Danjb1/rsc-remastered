@@ -26,7 +26,7 @@ public class PacketManager {
 	public static PacketHandler get(int opcode) {
 		return packets.get(opcode);
 	}
-	
+
 	public static void loadPackets() {
 		// #0 = RSA Handshake
 		// #1 = Ping
@@ -38,5 +38,5 @@ public class PacketManager {
 	public static void execute(Player player, Packet packet) {
 		packets.get(packet.getOpcode()).execute(player, packet);
 	}
-	
+
 }

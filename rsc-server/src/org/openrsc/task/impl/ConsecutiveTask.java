@@ -1,9 +1,12 @@
-package org.openrsc.task;
+package org.openrsc.task.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import org.openrsc.task.Task;
+import org.openrsc.task.TaskEngine;
 
 /**
  * A task which executes a group of tasks in a guaranteed sequence.

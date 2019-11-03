@@ -118,6 +118,7 @@ public class Player extends Mob {
 	}
 
 	/**
+	 * Executed when the player gets registered.
 	 */
 	public void executeLogin() {
 		this.privilege = Privilege.ROOT;
@@ -129,6 +130,7 @@ public class Player extends Mob {
 	}
 
 	/**
+	 * Executed when the player gets unregistered.
 	 */
 	public void executeLogout() {
 		packetQueue.clear();
@@ -141,6 +143,13 @@ public class Player extends Mob {
 		}
 	}
 
+	/**
+	 * Queues an incoming packet to be executed in the next game tick.
+	 */
+	public void addQueuedPacket(Packet packet) {
+		this.packetQueue.add(packet);
+	}
+	
 	/**
 	 */
 	public void interrupt() {

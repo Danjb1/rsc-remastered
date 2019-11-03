@@ -1,5 +1,8 @@
 package org.openrsc.model.data.locations;
 
+/**
+ * Represents a static game object location.
+ */
 public class GameObjectLoc {
     /**
      * The id of the gameObject

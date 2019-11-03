@@ -27,24 +27,24 @@ public class PlayerManager {
 	 * An incremental value. Used to generate a unique id for each entity.
 	 */
 	private final AtomicInteger uid = new AtomicInteger(0);
-	
+
 	/**
 	 * A list of registered entities.
 	 */
 	private final Set<Player> currentList = new HashSet<Player>();
-	
+
 	/**
 	 * A list of entities which are pending insertion.
 	 */
 	private final Queue<Player> insertQueue = new LinkedList<>();
-	
+
 	/**
 	 * A list of entities which are pending removal.
 	 */
 	private final Queue<Player> removeQueue = new LinkedList<>();
 
 	private int tickCounter = 0;
-	
+
 	public PlayerManager() {
 		Logger.getLogger(getClass().getName()).info("Initialized");
 	}
@@ -52,10 +52,11 @@ public class PlayerManager {
 	public void tick(long currentTime) {
 		tickCounter++;
 		boolean oneMinuteTimeLapse = tickCounter % 100 == 0;
-		
+
 		/*
 		 * OpenRSC doesn't have a 'PID' design like Jagex does for RuneScape. Instead,
-		 * we shuffle the {@link #currentList} to order of execution unpredictable.
+		 * we shuffle the {@link #currentList} to make the order of execution
+		 * unpredictable.
 		 */
 		if (oneMinuteTimeLapse) {
 			List<Player> randomList = new ArrayList<>();
@@ -63,7 +64,7 @@ public class PlayerManager {
 			Collections.shuffle(randomList, new Random());
 			currentList.clear();
 			currentList.addAll(randomList);
-			
+
 			tickCounter = 0; // Reset tick counter
 		}
 
@@ -120,14 +121,15 @@ public class PlayerManager {
 	 * Adds a player to the login queue.
 	 */
 	public void queueLogin(Player player) {
-		insertQueue.add(player);
 		Logger.getLogger(getClass().getName()).log(Level.INFO, player.getDisplayName() + " added to login queue.");
+		insertQueue.add(player);
 	}
 
 	/**
 	 * Adds the player into the logout queue.
 	 */
 	public void queueLogout(Player player) {
+		Logger.getLogger(getClass().getName()).log(Level.INFO, player.getDisplayName() + " added to logout queue.");
 		removeQueue.add(player);
 	}
 
@@ -151,8 +153,7 @@ public class PlayerManager {
 	}
 
 	/**
-	 * @return The player with the matching <code>sessionId</code>.matching
-	 *         <code>sessionId</code>.matching <code>sessionId</code>.
+	 * @return The player with the matching <code>sessionId</code>.
 	 */
 	public Player getForSessionId(int sessionId) {
 		for (Player player : currentList) {

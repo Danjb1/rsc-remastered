@@ -23,7 +23,7 @@ import org.openrsc.util.GameUtils;
  * The <code>ConnectionHandler</code> handles incoming packet data.
  */
 public class ConnectionHandler extends SimpleChannelHandler {
-    
+
 	private ArrayList<String> connections = new ArrayList<String>();
 
 	/**
@@ -64,16 +64,23 @@ public class ConnectionHandler extends SimpleChannelHandler {
 		}
 
 		// Get the packet instance
-		PacketHandler packetInstance = PacketManager.get(opcode);
-		if (packetInstance == null) {
+		if (PacketManager.get(opcode) == null) {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "No packet found for " + opcode);
 			return;
 		}
 
 		// Keep the player from idle logout.
 		player.updateLastPacketReceivedTime();
+		
+		// Queued packet.
+		// Execute in the next game tick.
+		if (PacketManager.get(opcode).addToQueue()) {
+			player.addQueuedPacket(packet);
+			return;
+		}
 
-		// Reactor-based packet
+		// Reactor-based packet.
+		// Execute immediately.
 		PacketManager.get(opcode).execute(player, packet);
 	}
 

@@ -1,5 +1,8 @@
 package org.openrsc.model.data.locations;
 
+/**
+ * Represents a static ground item spawn.
+ */
 public class ItemLoc {
     /**
      * The id of the gameObject

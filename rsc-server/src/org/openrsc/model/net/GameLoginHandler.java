@@ -31,7 +31,7 @@ public class GameLoginHandler {
 
 		// Check the client build.
 		double clientBuild = packet.getDouble();
-		
+
 		// Read account credentials from the client.
 		String username = packet.getString();
 		String password = packet.getString();
@@ -63,7 +63,7 @@ public class GameLoginHandler {
 
 		// Account is registered.
 		// Get the database uuid.
-		final int databaseId = new Random().nextInt(9999);
+		final int databaseId = new Random().nextInt(9999); // TODO load from database
 
 		// Invalid username or password.
 		if (!validateCredentials(databaseId, password)) {
@@ -94,10 +94,10 @@ public class GameLoginHandler {
 		/*
 		 * Successful login.
 		 */
-		
+
 		// Create the player instance.
 		final Player player = PlayerManager.getInstance().create(channel, databaseId, displayName);
-		
+
 		// Send the login response to the client.
 		Packet success = new Packet(1).putByte(0).putBase37(displayName).putInt(player.getSessionId()).putByte(privilege.toInteger());
 		channel.write(success).addListener(new ChannelFutureListener() {
@@ -125,7 +125,7 @@ public class GameLoginHandler {
 	// Check if user is already logged in.
 	private boolean isLoggedIn(int databaseId) {
 		boolean connected = PlayerManager.getInstance().getForAccountId(databaseId) != null;
-		
+
 		// TODO : Check if player is logged in to a different server
 		return connected;
 	}

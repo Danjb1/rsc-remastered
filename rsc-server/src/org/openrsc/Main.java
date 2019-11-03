@@ -12,6 +12,7 @@ import org.openrsc.net.packet.PacketManager;
 import org.openrsc.task.TaskEngine;
 
 /**
+ * The main class of the OpenRSC Server.
  */
 public class Main {
 
@@ -23,15 +24,15 @@ public class Main {
 	}
 
 	public Main() {
-        // Load world
-        World.getInstance();
+		// Load world
+		World.getInstance();
 
 		// Load the packets.
 		PacketManager.loadPackets();
 
 		// Initialize the main thread.
 		this.taskEngine = new TaskEngine(getThreadCount());
-		
+
 		// Bind to network.
 		Server server = new Server(taskEngine);
 		try {

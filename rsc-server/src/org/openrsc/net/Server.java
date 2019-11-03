@@ -16,7 +16,7 @@ import org.openrsc.net.codec.PacketEncoder;
 import org.openrsc.task.TaskEngine;
 
 /**
- * The main class of the OpenRSC Server.
+ * Integrates the Netty api into the OpenRSC project.
  */
 public class Server {
 

@@ -14,8 +14,8 @@ public class GameUtils {
 
 	private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.0");
 
-    private static final char VALID_CHARS[] = { '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', '{', ']', '}',
-            ';', ':', '\'', '"', ',', '<', '.', '>', '/', '?', ' ', '|', '`', '~', '\\' };
+	private static final char VALID_CHARS[] = { '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_', '=', '+', '[', '{', ']', '}',
+			';', ':', '\'', '"', ',', '<', '.', '>', '/', '?', ' ', '|', '`', '~', '\\' };
 
 	public GameUtils() {
 		// ..

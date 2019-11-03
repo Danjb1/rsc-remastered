@@ -36,9 +36,9 @@ public class Packet {
 		this.opcode = opcode;
 	}
 
-//	public void clear() {
-//		buffer.clear();
-//	}
+	//	public void clear() {
+	//		buffer.clear();
+	//	}
 
 	public int getOpcode() {
 		return opcode;
@@ -156,7 +156,7 @@ public class Packet {
 		buffer.writeBytes(s.getBytes());
 		return this;
 	}
-	
+
 	/**
 	 * @return Reads a Byte value from the buffer.
 	 */

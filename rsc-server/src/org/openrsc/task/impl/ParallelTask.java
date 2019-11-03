@@ -1,10 +1,13 @@
-package org.openrsc.task;
+package org.openrsc.task.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
+import org.openrsc.task.Task;
+import org.openrsc.task.TaskEngine;
 
 /**
  * A task which can execute multiple child tasks simultaneously.

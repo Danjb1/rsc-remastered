@@ -11,7 +11,7 @@ public class Config {
 	/**
 	 * The listener port.
 	 */
-    public static final int SERVER_PORT = 7780;
+	public static final int SERVER_PORT = 7780;
 
 	/**
 	 * The maximum number of connections per address.

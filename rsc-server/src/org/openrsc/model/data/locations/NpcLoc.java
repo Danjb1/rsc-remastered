@@ -1,5 +1,8 @@
 package org.openrsc.model.data.locations;
 
+/**
+ * Represents a static npc item spawn.
+ */
 public class NpcLoc {
     /**
      * The id of the Npc
