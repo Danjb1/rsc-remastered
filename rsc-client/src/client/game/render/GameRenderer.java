@@ -21,14 +21,6 @@ import client.game.world.World;
  */
 public class GameRenderer extends StateRenderer {
 
-    private static final int SPRITE_ID_MENUS = 2000;
-    private static final int SPRITE_ID_INVENTORY = 2001;
-
-    private static final int MENUS_OFFSET_X = 200;
-    private static final int MENUS_OFFSET_Y = 3;
-    private static final int INVENTORY_MENU_OFFSET_X = 248;
-
-    private Game game;
     private World world;
     private SceneBuilder sceneBuilder;
     private Scene scene;
@@ -36,8 +28,9 @@ public class GameRenderer extends StateRenderer {
     private SoftwareRenderer softwareRenderer;
     private MousePicker mousePicker;
 
+    private MenuBarRenderer menuRenderer;
+
     public GameRenderer(Game game) {
-        this.game = game;
 
         world = game.getWorld();
         scene = game.getScene();
@@ -47,6 +40,8 @@ public class GameRenderer extends StateRenderer {
                 game.getLauncher().getWidth(),
                 game.getLauncher().getHeight());
         mousePicker = softwareRenderer.getMousePicker();
+
+        menuRenderer = new MenuBarRenderer(game);
     }
 
     @Override
@@ -72,22 +67,7 @@ public class GameRenderer extends StateRenderer {
     }
 
     private void renderUi(Canvas canvas) {
-        renderMenus(canvas);
-        renderInventoryMenu(canvas);
-    }
-
-    private void renderMenus(Canvas canvas) {
-        canvas.drawSprite(
-                game.getLauncher().getWidth() - MENUS_OFFSET_X,
-                MENUS_OFFSET_Y,
-                SPRITE_ID_MENUS);
-    }
-
-    private void renderInventoryMenu(Canvas canvas) {
-        canvas.drawSprite(
-                game.getLauncher().getWidth() - INVENTORY_MENU_OFFSET_X,
-                MENUS_OFFSET_Y,
-                SPRITE_ID_INVENTORY);
+        menuRenderer.render(canvas);
     }
 
 }

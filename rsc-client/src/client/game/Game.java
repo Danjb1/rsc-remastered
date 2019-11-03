@@ -1,6 +1,8 @@
 package client.game;
 
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -14,6 +16,13 @@ import client.game.render.MousePicker;
 import client.game.scene.Camera;
 import client.game.scene.Model;
 import client.game.scene.Scene;
+import client.game.ui.FriendsMenu;
+import client.game.ui.InventoryMenu;
+import client.game.ui.MagicMenu;
+import client.game.ui.MapMenu;
+import client.game.ui.Menu;
+import client.game.ui.SettingsMenu;
+import client.game.ui.StatsMenu;
 import client.game.world.World;
 import client.game.world.WorldLoader;
 import client.loading.LoadingScreen;
@@ -37,6 +46,8 @@ public class Game extends State {
 
     private ExecutorService executor;
     private Connection connection;
+
+    private List<Menu> menus;
 
     private WorldLoader worldLoader;
     private World world;
@@ -65,6 +76,14 @@ public class Game extends State {
         world = new World(scene);
         worldLoader = new WorldLoader(world);
         renderer = new GameRenderer(this);
+
+        menus = new ArrayList<>();
+        menus.add(new SettingsMenu());
+        menus.add(new FriendsMenu());
+        menus.add(new MagicMenu());
+        menus.add(new StatsMenu());
+        menus.add(new MapMenu());
+        menus.add(new InventoryMenu());
     }
 
     @Override
@@ -227,6 +246,10 @@ public class Game extends State {
 
     public Mob getCurrentPlayer() {
         return player;
+    }
+
+    public List<Menu> getMenus() {
+        return menus;
     }
 
 }
