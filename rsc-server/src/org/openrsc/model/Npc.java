@@ -52,6 +52,7 @@ public class Npc extends Mob {
 	 */
 	protected void init(int type) {
 		this.type = type;
+		/*
 		setHealthMaximum(Resources.npcs[type].hits);
 		setHealthCurrent(getHealthMaximum());
 
@@ -64,6 +65,7 @@ public class Npc extends Mob {
 		// 1 level in Magic or Prayer is equivalent to 1/8 of a combat level.
 		// If ranged multiplied by 1.5 is equal to Attack + Strength combined, 1 ranged level is worth 0.375 combat levels, and attack and strength aren't counted.
 		setCombatLevel(cmb);
+		*/
 	}
 
 	/**
