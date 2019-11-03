@@ -55,35 +55,36 @@ public class Player extends Mob {
 	private GameMode gameMode;
 
 	/**
-	 * Premium membership status.
-	 */
-	private boolean isPremium = false;
-
-	/**
 	 */
 	private boolean isMuted = false;
 
 	/**
-	 * A list of players that are within drawing distance.
+	 * A list of nearby players.
 	 * The client will only have information for these entities.
 	 */
 	private Set<Player> localPlayerList = null;
 
 	/**
-	 * A list of npcs that are within drawing distance.
+	 * A list of nearby npcs.
 	 * The client will only have information for these entities.
 	 */
 	private Set<Npc> localNpcList = null;
 
 	private long lastYellTime = 0L;
 
+	// TODO Appearance
+	public int colourHairType;
+	public int colourTopType;
+	public int colourBottomType;
+	public int colourSkinType;
+	
 	/**
 	 * Npc pet slot.
 	 */
 	private Npc familiar;
 
 	public Player(Channel channel, int accountId, int sessionId, String displayName) {
-		super(sessionId, 3200, 3200);
+		super(sessionId, Constants.DEFAULT_LOCATION.getX(), Constants.DEFAULT_LOCATION.getZ());
 		this.accountId = accountId;
 		this.sessionId = sessionId;
 		this.displayName = displayName;
@@ -121,11 +122,8 @@ public class Player extends Mob {
 	 * Executed when the player gets registered.
 	 */
 	public void executeLogin() {
-		this.privilege = Privilege.ROOT;
-		this.isPremium = true;
 		super.setLocation(Constants.DEFAULT_LOCATION);
 		super.setTravelBack();
-
 		packetDispatcher.sendMessage("Welcome to RuneScape.");
 	}
 
@@ -231,13 +229,6 @@ public class Player extends Mob {
 
 	public GameMode getGameMode() {
 		return gameMode;
-	}
-
-	/**
-	 * @return True, if the account is a premium member.
-	 */
-	public boolean isPremium() {
-		return isPremium;
 	}
 
 	/**

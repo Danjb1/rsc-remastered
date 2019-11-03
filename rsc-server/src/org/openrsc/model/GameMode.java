@@ -30,17 +30,7 @@ public enum GameMode {
 	 * @return The game mode enum value.
 	 */
 	public static GameMode forValue(int value) {
-		switch (value) {
-		case 0:
-			return REGULAR;
-		case 1:
-			return IRONMAN;
-		case 2:
-			return HARDCORE_IRONMAN;
-		case 3:
-			return ULTIMATE_IRONMAN;
-		}
-		return null;
+		return GameMode.values()[value];
 	}
 
 }

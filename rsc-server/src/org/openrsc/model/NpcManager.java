@@ -14,6 +14,8 @@ public class NpcManager {
 
 	private static final NpcManager INSTANCE = new NpcManager();
 
+	private final Logger logger = Logger.getLogger(getClass().getName());
+	
 	/**
 	 * An incremental value. Used to generate a unique id for each entity.
 	 */
@@ -35,7 +37,6 @@ public class NpcManager {
 	private final Queue<Npc> removeQueue = new LinkedList<>();
 
 	public NpcManager() {
-		Logger.getLogger(getClass().getName()).info("Initialized");
 	}
 
 	public void tick(long currentTime) {
@@ -46,7 +47,7 @@ public class NpcManager {
 		while (!insertQueue.isEmpty()) {
 			queuedNpc = insertQueue.poll();
 			currentList.add(queuedNpc);
-			Logger.getLogger(getClass().getName()).info("Npc #" + queuedNpc.getSessionId() + " registered.");
+			logger.info("Npc #" + queuedNpc.getSessionId() + " registered.");
 		}
 
 		/*
@@ -55,7 +56,7 @@ public class NpcManager {
 		while (!removeQueue.isEmpty()) {
 			queuedNpc = removeQueue.poll();
 			currentList.remove(queuedNpc);
-			Logger.getLogger(getClass().getName()).info("Npc #" + queuedNpc.getSessionId() + " unregistered.");
+			logger.info("Npc #" + queuedNpc.getSessionId() + " unregistered.");
 		}
 
 		/*

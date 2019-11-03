@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import org.openrsc.model.data.Resources;
 import org.openrsc.model.player.Player;
 
 /**
@@ -31,7 +32,7 @@ public class Npc extends Mob {
 	private boolean retreatToOrigin = false;
 
 	/**
-	 * A list of players that are within drawing distance.
+	 * A list of nearby players.
 	 * The npc will only have information for these entities.
 	 */
 	private final Set<Player> playerList = new HashSet<>();
@@ -51,6 +52,18 @@ public class Npc extends Mob {
 	 */
 	protected void init(int type) {
 		this.type = type;
+		setHealthMaximum(Resources.npcs[type].hits);
+		setHealthCurrent(getHealthMaximum());
+
+		// TODO Calculate combat level.
+		int atk = Resources.npcs[type].attack;
+		int def = Resources.npcs[type].defense;
+		int str = Resources.npcs[type].strength;
+		int cmb = 0;
+		// 1 level in Attack, Strength, Hits or Defense is equal to 1/4 of a combat level.
+		// 1 level in Magic or Prayer is equivalent to 1/8 of a combat level.
+		// If ranged multiplied by 1.5 is equal to Attack + Strength combined, 1 ranged level is worth 0.375 combat levels, and attack and strength aren't counted.
+		setCombatLevel(cmb);
 	}
 
 	/**
@@ -62,6 +75,12 @@ public class Npc extends Mob {
 
 	@Override
 	public void tick(final long currentTime) {
+		// Npc is aggressive.
+		// Loop through nearby players.
+		// Find a low level player to attack.
+		if (Resources.npcs[type].isAggressive()) {
+			// TODO
+		}
 	}
 
 	@Override
@@ -70,8 +89,7 @@ public class Npc extends Mob {
 	}
 
 	/**
-	 * Loop through each player in the world and create a list of players within
-	 * render distance. This allows NPCs to acknowledge and interact with nearby players.
+	 * Loop through each player in the world and create a list of nearby players. This allows NPCs to acknowledge and interact with nearby players.
 	 */
 	public void updateLocalPlayerList(Set<Player> globalPlayerList) {
 

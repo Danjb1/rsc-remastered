@@ -5,14 +5,30 @@ package org.openrsc.model;
  */
 public enum Privilege {
 
+	/**
+	 * A regular user. No special privileges.
+	 */
 	REGULAR(0),
 
+	/**
+	 * A player moderator. Can kick, mute regular users.
+	 */
 	MODERATOR(1),
 
+	/**
+	 * A regular administrator. Can kick, mute, ban regular users or moderators.
+	 */
 	ADMINISTRATOR(2),
 
+	/**
+	 * A root administrator. Can kick, mute, ban, promote any type of user.
+	 */
 	ROOT(3),
 
+	/**
+	 * A github contributor. Has no special privileges, but gets a wrench icon near
+	 * their name in-game, as a special thanks for their contribution.
+	 */
 	GITHUB_CONTRIBUTOR(4);
 
 	/**
@@ -33,19 +49,7 @@ public enum Privilege {
 	}
 
 	public static Privilege getForValue(int value) {
-		switch (value) {
-		case 0:
-			return REGULAR;
-		case 1:
-			return MODERATOR;
-		case 2:
-			return ADMINISTRATOR;
-		case 3:
-			return ROOT;
-		case 4:
-			return GITHUB_CONTRIBUTOR;
-		}
-		return null;
+		return Privilege.values()[value];
 	}
 
 }

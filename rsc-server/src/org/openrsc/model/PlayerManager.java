@@ -23,6 +23,8 @@ public class PlayerManager {
 
 	private static final PlayerManager INSTANCE = new PlayerManager();
 
+	private final Logger logger = Logger.getLogger(getClass().getName());
+	
 	/**
 	 * An incremental value. Used to generate a unique id for each entity.
 	 */
@@ -46,7 +48,6 @@ public class PlayerManager {
 	private int tickCounter = 0;
 
 	public PlayerManager() {
-		Logger.getLogger(getClass().getName()).info("Initialized");
 	}
 
 	public void tick(long currentTime) {
@@ -76,7 +77,7 @@ public class PlayerManager {
 			queuedPlayer = insertQueue.poll();
 			currentList.add(queuedPlayer);
 			queuedPlayer.executeLogin();
-			Logger.getLogger(getClass().getName()).info(queuedPlayer.getDisplayName() + " registered.");
+			logger.info(queuedPlayer.getDisplayName() + " registered.");
 		}
 
 		/*
@@ -86,7 +87,7 @@ public class PlayerManager {
 			queuedPlayer = removeQueue.poll();
 			currentList.remove(queuedPlayer);
 			queuedPlayer.executeLogout();
-			Logger.getLogger(getClass().getName()).info(queuedPlayer.getDisplayName() + " unregistered.");
+			logger.info(queuedPlayer.getDisplayName() + " unregistered.");
 		}
 
 		/*
@@ -99,7 +100,7 @@ public class PlayerManager {
 
 			// Check for disconnected clients.
 			if (!player.getChannel().isConnected()) {
-				Logger.getLogger(getClass().getName()).info(player.getDisplayName() + " disconnected.");
+				logger.info(player.getDisplayName() + " disconnected.");
 				removeQueue.add(player);
 			}
 
@@ -121,7 +122,7 @@ public class PlayerManager {
 	 * Adds a player to the login queue.
 	 */
 	public void queueLogin(Player player) {
-		Logger.getLogger(getClass().getName()).log(Level.INFO, player.getDisplayName() + " added to login queue.");
+		logger.log(Level.INFO, player.getDisplayName() + " added to login queue.");
 		insertQueue.add(player);
 	}
 
@@ -129,7 +130,7 @@ public class PlayerManager {
 	 * Adds the player into the logout queue.
 	 */
 	public void queueLogout(Player player) {
-		Logger.getLogger(getClass().getName()).log(Level.INFO, player.getDisplayName() + " added to logout queue.");
+		logger.log(Level.INFO, player.getDisplayName() + " added to logout queue.");
 		removeQueue.add(player);
 	}
 
@@ -165,7 +166,7 @@ public class PlayerManager {
 	}
 
 	/**
-	 * @return A lost of registered players. This does not include players from the
+	 * @return A list of registered players. This does not include players from the
 	 *         login queue.
 	 */
 	public Set<Player> getList() {
@@ -194,18 +195,18 @@ public class PlayerManager {
 
 	// TODO Auto-generated method stub
 	public boolean checkPassword(String username, String password) {
-		Logger.getLogger(getClass().getName()).info("TODO");
+		logger.info("TODO");
 		return true;
 	}
 
 	// TODO Auto-generated method stub
 	private void loadGame(Player user) {
-		Logger.getLogger(getClass().getName()).info("TODO");
+		logger.info("TODO");
 	}
 
 	// TODO Auto-generated method stub
 	private void saveGame(Player user) {
-		Logger.getLogger(getClass().getName()).info("TODO");
+		logger.info("TODO");
 	}
 
 	public static PlayerManager getInstance() {

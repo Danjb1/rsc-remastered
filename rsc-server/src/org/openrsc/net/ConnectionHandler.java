@@ -15,9 +15,7 @@ import org.openrsc.model.PlayerManager;
 import org.openrsc.model.net.GameLoginHandler;
 import org.openrsc.model.player.Player;
 import org.openrsc.net.packet.Packet;
-import org.openrsc.net.packet.PacketHandler;
 import org.openrsc.net.packet.PacketManager;
-import org.openrsc.util.GameUtils;
 
 /**
  * The <code>ConnectionHandler</code> handles incoming packet data.
@@ -42,16 +40,28 @@ public class ConnectionHandler extends SimpleChannelHandler {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received null packet from client.");
 			return;
 		}
+		
+		// Check if the packet exists.
 		final int opcode = packet.getOpcode();
+		if (PacketManager.get(opcode) == null) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, "No packet found for " + opcode);
+			return;
+		}
 
-		// Ping Packet
+		// XXX Opcode 0 is reserved for future pre-login handshake.
 		if (opcode == 0) {
-			ctx.getChannel().write(new Packet(0).putLong(GameUtils.getCurrentTimeMillis()));
+			return;
+		}
+		
+		// Ping Packet
+		if (opcode == 1) {
+			// When the client sent the ping.
+			ctx.getChannel().write(new Packet(1));
 			return;
 		}
 
 		// Login packet
-		if (opcode == 1) {
+		if (opcode == 2) {
 			loginDecoder.execute(ctx.getChannel(), packet);
 			return;
 		}
@@ -60,12 +70,6 @@ public class ConnectionHandler extends SimpleChannelHandler {
 		Player player = ((Player) ctx.getChannel().getAttachment());
 		if (player == null) {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received packet from null player.");
-			return;
-		}
-
-		// Get the packet instance
-		if (PacketManager.get(opcode) == null) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, "No packet found for " + opcode);
 			return;
 		}
 

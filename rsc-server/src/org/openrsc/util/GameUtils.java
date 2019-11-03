@@ -56,12 +56,12 @@ public class GameUtils {
 	/**
 	 * aA-zZ, 0-9, and VALID_CHARS[] are THE ONLY usable chat characters.
 	 */
-	public static boolean isValidCharacter(char letterOrDigit) {
-		if (Character.isLetterOrDigit(letterOrDigit)) {
+	public static boolean isValidCharacter(char character) {
+		if (Character.isLetterOrDigit(character)) {
 			return true;
 		}
 		for (int i = 0; i < VALID_CHARS.length; i++) {
-			if (letterOrDigit == VALID_CHARS[i]) {
+			if (character == VALID_CHARS[i]) {
 				return true;
 			}
 		}

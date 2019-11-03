@@ -20,44 +20,33 @@ public abstract class Mob {
 	 */
 	private Location travelBack = new Location(-1, -1);
 
-	// FIXME Figure out is Dan has a plan for these variables.
-	public int admin;
-	public long nameLong;
-	public String name;
-	public int serverIndex;
-	public int mobIntUnknown;
-	public int x;
-	public int z;
-	public int type;
-	public int stepCount;
-	public int currentSprite;
-	public int nextAnimation;
-	public int movingStep;
-	public int waypointCurrent;
-	public int waypointsX[] = new int[10];
-	public int waypointsZ[] = new int[10];
-	public int animationCount[] = new int[12];
-	public String lastMessage;
-	public int lastMessageTimeout;
-	public int anInt162;
-	public int anInt163;
-	public int damageTaken;
-	public int healthCurrent;
-	public int healthMax;
-	public int combatTimer;
-	public int level = -1;
-	public int colourHairType;
-	public int colourTopType;
-	public int colourBottomType;
-	public int colourSkinType;
-	public int attackingCameraInt;
-	public int attackingMobIndex;
-	public int attackingNpcIndex;
-	public int projectileRange;
-	public boolean unusedBool;
-	public int unusedInt = -1;
-	public int anInt179;
+	// Combat mob
+	private Mob opponent = null;
+	
+	// Number of ticks before next attack.
+	private int combatDelay = 0;
+	
+	// Current health.
+	private int healthCurrent = 10;
+	
+	// Maximum health.
+	private int healthMaximum = 10;
+	
+	// Combat level.
+	private int combatLevel = 0;
 
+	// Create appropriate replacement variables.
+	public int currentSprite;//TODO
+	public int nextAnimation;//TODO
+	public int animationCount[] = new int[12];//TODO
+	
+	// TODO A* PATH FINDER
+	public int stepCount;//TODO
+	public int movingStep;//TODO
+	public int waypointCurrent;//TODO
+	public int waypointsX[] = new int[10];//TODO
+	public int waypointsZ[] = new int[10];//TODO
+	
 	public Mob(int sessionId) {
 		this(sessionId, 0, 0);
 	}
@@ -139,6 +128,47 @@ public abstract class Mob {
 	 */
 	public void setLocation(Location location) {
 		setLocation(location.getX(), location.getZ());
+	}
+
+	public Mob getOpponent() {
+		return opponent;
+	}
+
+	public int getCombatDelay() {
+		return combatDelay;
+	}
+	
+	public void setCombatDelay(int combatDelay) {
+		this.combatDelay = combatDelay;
+	}
+
+	public int getHealthCurrent() {
+		return healthCurrent;
+	}
+	
+	public void setHealthCurrent(int healthCurrent) {
+		this.healthCurrent = healthCurrent;
+	}
+
+	public int getHealthMaximum() {
+		return healthMaximum;
+	}
+	
+	public void setHealthMaximum(int healthMaximum) {
+		this.healthMaximum = healthMaximum;
+	}
+
+	public int getCombatLevel() {
+		return combatLevel;
+	}
+	
+	public void setCombatLevel(int combatLevel) {
+		this.combatLevel = combatLevel;
+	}
+
+	// TODO
+	public int getProjectileRange() {
+		return 0;
 	}
 
 }

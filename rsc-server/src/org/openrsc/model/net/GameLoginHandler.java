@@ -8,6 +8,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.openrsc.Config;
+import org.openrsc.model.Constants;
 import org.openrsc.model.PlayerManager;
 import org.openrsc.model.Privilege;
 import org.openrsc.model.player.Player;
@@ -34,30 +35,37 @@ public class GameLoginHandler {
 
 		// Read account credentials from the client.
 		String username = packet.getString();
-		String password = packet.getString();
+		
+		// Read the secure password from the client.
+		String password = packet.getString(); // TODO Use RSA
 
+		// Invalid client build.
+		if (clientBuild != Constants.CLIENT_BUILD) {
+			sendLoginError(channel, "Please update your client");
+			return;
+		}
+		
 		// Server is full.
 		if (PlayerManager.getInstance().getCount() >= Config.USER_LIMIT) {
-			sendLoginErrorCode(channel, 1, null);
+			sendLoginError(channel, "Server is full");
 			return;
 		}
 
 		// Username is not allowed.
 		if (!isUsernameValid(username)) {
-			sendLoginErrorCode(channel, 2, usernameErrorReport);
+			sendLoginError(channel, usernameErrorReport);
 			return;
 		}
 
 		// Password is not allowed.
 		if (!isPasswordValid(password)) {
-			sendLoginErrorCode(channel, 3, passwordErrorReport);
+			sendLoginError(channel, passwordErrorReport);
 			return;
 		}
 
 		// Account is not registered.
-		// Invalid username or password.
 		if (!doesUserExist(username)) {
-			sendLoginErrorCode(channel, 4, null);
+			sendLoginError(channel, "Account does not exist");
 			return;
 		}
 
@@ -67,7 +75,7 @@ public class GameLoginHandler {
 
 		// Invalid username or password.
 		if (!validateCredentials(databaseId, password)) {
-			sendLoginErrorCode(channel, 4, null);
+			sendLoginError(channel, "Invalid username or password");
 			return;
 		}
 
@@ -77,7 +85,7 @@ public class GameLoginHandler {
 
 		// Account is already logged in.
 		if (isLoggedIn(databaseId)) {
-			sendLoginErrorCode(channel, 5, null);
+			sendLoginError(channel, "Account is already logged in");
 			return;
 		}
 
@@ -87,7 +95,7 @@ public class GameLoginHandler {
 
 		// Account is banned.
 		if (isBanned(databaseId)) {
-			sendLoginErrorCode(channel, 6, null);
+			sendLoginError(channel, "Account is banned");
 			return;
 		}
 
@@ -97,9 +105,13 @@ public class GameLoginHandler {
 
 		// Create the player instance.
 		final Player player = PlayerManager.getInstance().create(channel, databaseId, displayName);
+		
+		System.out.println(displayName);
+		System.out.println(player.getSessionId());
+		System.out.println(privilege.toInteger());
 
 		// Send the login response to the client.
-		Packet success = new Packet(1).putByte(0).putBase37(displayName).putInt(player.getSessionId()).putByte(privilege.toInteger());
+		Packet success = new Packet(2).putBoolean(true).putBase37(displayName).putInt(player.getSessionId()).putByte(privilege.toInteger());
 		channel.write(success).addListener(new ChannelFutureListener() {
 			@Override
 			public void operationComplete(ChannelFuture future) {
@@ -110,50 +122,13 @@ public class GameLoginHandler {
 
 	}
 
-	// Check if account has completed registration.
-	private boolean doesUserExist(String username) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	// Check if username password combination is valid.
-	private boolean validateCredentials(int databaseId, String password) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	// Check if user is already logged in.
-	private boolean isLoggedIn(int databaseId) {
-		boolean connected = PlayerManager.getInstance().getForAccountId(databaseId) != null;
-
-		// TODO : Check if player is logged in to a different server
-		return connected;
-	}
-
-	// Check if account is banned.
-	private boolean isBanned(int databaseId) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	// Get user privilege.
-	private Privilege getPrivilege(int databaseId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	/**
 	 * The login request has been denied. Tell the client which error, then close
 	 * the connection.
 	 */
-	private void sendLoginErrorCode(Channel channel, int errorCode, String message) {
-		Packet error = new Packet(1);
-		error.putByte(errorCode);
-		error.putBoolean(message != null);
-		if (message != null) {
-			error.putString(message);
-		}
-		channel.write(error).addListener(new ChannelFutureListener() {
+	private void sendLoginError(Channel channel, String message) {
+		Packet packet = new Packet(2).putBoolean(false).putString(message);
+		channel.write(packet).addListener(new ChannelFutureListener() {
 			@Override
 			public void operationComplete(ChannelFuture future) {
 				channel.close();
@@ -216,6 +191,38 @@ public class GameLoginHandler {
 			return false;
 		}
 		return true;
+	}
+
+	// Check if account has completed registration.
+	private boolean doesUserExist(String username) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	// Check if username password combination is valid.
+	private boolean validateCredentials(int databaseId, String password) {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+	// Check if user is already logged in.
+	private boolean isLoggedIn(int databaseId) {
+		boolean connected = PlayerManager.getInstance().getForAccountId(databaseId) != null;
+
+		// TODO : Check if player is logged in to a different server
+		return connected;
+	}
+
+	// Check if account is banned.
+	private boolean isBanned(int databaseId) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	// Get user privilege.
+	private Privilege getPrivilege(int databaseId) {
+		// TODO Auto-generated method stub
+		return Privilege.GITHUB_CONTRIBUTOR;
 	}
 
 }
