@@ -118,6 +118,9 @@ public class RuneClient {
 	}
 
 	public void run() {
+		Thread.currentThread().setName(WINDOW_TITLE);
+		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+		
 		while (!exiting) {
 			long before = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
 
