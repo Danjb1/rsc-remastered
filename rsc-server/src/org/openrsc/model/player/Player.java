@@ -212,6 +212,10 @@ public class Player extends Mob {
 	public Privilege getPrivileges() {
 		return privilege;
 	}
+	
+	public void setPrivileges(Privilege privilege ) {
+		this.privilege = privilege;
+	}
 
 	/**
 	 * @return True, if the account has developer privileges.

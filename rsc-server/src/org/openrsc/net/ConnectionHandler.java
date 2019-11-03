@@ -40,19 +40,14 @@ public class ConnectionHandler extends SimpleChannelHandler {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received null packet from client.");
 			return;
 		}
-		
-		// Check if the packet exists.
+
 		final int opcode = packet.getOpcode();
-		if (PacketManager.get(opcode) == null) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, "No packet found for " + opcode);
-			return;
-		}
 
 		// XXX Opcode 0 is reserved for future pre-login handshake.
 		if (opcode == 0) {
 			return;
 		}
-		
+
 		// Ping Packet
 		if (opcode == 1) {
 			// When the client sent the ping.
@@ -66,10 +61,16 @@ public class ConnectionHandler extends SimpleChannelHandler {
 			return;
 		}
 
-		// Game packet
+		// Get player instance.
 		Player player = ((Player) ctx.getChannel().getAttachment());
 		if (player == null) {
 			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received packet from null player.");
+			return;
+		}
+
+		// Check if the packet exists.
+		if (PacketManager.get(opcode) == null) {
+			Logger.getLogger(getClass().getName()).log(Level.WARNING, "No packet found for " + opcode);
 			return;
 		}
 

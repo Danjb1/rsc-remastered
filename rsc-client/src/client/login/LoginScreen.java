@@ -1,54 +1,66 @@
 package client.login;
 
-import java.io.IOException;
-import java.net.Socket;
+import java.util.Random;
 
 import client.RuneClient;
 import client.State;
 import client.StateRenderer;
-import client.game.Game;
-import client.net.Connection;
+import client.net.Packet;
 
 public class LoginScreen extends State {
 
-    private static final String SERVER_ADDRESS = "localhost";
-    private static final int SERVER_PORT = 7780;
+	private LoginScreenRenderer renderer;
 
-    private LoginScreenRenderer renderer;
+	public LoginScreen(RuneClient launcher) {
+		super(launcher);
 
-    public LoginScreen(RuneClient launcher) {
-        super(launcher);
+		renderer = new LoginScreenRenderer(this);
+	}
 
-        renderer = new LoginScreenRenderer(this);
-    }
+	@Override
+	public StateRenderer getRenderer() {
+		return renderer;
+	}
 
-    @Override
-    public StateRenderer getRenderer() {
-        return renderer;
-    }
+	@Override
+	public void pollInput() {
+		if (input.wasLeftClickReleased()) {
+			// For now, just connect to the server immediately
 
-    @Override
-    public void pollInput() {
-        if (input.wasLeftClickReleased()) {
-            // For now, just connect to the server immediately
-            connect(SERVER_ADDRESS, SERVER_PORT);
-        }
-    }
+			boolean connected = launcher.isConnected() || launcher.connect("localhost", 7780);
+			if (connected) {
+				sendLoginRequest("Player" + new Random().nextInt(1000), "topsecret");
+			}
+		}
+	}
 
-    private void connect(String address, int port) {
+	@Override
+	public void tick() {
+	}
 
-        Connection conn = null;
+	/**
+	 * Sends a login request to the server.
+	 */
+	private void sendLoginRequest(String name, String password) {
+		// Create a packet.
+		// Send the username and password.
+		Packet packet = new Packet(2);
 
-        try {
-            Socket socket = new Socket(address, port);
-            conn = new Connection(socket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		// Send the client build.
+		packet.putDouble(0.1); // TODO Add client build value to code somewhere?
 
-        if (conn != null) {
-            launcher.changeState(new Game(launcher, conn));
-        }
-    }
+		// Send name
+		packet.putString(name);
+		
+		// Send password
+		packet.putString(password); // TODO Use RSA
 
+		// Send the packet.
+		launcher.sendPacket(packet);
+	}
+
+	@Override
+	public void reset() {
+	}
+	
 }

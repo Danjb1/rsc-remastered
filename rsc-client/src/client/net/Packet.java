@@ -1,6 +1,7 @@
-package org.openrsc.net.packet;
+package client.net;
 
 import java.util.Arrays;
+
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 
@@ -256,7 +257,7 @@ public class Packet {
 		int length = getByte();
 		byte[] b = new byte[length];
 		for (int i = 0; i < b.length; i++) {
-			b[i] = getByte();
+			b[i] = buffer.readByte();
 		}
 		return new String(b);
 	}

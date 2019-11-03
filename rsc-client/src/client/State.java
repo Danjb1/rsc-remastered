@@ -15,8 +15,10 @@ public abstract class State {
     public void pollInput() {}
 
     public void tick() {}
-
+    
     public abstract StateRenderer getRenderer();
+    
+    public abstract void reset();
 
     public Input getInput() {
         return input;

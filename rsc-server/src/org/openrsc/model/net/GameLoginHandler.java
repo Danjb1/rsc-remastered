@@ -105,13 +105,10 @@ public class GameLoginHandler {
 
 		// Create the player instance.
 		final Player player = PlayerManager.getInstance().create(channel, databaseId, displayName);
-		
-		System.out.println(displayName);
-		System.out.println(player.getSessionId());
-		System.out.println(privilege.toInteger());
+		player.setPrivileges(privilege);
 
 		// Send the login response to the client.
-		Packet success = new Packet(2).putBoolean(true).putBase37(displayName).putInt(player.getSessionId()).putByte(privilege.toInteger());
+		Packet success = new Packet(2).putBoolean(true).putBase37(displayName).putInt(player.getSessionId()).putByte(player.getPrivileges().toInteger());
 		channel.write(success).addListener(new ChannelFutureListener() {
 			@Override
 			public void operationComplete(ChannelFuture future) {
