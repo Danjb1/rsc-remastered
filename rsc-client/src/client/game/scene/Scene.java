@@ -22,18 +22,18 @@ public class Scene {
      * Fog "density".
      */
     public int fogZFalloff = 1;
-    
+
     public int fogZDistance = 2100 + (Camera.DEFAULT_HEIGHT * 2);
-    
+
     public Scene() {
         for (int l = 0; l < spriteEntities.length; l++) {
             spriteEntities[l] = new SpriteEntity();
         }
         sprites = new Model(MAX_SPRITES * 2, MAX_SPRITES);
         camera = new Camera();
-        
+
         camera.set(0, 0, 0, 912, 0, 0, 2000);
-        
+
         setLight(-50, -10, -50);
     }
 
@@ -83,13 +83,8 @@ public class Scene {
 
     public int addSpriteEntity(SpriteEntity spriteEntity, int tag) {
         spriteEntities[numSprites] = spriteEntity;
-        int v1 = sprites.addVertex(
-                spriteEntity.getX(),
-                spriteEntity.getY(),
-                spriteEntity.getZ());
-        int v2 = sprites.addVertex(
-                spriteEntity.getX(),
-                spriteEntity.getZ() - spriteEntity.getHeight(),
+        int v1 = sprites.addVertex(spriteEntity.getX(), spriteEntity.getY(), spriteEntity.getZ());
+        int v2 = sprites.addVertex(spriteEntity.getX(), spriteEntity.getZ() - spriteEntity.getHeight(),
                 spriteEntity.getY());
         int vertices[] = { v1, v2 };
         sprites.addFace(2, vertices, 0, 0);
@@ -121,19 +116,19 @@ public class Scene {
     public Model getSprites() {
         return sprites;
     }
-    
+
     public Camera getCamera() {
         return camera;
     }
-    
+
     public int getNumModels() {
         return numModels;
     }
-    
+
     public Model[] getModels() {
         return models;
     }
-    
+
     public SpriteEntity[] getSpriteEntities() {
         return spriteEntities;
     }

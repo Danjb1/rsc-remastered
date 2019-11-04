@@ -13,12 +13,15 @@ import client.res.Texture;
 /**
  * Class responsible for rendering a scene.
  *
- * <p>This is essentially a 3d software renderer; consider porting to OpenGL.
+ * <p>
+ * This is essentially a 3d software renderer; consider porting to OpenGL.
  *
- * <p>This class should not be aware of the game at all, and the game should
- * not be aware of what goes on inside this class.
+ * <p>
+ * This class should not be aware of the game at all, and the game should not be
+ * aware of what goes on inside this class.
  *
- * <p><i>Based on <code>client.Scene</code> from EasyRSC.</i>
+ * <p>
+ * <i>Based on <code>client.Scene</code> from EasyRSC.</i>
  */
 public class SoftwareRenderer {
 
@@ -87,11 +90,7 @@ public class SoftwareRenderer {
             visiblePolygons[l] = new Polygon();
         }
 
-        setBounds(
-                width / 2, height / 2,
-                width / 2, height / 2,
-                width,
-                VIEW_DISTANCE);
+        setBounds(width / 2, height / 2, width / 2, height / 2, width, VIEW_DISTANCE);
     }
 
     public void render(Canvas canvas) {
@@ -106,8 +105,7 @@ public class SoftwareRenderer {
             scene.getModels()[i].project(camera, viewDistance, clipNear);
         }
 
-        scene.getModels()[scene.getNumModels()]
-                .project(camera, viewDistance, clipNear);
+        scene.getModels()[scene.getNumModels()].project(camera, viewDistance, clipNear);
         visiblePolygonCount = 0;
 
         // Draw each model in the scene
@@ -287,7 +285,6 @@ public class SoftwareRenderer {
                     }
                 }
 
-
                 if (polygonModel.verticesProjected[vertexIndexInModel].z >= clipNear) {
 
                     planeX[plane] = polygonModel.verticesView[vertexIndexInModel].x;
@@ -295,7 +292,8 @@ public class SoftwareRenderer {
                     vertexShade[plane] = light;
 
                     if (polygonModel.verticesProjected[vertexIndexInModel].z > scene.fogZDistance) {
-                        vertexShade[plane] += (polygonModel.verticesProjected[vertexIndexInModel].z - scene.fogZDistance) / scene.fogZFalloff;
+                        vertexShade[plane] += (polygonModel.verticesProjected[vertexIndexInModel].z
+                                - scene.fogZDistance) / scene.fogZFalloff;
                     }
                     plane++;
 
@@ -310,12 +308,15 @@ public class SoftwareRenderer {
                     }
 
                     if (polygonModel.verticesProjected[vertEnd].z >= clipNear) {
-                        int k7 = polygonModel.verticesProjected[vertexIndexInModel].z - polygonModel.verticesProjected[vertEnd].z;
+                        int k7 = polygonModel.verticesProjected[vertexIndexInModel].z
+                                - polygonModel.verticesProjected[vertEnd].z;
                         int i5 = polygonModel.verticesProjected[vertexIndexInModel].x
-                                - ((polygonModel.verticesProjected[vertexIndexInModel].x - polygonModel.verticesProjected[vertEnd].x)
+                                - ((polygonModel.verticesProjected[vertexIndexInModel].x
+                                        - polygonModel.verticesProjected[vertEnd].x)
                                         * (polygonModel.verticesProjected[vertexIndexInModel].z - clipNear)) / k7;
                         int j6 = polygonModel.verticesProjected[vertexIndexInModel].y
-                                - ((polygonModel.verticesProjected[vertexIndexInModel].y - polygonModel.verticesProjected[vertEnd].y)
+                                - ((polygonModel.verticesProjected[vertexIndexInModel].y
+                                        - polygonModel.verticesProjected[vertEnd].y)
                                         * (polygonModel.verticesProjected[vertexIndexInModel].z - clipNear)) / k7;
                         planeX[plane] = (i5 << viewDistance) / clipNear;
                         planeY[plane] = (j6 << viewDistance) / clipNear;
@@ -330,12 +331,15 @@ public class SoftwareRenderer {
                     }
 
                     if (polygonModel.verticesProjected[vertEnd].z >= clipNear) {
-                        int l7 = polygonModel.verticesProjected[vertexIndexInModel].z - polygonModel.verticesProjected[vertEnd].z;
+                        int l7 = polygonModel.verticesProjected[vertexIndexInModel].z
+                                - polygonModel.verticesProjected[vertEnd].z;
                         int j5 = polygonModel.verticesProjected[vertexIndexInModel].x
-                                - ((polygonModel.verticesProjected[vertexIndexInModel].x - polygonModel.verticesProjected[vertEnd].x)
+                                - ((polygonModel.verticesProjected[vertexIndexInModel].x
+                                        - polygonModel.verticesProjected[vertEnd].x)
                                         * (polygonModel.verticesProjected[vertexIndexInModel].z - clipNear)) / l7;
                         int k6 = polygonModel.verticesProjected[vertexIndexInModel].y
-                                - ((polygonModel.verticesProjected[vertexIndexInModel].y - polygonModel.verticesProjected[vertEnd].y)
+                                - ((polygonModel.verticesProjected[vertexIndexInModel].y
+                                        - polygonModel.verticesProjected[vertEnd].y)
                                         * (polygonModel.verticesProjected[vertexIndexInModel].z - clipNear)) / l7;
                         planeX[plane] = (j5 << viewDistance) / clipNear;
                         planeY[plane] = (k6 << viewDistance) / clipNear;
@@ -370,8 +374,7 @@ public class SoftwareRenderer {
         }
     }
 
-    private void renderSprite(Model polygonModel, int polyFace,
-            Canvas canvas) {
+    private void renderSprite(Model polygonModel, int polyFace, Canvas canvas) {
         SpriteEntity spriteEntity = scene.getSpriteEntities()[polyFace];
         int faceverts[] = polygonModel.faceVertices[polyFace];
         int face0 = faceverts[0];
@@ -515,17 +518,8 @@ public class SoftwareRenderer {
         } while (true);
     }
 
-    private void generateScanlines(
-            int startX,
-            int endX,
-            int y,
-            int startS,
-            int plane,
-            int planeX[],
-            int planeY[],
-            int vertexShade[],
-            Model gameModel,
-            int faceId) {
+    private void generateScanlines(int startX, int endX, int y, int startS, int plane, int planeX[], int planeY[],
+            int vertexShade[], Model gameModel, int faceId) {
 
         if (plane == 3) {
 
@@ -1124,16 +1118,15 @@ public class SoftwareRenderer {
 
         if (mouseY >= minY && mouseY < maxY) {
             Scanline scanline = scanlines[mouseY];
-            if (mouseX >= scanline.startX >> 8 &&
-                    mouseX <= scanline.endX >> 8 &&
-                    scanline.startX <= scanline.endX &&
-                    !gameModel.unpickable) {
+            if (mouseX >= scanline.startX >> 8 && mouseX <= scanline.endX >> 8 && scanline.startX <= scanline.endX
+                    && !gameModel.unpickable) {
                 mousePicker.add(gameModel, faceId);
             }
         }
     }
 
-    private void rasterize(Canvas canvas, int numFaces, int vertexX[], int vertexY[], int vertexZ[], int textureId, Model gameModel) {
+    private void rasterize(Canvas canvas, int numFaces, int vertexX[], int vertexY[], int vertexZ[], int textureId,
+            Model gameModel) {
 
         if (textureId == -2) {
             // Transparent
@@ -1211,20 +1204,9 @@ public class SoftwareRenderer {
                                 int l17 = clipX;
                                 k20 = l17 - scanlineStartX;
                             }
-                            canvas.renderScanline_LargeTranslucentTexture(
-                                    tex.pixels,
-                                    0,
-                                    0,
-                                    l9 + k14 * scanlineStartX,
-                                    k11 + i15 * scanlineStartX,
-                                    i13 + k15 * scanlineStartX,
-                                    k10,
-                                    i12,
-                                    k13,
-                                    k20,
-                                    i17 + scanlineStartX,
-                                    i22,
-                                    k23 << 2);
+                            canvas.renderScanline_LargeTranslucentTexture(tex.pixels, 0, 0, l9 + k14 * scanlineStartX,
+                                    k11 + i15 * scanlineStartX, i13 + k15 * scanlineStartX, k10, i12, k13, k20,
+                                    i17 + scanlineStartX, i22, k23 << 2);
                             l9 += i11;
                             k11 += k12;
                             i13 += i14;
@@ -1262,20 +1244,9 @@ public class SoftwareRenderer {
                                 int j18 = clipX;
                                 l20 = j18 - scanlineStartX;
                             }
-                            canvas.renderScanline_LargeTexture(
-                                    tex.pixels,
-                                    0,
-                                    0,
-                                    l9 + k14 * scanlineStartX,
-                                    k11 + i15 * scanlineStartX,
-                                    i13 + k15 * scanlineStartX,
-                                    k10,
-                                    i12,
-                                    k13,
-                                    l20,
-                                    i17 + scanlineStartX,
-                                    j22,
-                                    l23 << 2);
+                            canvas.renderScanline_LargeTexture(tex.pixels, 0, 0, l9 + k14 * scanlineStartX,
+                                    k11 + i15 * scanlineStartX, i13 + k15 * scanlineStartX, k10, i12, k13, l20,
+                                    i17 + scanlineStartX, j22, l23 << 2);
                             l9 += i11;
                             k11 += k12;
                             i13 += i14;
@@ -1312,21 +1283,9 @@ public class SoftwareRenderer {
                             int l18 = clipX;
                             i21 = l18 - scanlineStartX;
                         }
-                        canvas.renderScanline_LargeTextureWithTransparency(
-                                0,
-                                0,
-                                0,
-                                tex.pixels,
-                                l9 + k14 * scanlineStartX,
-                                k11 + i15 * scanlineStartX,
-                                i13 + k15 * scanlineStartX,
-                                k10,
-                                i12,
-                                k13,
-                                i21,
-                                i17 + scanlineStartX,
-                                k22,
-                                i24);
+                        canvas.renderScanline_LargeTextureWithTransparency(0, 0, 0, tex.pixels,
+                                l9 + k14 * scanlineStartX, k11 + i15 * scanlineStartX, i13 + k15 * scanlineStartX, k10,
+                                i12, k13, i21, i17 + scanlineStartX, k22, i24);
                         l9 += i11;
                         k11 += k12;
                         i13 += i14;
@@ -1387,20 +1346,9 @@ public class SoftwareRenderer {
                             int j19 = clipX;
                             j21 = j19 - scanlineStartX;
                         }
-                        canvas.renderScanline_SmallTranslucentTexture(
-                                tex.pixels,
-                                0,
-                                0,
-                                i10 + l14 * scanlineStartX,
-                                l11 + j15 * scanlineStartX,
-                                j13 + l15 * scanlineStartX,
-                                l10,
-                                j12,
-                                l13,
-                                j21,
-                                j17 + scanlineStartX,
-                                l22,
-                                j24);
+                        canvas.renderScanline_SmallTranslucentTexture(tex.pixels, 0, 0, i10 + l14 * scanlineStartX,
+                                l11 + j15 * scanlineStartX, j13 + l15 * scanlineStartX, l10, j12, l13, j21,
+                                j17 + scanlineStartX, l22, j24);
                         i10 += j11;
                         l11 += l12;
                         j13 += j14;
@@ -1441,20 +1389,9 @@ public class SoftwareRenderer {
                         k21 = l19 - scanlineStartX;
                     }
 
-                    canvas.renderScanline_SmallTexture(
-                            tex.pixels,
-                            0,
-                            0,
-                            i10 + l14 * scanlineStartX,
-                            l11 + j15 * scanlineStartX,
-                            j13 + l15 * scanlineStartX,
-                            l10,
-                            j12,
-                            l13,
-                            k21,
-                            j17 + scanlineStartX,
-                            i23,
-                            k24);
+                    canvas.renderScanline_SmallTexture(tex.pixels, 0, 0, i10 + l14 * scanlineStartX,
+                            l11 + j15 * scanlineStartX, j13 + l15 * scanlineStartX, l10, j12, l13, k21,
+                            j17 + scanlineStartX, i23, k24);
 
                     i10 += j11;
                     l11 += l12;
@@ -1490,18 +1427,9 @@ public class SoftwareRenderer {
                         int j20 = clipX;
                         l21 = j20 - scanlineStartX;
                     }
-                    canvas.renderScanline_SmallTextureWithTransparency(
-                            tex.pixels,
-                            i10 + l14 * scanlineStartX,
-                            l11 + j15 * scanlineStartX,
-                            j13 + l15 * scanlineStartX,
-                            l10,
-                            j12,
-                            l13,
-                            l21,
-                            j17 + scanlineStartX,
-                            j23,
-                            l24);
+                    canvas.renderScanline_SmallTextureWithTransparency(tex.pixels, i10 + l14 * scanlineStartX,
+                            l11 + j15 * scanlineStartX, j13 + l15 * scanlineStartX, l10, j12, l13, l21,
+                            j17 + scanlineStartX, j23, l24);
                     i10 += j11;
                     l11 += l12;
                     j13 += j14;
@@ -1559,12 +1487,8 @@ public class SoftwareRenderer {
                     if (k4 > clipX) {
                         length = clipX - scanlineStartX;
                     }
-                    canvas.renderScanline_TranslucentGradient(
-                            length,
-                            rowStart + scanlineStartX,
-                            currentGradientRamps,
-                            gradientIndex,
-                            stride * 4);
+                    canvas.renderScanline_TranslucentGradient(length, rowStart + scanlineStartX, currentGradientRamps,
+                            gradientIndex, stride * 4);
                     rowStart += width;
                 }
             }
@@ -1592,11 +1516,7 @@ public class SoftwareRenderer {
                     length = l5 - scanlineStartX;
                 }
 
-                canvas.renderScanline_Gradient(
-                        length,
-                        rowStart + scanlineStartX,
-                        currentGradientRamps,
-                        gradientIndex,
+                canvas.renderScanline_Gradient(length, rowStart + scanlineStartX, currentGradientRamps, gradientIndex,
                         stride * 4);
 
                 rowStart += width;
@@ -1632,7 +1552,8 @@ public class SoftwareRenderer {
             }
 
             gameModel.faceCameraNormalScale[face] = faceCameraNormalScale;
-            gameModel.faceCameraNormalMagnitude[face] = (int) (normalMagnitude * Math.sqrt(k3 * k3 + l3 * l3 + i4 * i4));
+            gameModel.faceCameraNormalMagnitude[face] = (int) (normalMagnitude
+                    * Math.sqrt(k3 * k3 + l3 * l3 + i4 * i4));
         } else {
             k3 >>= faceCameraNormalScale;
             l3 >>= faceCameraNormalScale;

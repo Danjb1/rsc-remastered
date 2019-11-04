@@ -21,7 +21,8 @@ import client.util.DataUtils;
 /**
  * Class responsible for holding the game's resources.
  *
- * <p><i>Based on <code>EntityHandler.java</code> from other RSC sources.</i>
+ * <p>
+ * <i>Based on <code>EntityHandler.java</code> from other RSC sources.</i>
  *
  * @author Dan Bryce
  */
@@ -102,8 +103,7 @@ public class Resources {
                     }
                 }
             } else {
-                ByteBuffer data = DataUtils.streamToBuffer(
-                        new BufferedInputStream(tileArchive.getInputStream(e)));
+                ByteBuffer data = DataUtils.streamToBuffer(new BufferedInputStream(tileArchive.getInputStream(e)));
                 s = Sector.unpack(data);
             }
         } catch (Exception e) {
@@ -154,8 +154,8 @@ public class Resources {
         /*
          * Produce 3 additional versions of the texture.
          *
-         * These seem to be darker versions, which seem to be drawn over the
-         * normal texture during rendering.
+         * These seem to be darker versions, which seem to be drawn over the normal
+         * texture during rendering.
          */
         for (int i = 0; i < pixelIndex; i++) {
             int colour = tex.pixels[i];

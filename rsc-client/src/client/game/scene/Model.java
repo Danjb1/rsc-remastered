@@ -21,9 +21,7 @@ public class Model {
     private static final int DEFAULT_SCALE = 256;
 
     public enum TransformState {
-        CLEAN,
-        PENDING,
-        BILLBOARD
+        CLEAN, PENDING, BILLBOARD
     }
 
     private static int sine9[] = new int[512];
@@ -276,8 +274,7 @@ public class Model {
     }
 
     /**
-     * Copies the Model at the given index of the given array, and sets some
-     * flags.
+     * Copies the Model at the given index of the given array, and sets some flags.
      *
      * @param models
      * @param i
@@ -325,13 +322,7 @@ public class Model {
      * @param unpickable
      * @param projected
      */
-    public Model(
-            int maxVertices,
-            int maxFaces,
-            boolean autoCommit,
-            boolean isolated,
-            boolean unlit,
-            boolean unpickable,
+    public Model(int maxVertices, int maxFaces, boolean autoCommit, boolean isolated, boolean unlit, boolean unpickable,
             boolean projected) {
         this.autoCommit = autoCommit;
         this.isolated = isolated;
@@ -448,16 +439,11 @@ public class Model {
                 int vertices[] = gameModel.faceVertices[faceId];
 
                 for (int vertId = 0; vertId < gameModel.numVerticesPerFace[faceId]; vertId++) {
-                    faces[vertId] = addUniqueVertex(
-                            gameModel.vertices[vertices[vertId]].x,
-                            gameModel.vertices[vertices[vertId]].y,
-                            gameModel.vertices[vertices[vertId]].z);
+                    faces[vertId] = addUniqueVertex(gameModel.vertices[vertices[vertId]].x,
+                            gameModel.vertices[vertices[vertId]].y, gameModel.vertices[vertices[vertId]].z);
                 }
 
-                int faceIndex = addFace(
-                        gameModel.numVerticesPerFace[faceId],
-                        faces,
-                        gameModel.faceFillFront[faceId],
+                int faceIndex = addFace(gameModel.numVerticesPerFace[faceId], faces, gameModel.faceFillFront[faceId],
                         gameModel.faceFillBack[faceId]);
 
                 faceIntensity[faceIndex] = gameModel.faceIntensity[faceId];
@@ -561,10 +547,7 @@ public class Model {
             if (numVerticesInPiece[i] > maxVertices) {
                 numVerticesInPiece[i] = maxVertices;
             }
-            models[i] = new Model(
-                    numVerticesInPiece[i],
-                    numFacesInPiece[i],
-                    true, true, true, unpickable, true);
+            models[i] = new Model(numVerticesInPiece[i], numFacesInPiece[i], true, true, true, unpickable, true);
             models[i].lightDiffuse = lightDiffuse;
             models[i].lightAmbience = lightAmbience;
         }
@@ -590,17 +573,11 @@ public class Model {
         return models;
     }
 
-    public void copyModelData(
-            Model gameModel,
-            int srcVertices[],
-            int count,
-            int faceId) {
+    public void copyModelData(Model gameModel, int srcVertices[], int count, int faceId) {
 
         int destVertices[] = new int[count];
         for (int i = 0; i < count; i++) {
-            int l = destVertices[i] = gameModel.addUniqueVertex(
-                    vertices[srcVertices[i]].x,
-                    vertices[srcVertices[i]].y,
+            int l = destVertices[i] = gameModel.addUniqueVertex(vertices[srcVertices[i]].x, vertices[srcVertices[i]].y,
                     vertices[srcVertices[i]].z);
             gameModel.vertexIntensity[l] = vertexIntensity[srcVertices[i]];
             gameModel.vertexAmbience[l] = vertexAmbience[srcVertices[i]];
@@ -615,12 +592,7 @@ public class Model {
         gameModel.faceCameraNormalMagnitude[nextIndex] = faceCameraNormalMagnitude[faceId];
     }
 
-    public void setLighting(
-            boolean useGouraud,
-            int ambient,
-            int diffuse,
-            int lightDirectionX,
-            int lightDirectionY,
+    public void setLighting(boolean useGouraud, int ambient, int diffuse, int lightDirectionX, int lightDirectionY,
             int lightDirectionZ) {
 
         lightAmbience = 256 - ambient * 4;
@@ -644,12 +616,7 @@ public class Model {
         light();
     }
 
-    public void setLighting(
-            int ambient,
-            int diffuse,
-            int lightDirectionX,
-            int lightDirectionY,
-            int lightDirectionZ) {
+    public void setLighting(int ambient, int diffuse, int lightDirectionX, int lightDirectionY, int lightDirectionZ) {
 
         lightAmbience = 256 - ambient * 4;
         lightDiffuse = (64 - diffuse) * 16 + 128;
@@ -664,10 +631,7 @@ public class Model {
         light();
     }
 
-    public void setLighting(
-            int lightDirectionX,
-            int lightDirectionY,
-            int lightDirectionZ) {
+    public void setLighting(int lightDirectionX, int lightDirectionY, int lightDirectionZ) {
 
         if (unlit) {
             return;
@@ -708,8 +672,7 @@ public class Model {
     }
 
     private void determineTransformType() {
-        if (shearXY != 256 || shearXZ != 256 || shearYX != 256 || shearYZ != 256
-                || shearZX != 256 || shearZY != 256) {
+        if (shearXY != 256 || shearXZ != 256 || shearYX != 256 || shearYZ != 256 || shearZX != 256 || shearZY != 256) {
             transformType = 4;
             return;
         }
@@ -765,13 +728,7 @@ public class Model {
 
     }
 
-    private void applyShear(
-            int xy,
-            int xz,
-            int yx,
-            int yz,
-            int zx,
-            int zy) {
+    private void applyShear(int xy, int xz, int yx, int yz, int zx, int zy) {
         for (int i = 0; i < numVertices; i++) {
             if (xy != 0) {
                 verticesTransformed[i].x += verticesTransformed[i].y * xy >> 8;
@@ -880,9 +837,7 @@ public class Model {
         int i = lightDiffuse * VectorUtils.magnitude(lightDirection) >> 8;
         for (int j = 0; j < numFaces; j++) {
             if (faceIntensity[j] != USE_GOURAUD_LIGHTING) {
-                faceIntensity[j] =
-                        (faceNormals[j].x * lightDirection.x
-                        + faceNormals[j].y * lightDirection.y
+                faceIntensity[j] = (faceNormals[j].x * lightDirection.x + faceNormals[j].y * lightDirection.y
                         + faceNormals[j].z * lightDirection.z) / i;
             }
         }
@@ -913,11 +868,8 @@ public class Model {
 
         for (int j1 = 0; j1 < numVertices; j1++) {
             if (normalMagnitude[j1] > 0) {
-                vertexIntensity[j1] =
-                        (normalX[j1] * lightDirection.x
-                        + normalY[j1] * lightDirection.y
-                        + normalZ[j1] * lightDirection.z)
-                        / (i * normalMagnitude[j1]);
+                vertexIntensity[j1] = (normalX[j1] * lightDirection.x + normalY[j1] * lightDirection.y
+                        + normalZ[j1] * lightDirection.z) / (i * normalMagnitude[j1]);
             }
         }
     }
@@ -945,21 +897,13 @@ public class Model {
             int normalY = (bZ * cX) - (cZ * bX);
             int normalZ;
 
-            for (normalZ = bX * cY - cX * bY;
-                    normalX > 8192
-                    || normalY > 8192
-                    || normalZ > 8192
-                    || normalX < -8192
-                    || normalY < -8192
-                    || normalZ < -8192; normalZ >>= 1) {
+            for (normalZ = bX * cY - cX * bY; normalX > 8192 || normalY > 8192 || normalZ > 8192 || normalX < -8192
+                    || normalY < -8192 || normalZ < -8192; normalZ >>= 1) {
                 normalX >>= 1;
                 normalY >>= 1;
             }
 
-            int normalMagnitude = (int) (256D * Math.sqrt(
-                    normalX * normalX
-                    + normalY * normalY
-                    + normalZ * normalZ));
+            int normalMagnitude = (int) (256D * Math.sqrt(normalX * normalX + normalY * normalY + normalZ * normalZ));
             if (normalMagnitude <= 0) {
                 normalMagnitude = 1;
             }
@@ -996,8 +940,7 @@ public class Model {
                 scale(scale.x, scale.y, scale.z);
             }
             if (transformType >= 4) {
-                applyShear(
-                        shearXY, shearXZ, shearYX, shearYZ, shearZX, shearZY);
+                applyShear(shearXY, shearXZ, shearYX, shearYZ, shearZX, shearZY);
             }
             if (transformType >= 1) {
                 applyTranslate(translate.x, translate.y, translate.z);
@@ -1009,12 +952,8 @@ public class Model {
 
     public void project(Camera camera, int viewDistance, int clipNear) {
         applyTransform();
-        if (z1 > camera.getFrustumNearZ() ||
-                z2 < camera.getFrustumFarZ() ||
-                x1 > camera.getFrustumMinX() ||
-                x2 < camera.getFrustumMaxX() ||
-                y1 > camera.getFrustumMaxY() ||
-                y2 < camera.getFrustumMinY()) {
+        if (z1 > camera.getFrustumNearZ() || z2 < camera.getFrustumFarZ() || x1 > camera.getFrustumMinX()
+                || x2 < camera.getFrustumMaxX() || y1 > camera.getFrustumMaxY() || y2 < camera.getFrustumMinY()) {
             visible = false;
             return;
         }
@@ -1093,11 +1032,7 @@ public class Model {
         return gameModel;
     }
 
-    public Model copy(
-            boolean autoCommit,
-            boolean isolated,
-            boolean unlit,
-            boolean unpickable) {
+    public Model copy(boolean autoCommit, boolean isolated, boolean unlit, boolean unpickable) {
         Model models[] = new Model[1];
         models[0] = this;
         Model gameModel = new Model(models, 1, autoCommit, isolated, unlit, unpickable);

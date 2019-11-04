@@ -42,25 +42,18 @@ public class LoadingScreenRenderer extends StateRenderer {
         int y = canvas.getHeight() / 2 - BAR_HEIGHT / 2;
         g.setColor(BAR_COLOUR);
         g.drawRect(x - 2, y - 2, OUTLINE_WIDTH, OUTLINE_HEIGHT);
-        g.fillRect(x, y,
-                (BAR_WIDTH * loadingScreen.getProgress()) / 100,
-                BAR_HEIGHT);
+        g.fillRect(x, y, (BAR_WIDTH * loadingScreen.getProgress()) / 100, BAR_HEIGHT);
 
         // Draw loading message
         g.setColor(Color.WHITE);
-        drawString(g, loadingScreen.getMessage(), LOADING_FONT,
-                x + BAR_WIDTH / 2,
-                y + BAR_HEIGHT / 2);
+        drawString(g, loadingScreen.getMessage(), LOADING_FONT, x + BAR_WIDTH / 2, y + BAR_HEIGHT / 2);
     }
 
-    private static void drawString(Graphics g, String s,
-            Font font, int x, int y) {
+    private static void drawString(Graphics g, String s, Font font, int x, int y) {
         FontMetrics fontMetrics = g.getFontMetrics(font);
         fontMetrics.stringWidth(s);
         g.setFont(font);
-        g.drawString(s,
-                x - fontMetrics.stringWidth(s) / 2,
-                y + fontMetrics.getHeight() / 4);
+        g.drawString(s, x - fontMetrics.stringWidth(s) / 2, y + fontMetrics.getHeight() / 4);
     }
 
 }

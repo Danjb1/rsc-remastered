@@ -17,14 +17,8 @@ public class WorldLoader {
     /**
      * Model used when loading sectors.
      */
-    private Model tmpModel = new Model(
-            World.NUM_TERRAIN_FACES + 256,
-            World.NUM_TERRAIN_FACES + 256,
-            true,
-            true,
-            false,
-            false,
-            true);
+    private Model tmpModel = new Model(World.NUM_TERRAIN_FACES + 256, World.NUM_TERRAIN_FACES + 256, true, true, false,
+            false, true);
 
     /**
      * Ground colour palette.
@@ -50,28 +44,16 @@ public class WorldLoader {
         for (int i = 0; i < 64; i++) {
 
             // Pale Grass / Snow
-            GROUND_COLOURS[i] = DataUtils.rgbToInt(
-                    255 - i * 4,
-                    255 - (int) (i * 1.75),
-                    255 - i * 4);
+            GROUND_COLOURS[i] = DataUtils.rgbToInt(255 - i * 4, 255 - (int) (i * 1.75), 255 - i * 4);
 
             // Grass
-            GROUND_COLOURS[i + 64] = DataUtils.rgbToInt(
-                    i * 3,
-                    144,
-                    0);
+            GROUND_COLOURS[i + 64] = DataUtils.rgbToInt(i * 3, 144, 0);
 
             // Sand
-            GROUND_COLOURS[i + 128] = DataUtils.rgbToInt(
-                    192 - (int) (i * 1.5),
-                    144 - (int) (i * 1.5),
-                    0);
+            GROUND_COLOURS[i + 128] = DataUtils.rgbToInt(192 - (int) (i * 1.5), 144 - (int) (i * 1.5), 0);
 
             // Dark Grass / Mud
-            GROUND_COLOURS[i + 192] = DataUtils.rgbToInt(
-                    96 - (int) (i * 1.5),
-                    48 + (int) (i * 1.5),
-                    0);
+            GROUND_COLOURS[i + 192] = DataUtils.rgbToInt(96 - (int) (i * 1.5), 48 + (int) (i * 1.5), 0);
         }
     }
 
@@ -138,8 +120,7 @@ public class WorldLoader {
      */
     private void loadRequiredLayers(int sectorX, int sectorZ, int currentLayer) {
 
-        System.out.println("Loading sector: " + sectorX + ", " + sectorZ +
-                " (" + currentLayer + ")");
+        System.out.println("Loading sector: " + sectorX + ", " + sectorZ + " (" + currentLayer + ")");
 
         loadLayer(sectorX, sectorZ, currentLayer, true);
 
@@ -181,24 +162,22 @@ public class WorldLoader {
                     int elevation = -world.getGroundElevation(x, z);
 
                     // Flatten water under bridges
-                    if (world.getGroundTextureOverlay(x, z) > 0
-                            && Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                    if (world.getGroundTextureOverlay(x, z) > 0 && Resources
+                            .getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                         elevation = 0;
-                    } else if (world.getGroundTextureOverlay(x - 1, z) > 0
-                            && Resources.getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                    } else if (world.getGroundTextureOverlay(x - 1, z) > 0 && Resources
+                            .getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                         elevation = 0;
-                    } else if (world.getGroundTextureOverlay(x, z - 1) > 0
-                            && Resources.getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                    } else if (world.getGroundTextureOverlay(x, z - 1) > 0 && Resources
+                            .getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
                         elevation = 0;
-                    } else if (world.getGroundTextureOverlay(x - 1, z - 1) > 0 &&
-                            Resources.getTileDef(world.getGroundTextureOverlay(x - 1, z - 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                    } else if (world.getGroundTextureOverlay(x - 1, z - 1) > 0
+                            && Resources.getTileDef(world.getGroundTextureOverlay(x - 1, z - 1) - 1)
+                                    .getType() == TileDef.TYPE_BRIDGE) {
                         elevation = 0;
                     }
 
-                    int vertexId = tmpModel.addUniqueVertex(
-                            x * World.TILE_WIDTH,
-                            elevation,
-                            z * World.TILE_DEPTH);
+                    int vertexId = tmpModel.addUniqueVertex(x * World.TILE_WIDTH, elevation, z * World.TILE_DEPTH);
 
                     // Randomise vertex ambience
                     int ambience = (int) (Math.random() * 10D) - 5;
@@ -262,7 +241,7 @@ public class WorldLoader {
                                 }
                             }
 
-                        // Create smooth diagonal lines for road / water edges, etc.
+                            // Create smooth diagonal lines for road / water edges, etc.
                         } else if (tileType1 != 2 || getDiagonalWalls(x, z) > 0 && getDiagonalWalls(x, z) < 24000) {
                             if (getTileType(x - 1, z) != tileType2 && getTileType(x, z - 1) != tileType2) {
                                 groundColour = groundColour2;
@@ -337,8 +316,8 @@ public class WorldLoader {
             for (int x = 1; x < World.NUM_TILES_X - 1; x++) {
                 for (int z = 1; z < World.NUM_TILES_Z - 1; z++) {
 
-                    if (world.getGroundTextureOverlay(x, z) > 0
-                            && Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                    if (world.getGroundTextureOverlay(x, z) > 0 && Resources
+                            .getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
                         int l7 = Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getColour();
                         int j10 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
                         int l12 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
@@ -352,56 +331,68 @@ public class WorldLoader {
 
                     } else if (world.getGroundTextureOverlay(x, z) == 0
                             || Resources.getTileDef(world.getGroundTextureOverlay(x, z) - 1).getType() != 3) {
-                        if (world.getGroundTextureOverlay(x, z + 1) > 0 && Resources
-                                .getTileDef(world.getGroundTextureOverlay(x, z + 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                        if (world.getGroundTextureOverlay(x, z + 1) > 0
+                                && Resources.getTileDef(world.getGroundTextureOverlay(x, z + 1) - 1)
+                                        .getType() == TileDef.TYPE_BRIDGE) {
                             int i8 = Resources.getTileDef(world.getGroundTextureOverlay(x, z + 1) - 1).getColour();
                             int k10 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
-                            int i13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                            int i13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z),
+                                    z * 128);
                             int j15 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                     (z + 1) * 128);
-                            int k17 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                            int k17 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1),
+                                    (z + 1) * 128);
                             int ai3[] = { k10, i13, j15, k17 };
                             int j20 = tmpModel.addFace(4, ai3, i8, 0xbc614e);
                             world.setTilePosForFace(j20, x, z);
                             tmpModel.faceTag[j20] = 0x30d40 + j20;
                         }
 
-                        if (world.getGroundTextureOverlay(x, z - 1) > 0 && Resources
-                                .getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                        if (world.getGroundTextureOverlay(x, z - 1) > 0
+                                && Resources.getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1)
+                                        .getType() == TileDef.TYPE_BRIDGE) {
                             int j8 = Resources.getTileDef(world.getGroundTextureOverlay(x, z - 1) - 1).getColour();
                             int l10 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
-                            int j13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                            int j13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z),
+                                    z * 128);
                             int k15 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                     (z + 1) * 128);
-                            int l17 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                            int l17 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1),
+                                    (z + 1) * 128);
                             int ai4[] = { l10, j13, k15, l17 };
                             int k20 = tmpModel.addFace(4, ai4, j8, 0xbc614e);
                             world.setTilePosForFace(k20, x, z);
                             tmpModel.faceTag[k20] = 0x30d40 + k20;
                         }
 
-                        if (world.getGroundTextureOverlay(x + 1, z) > 0 && Resources
-                                .getTileDef(world.getGroundTextureOverlay(x + 1, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                        if (world.getGroundTextureOverlay(x + 1, z) > 0
+                                && Resources.getTileDef(world.getGroundTextureOverlay(x + 1, z) - 1)
+                                        .getType() == TileDef.TYPE_BRIDGE) {
                             int k8 = Resources.getTileDef(world.getGroundTextureOverlay(x + 1, z) - 1).getColour();
                             int i11 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
-                            int k13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                            int k13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z),
+                                    z * 128);
                             int l15 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                     (z + 1) * 128);
-                            int i18 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                            int i18 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1),
+                                    (z + 1) * 128);
                             int ai5[] = { i11, k13, l15, i18 };
                             int l20 = tmpModel.addFace(4, ai5, k8, 0xbc614e);
                             world.setTilePosForFace(l20, x, z);
                             tmpModel.faceTag[l20] = 0x30d40 + l20;
                         }
 
-                        if (world.getGroundTextureOverlay(x - 1, z) > 0 && Resources
-                                .getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1).getType() == TileDef.TYPE_BRIDGE) {
+                        if (world.getGroundTextureOverlay(x - 1, z) > 0
+                                && Resources.getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1)
+                                        .getType() == TileDef.TYPE_BRIDGE) {
                             int l8 = Resources.getTileDef(world.getGroundTextureOverlay(x - 1, z) - 1).getColour();
                             int j11 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z), z * 128);
-                            int l13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z), z * 128);
+                            int l13 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z),
+                                    z * 128);
                             int i16 = tmpModel.addUniqueVertex((x + 1) * 128, -world.getGroundElevation(x + 1, z + 1),
                                     (z + 1) * 128);
-                            int j18 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1), (z + 1) * 128);
+                            int j18 = tmpModel.addUniqueVertex(x * 128, -world.getGroundElevation(x, z + 1),
+                                    (z + 1) * 128);
                             int ai6[] = { j11, l13, i16, j18 };
                             int i21 = tmpModel.addFace(4, ai6, l8, 0xbc614e);
                             world.setTilePosForFace(i21, x, z);
@@ -521,26 +512,22 @@ public class WorldLoader {
                     if (j24 < 0x13880) {
                         world.setElevation(l11, i14, l23);
                     } else {
-                        world.setElevation(l11, i14,
-                                world.getElevation(l11, i14) - 0x13880);
+                        world.setElevation(l11, i14, world.getElevation(l11, i14) - 0x13880);
                     }
                     if (l24 < 0x13880) {
                         world.setElevation(j16, k18, l23);
                     } else {
-                        world.setElevation(j16, k18,
-                                world.getElevation(j16, k18) - 0x13880);
+                        world.setElevation(j16, k18, world.getElevation(j16, k18) - 0x13880);
                     }
                     if (j25 < 0x13880) {
                         world.setElevation(j19, j21, l23);
                     } else {
-                        world.setElevation(j19, j21,
-                                world.getElevation(j19, j21) - 0x13880);
+                        world.setElevation(j19, j21, world.getElevation(j19, j21) - 0x13880);
                     }
                     if (l25 < 0x13880) {
                         world.setElevation(l22, j23, l23);
                     } else {
-                        world.setElevation(l22, j23,
-                                world.getElevation(l22, j23) - 0x13880);
+                        world.setElevation(l22, j23, world.getElevation(l22, j23) - 0x13880);
                     }
                 }
             }
@@ -861,28 +848,22 @@ public class WorldLoader {
     }
 
     private boolean isCentreRoof(int x, int z) {
-        return getRoofTexture(x, z) > 0 &&
-                getRoofTexture(x - 1, z) > 0 &&
-                getRoofTexture(x - 1, z - 1) > 0 &&
-                getRoofTexture(x, z - 1) > 0;
+        return getRoofTexture(x, z) > 0 && getRoofTexture(x - 1, z) > 0 && getRoofTexture(x - 1, z - 1) > 0
+                && getRoofTexture(x, z - 1) > 0;
     }
 
     private boolean isCornerRoof(int x, int z) {
-        return getRoofTexture(x, z) > 0 ||
-                getRoofTexture(x - 1, z) > 0 ||
-                getRoofTexture(x - 1, z - 1) > 0 ||
-                getRoofTexture(x, z - 1) > 0;
+        return getRoofTexture(x, z) > 0 || getRoofTexture(x - 1, z) > 0 || getRoofTexture(x - 1, z - 1) > 0
+                || getRoofTexture(x, z - 1) > 0;
     }
 
     private void setDoorElevation(int doorIndex, int x1, int z1, int x2, int z2) {
         int heightIncrement = Resources.getDoorDef(doorIndex).getHeight();
         if (world.getElevation(x1, z1) < 0x13880) {
-            world.setElevation(x1, z1,
-                    world.getElevation(x1, z1) + 0x13880 + heightIncrement);
+            world.setElevation(x1, z1, world.getElevation(x1, z1) + 0x13880 + heightIncrement);
         }
         if (world.getElevation(x2, z2) < 0x13880) {
-            world.setElevation(x2, z2,
-                    world.getElevation(x2, z2) + 0x13880 + heightIncrement);
+            world.setElevation(x2, z2, world.getElevation(x2, z2) + 0x13880 + heightIncrement);
         }
     }
 

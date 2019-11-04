@@ -11,8 +11,7 @@ import javax.swing.JFrame;
 
 public abstract class Fonts {
 
-    private static final String ALLOWED_CHARS =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"£$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
+    private static final String ALLOWED_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!\"£$%^&*()-_=+[{]};:'@#~,<.>/?\\| ";
     private static final String CHARS_WITH_EXTRA_WIDTH = "ftwvkxyAVW";
     private static final int NUM_CHAR_PROPERTIES = 9;
 
@@ -32,6 +31,7 @@ public abstract class Fonts {
             charIndexes[i] = index * NUM_CHAR_PROPERTIES;
         }
     }
+
     public static void loadFonts(JFrame frame) {
         loadFont("helvetica", 11, Font.PLAIN, 0, frame, false, false);
         loadFont("helvetica", 12, Font.BOLD, 1, frame, false, false);
@@ -43,17 +43,16 @@ public abstract class Fonts {
         loadFont("helvetica", 24, Font.BOLD, 7, frame, false, false);
     }
 
-    private static void loadFont(String fontName, int size, int style,
-            int fontNumber, JFrame frame, boolean fontWasRedrawn,
-            boolean addCharWidth) {
+    private static void loadFont(String fontName, int size, int style, int fontNumber, JFrame frame,
+            boolean fontWasRedrawn, boolean addCharWidth) {
 
         Font font = new Font("Helvetica", style, size);
         FontMetrics fontmetrics = frame.getFontMetrics(font);
 
         nextDataIndex = ALLOWED_CHARS.length() * NUM_CHAR_PROPERTIES;
         for (int i = 0; i < ALLOWED_CHARS.length(); i++) {
-            drawLetter(font, fontmetrics, ALLOWED_CHARS.charAt(i), i, frame,
-                    fontNumber * NUM_CHAR_PROPERTIES, addCharWidth);
+            drawLetter(font, fontmetrics, ALLOWED_CHARS.charAt(i), i, frame, fontNumber * NUM_CHAR_PROPERTIES,
+                    addCharWidth);
         }
 
         // First 855 elements of fontProperties for a given font are the 9
@@ -74,8 +73,8 @@ public abstract class Fonts {
         }
     }
 
-    public static void drawLetter(Font font, FontMetrics fontMetrics, char c,
-            int charIndex, JFrame frame, int fontNumber, boolean addCharWidth) {
+    public static void drawLetter(Font font, FontMetrics fontMetrics, char c, int charIndex, JFrame frame,
+            int fontNumber, boolean addCharWidth) {
 
         // Determine properties of this character
         int charWidth = fontMetrics.charWidth(c);
@@ -84,13 +83,12 @@ public abstract class Fonts {
             if (c == '/') {
                 addCharWidth = false;
             }
-            if (CHARS_WITH_EXTRA_WIDTH.indexOf(c) > 0){
+            if (CHARS_WITH_EXTRA_WIDTH.indexOf(c) > 0) {
                 charWidth++;
             }
         }
         int maxAscent = fontMetrics.getMaxAscent();
-        int maxCharHeight = 
-                fontMetrics.getMaxAscent() + fontMetrics.getMaxDescent();
+        int maxCharHeight = fontMetrics.getMaxAscent() + fontMetrics.getMaxDescent();
         int standardCharHeight = fontMetrics.getHeight();
 
         // Create a blank image
@@ -109,8 +107,7 @@ public abstract class Fonts {
 
         // Get pixels from image
         int pix[] = new int[charWidth * maxCharHeight];
-        PixelGrabber pixelgrabber = new PixelGrabber(image, 0, 0, charWidth,
-                maxCharHeight, pix, 0, charWidth);
+        PixelGrabber pixelgrabber = new PixelGrabber(image, 0, 0, charWidth, maxCharHeight, pix, 0, charWidth);
         try {
             pixelgrabber.grabPixels();
         } catch (InterruptedException ex) {
@@ -124,86 +121,82 @@ public abstract class Fonts {
         int drawWidth = charWidth;
         int drawHeight = maxCharHeight;
 
-        searchRowsDown:
-            for (int y = 0; y < maxCharHeight; y++) {
-                for (int x = 0; x < charWidth; x++) {
-                    int col = pix[x + y * charWidth];
-                    if ((col & 0xffffff) == 0) {
-                        // Pixel has no colour
-                        continue;
-                    }
-                    drawOffsetY = y;
-                    break searchRowsDown;
-                }
-
-            }
-
-        searchColumnsRight:
+        searchRowsDown: for (int y = 0; y < maxCharHeight; y++) {
             for (int x = 0; x < charWidth; x++) {
-                for (int y = 0; y < maxCharHeight; y++) {
-                    int col = pix[x + y * charWidth];
-                    if ((col & 0xffffff) == 0) {
-                        // Pixel has no colour
-                        continue;
-                    }
-                    drawOffsetX = x;
-                    break searchColumnsRight;
+                int col = pix[x + y * charWidth];
+                if ((col & 0xffffff) == 0) {
+                    // Pixel has no colour
+                    continue;
                 }
-
+                drawOffsetY = y;
+                break searchRowsDown;
             }
 
-            searchRowsUp:
-                for (int y = maxCharHeight - 1; y >= 0; y--) {
-                    for (int x = 0; x < charWidth; x++) {
-                        int col = pix[x + y * charWidth];
-                        if ((col & 0xffffff) == 0) {
-                            // Pixel has no colour
-                            continue;
-                        }
-                        drawHeight = y + 1;
-                        break searchRowsUp;
-                    }
+        }
 
+        searchColumnsRight: for (int x = 0; x < charWidth; x++) {
+            for (int y = 0; y < maxCharHeight; y++) {
+                int col = pix[x + y * charWidth];
+                if ((col & 0xffffff) == 0) {
+                    // Pixel has no colour
+                    continue;
                 }
-            searchColumnsLeft:
-                for (int x = charWidth - 1; x >= 0; x--) {
-                    for (int y = 0; y < maxCharHeight; y++) {
-                        int col = pix[x + y * charWidth];
-                        if ((col & 0xffffff) == 0) {
-                            // Pixel has no colour
-                            continue;
-                        }
-                        drawWidth = x + 1;
-                        break searchColumnsLeft;
-                    }
+                drawOffsetX = x;
+                break searchColumnsRight;
+            }
 
+        }
+
+        searchRowsUp: for (int y = maxCharHeight - 1; y >= 0; y--) {
+            for (int x = 0; x < charWidth; x++) {
+                int col = pix[x + y * charWidth];
+                if ((col & 0xffffff) == 0) {
+                    // Pixel has no colour
+                    continue;
                 }
+                drawHeight = y + 1;
+                break searchRowsUp;
+            }
 
-                // Store character properties
-                //     nextDataIndex: bits 11-18
-                fontData[charIndex]     = (byte) (nextDataIndex >> 14);
-                //     nextDataIndex: bits 19-26 (& excludes bit 18)
-                fontData[charIndex + 1] = (byte) ((nextDataIndex >> 7) & 127);
-                //     nextDataIndex: bits 27-32 (& excludes bit 26)
-                fontData[charIndex + 2] = (byte) (nextDataIndex & 127);
-                fontData[charIndex + 3] = (byte) (drawWidth - drawOffsetX);
-                fontData[charIndex + 4] = (byte) (drawHeight - drawOffsetY);
-                fontData[charIndex + 5] = (byte) drawOffsetX;
-                fontData[charIndex + 6] = (byte) (maxAscent - drawOffsetY);
-                fontData[charIndex + 7] = (byte) oldCharWidth;
-                fontData[charIndex + 8] = (byte) standardCharHeight;
-
-                // Store character pixel data
-                for (int x = drawOffsetY; x < drawHeight; x++) {
-                    for (int y = drawOffsetX; y < drawWidth; y++) {
-                        int col = pix[y + x * charWidth] & 0xff;
-                        if (col > 30 && col < 230) {
-                            redraw[fontNumber] = true;
-                        }
-                        fontData[nextDataIndex] = (byte) col;
-                        nextDataIndex++;
-                    }
+        }
+        searchColumnsLeft: for (int x = charWidth - 1; x >= 0; x--) {
+            for (int y = 0; y < maxCharHeight; y++) {
+                int col = pix[x + y * charWidth];
+                if ((col & 0xffffff) == 0) {
+                    // Pixel has no colour
+                    continue;
                 }
+                drawWidth = x + 1;
+                break searchColumnsLeft;
+            }
+
+        }
+
+        // Store character properties
+        // nextDataIndex: bits 11-18
+        fontData[charIndex] = (byte) (nextDataIndex >> 14);
+        // nextDataIndex: bits 19-26 (& excludes bit 18)
+        fontData[charIndex + 1] = (byte) ((nextDataIndex >> 7) & 127);
+        // nextDataIndex: bits 27-32 (& excludes bit 26)
+        fontData[charIndex + 2] = (byte) (nextDataIndex & 127);
+        fontData[charIndex + 3] = (byte) (drawWidth - drawOffsetX);
+        fontData[charIndex + 4] = (byte) (drawHeight - drawOffsetY);
+        fontData[charIndex + 5] = (byte) drawOffsetX;
+        fontData[charIndex + 6] = (byte) (maxAscent - drawOffsetY);
+        fontData[charIndex + 7] = (byte) oldCharWidth;
+        fontData[charIndex + 8] = (byte) standardCharHeight;
+
+        // Store character pixel data
+        for (int x = drawOffsetY; x < drawHeight; x++) {
+            for (int y = drawOffsetX; y < drawWidth; y++) {
+                int col = pix[y + x * charWidth] & 0xff;
+                if (col > 30 && col < 230) {
+                    redraw[fontNumber] = true;
+                }
+                fontData[nextDataIndex] = (byte) col;
+                nextDataIndex++;
+            }
+        }
     }
 
 }

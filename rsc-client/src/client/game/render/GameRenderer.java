@@ -9,12 +9,13 @@ import client.game.world.World;
 /**
  * Class responsible for rendering the game.
  *
- * <p>The general idea is:
+ * <p>
+ * The general idea is:
  *
  * <ul>
- *  <li>Build the scene</li>
- *  <li>Tell the SoftwareRenderer to render the scene</li>
- *  <li>Draw the UI on top</li>
+ * <li>Build the scene</li>
+ * <li>Tell the SoftwareRenderer to render the scene</li>
+ * <li>Draw the UI on top</li>
  * </ul>
  *
  * @author Dan Bryce
@@ -43,9 +44,7 @@ public class GameRenderer extends StateRenderer {
         scene = game.getScene();
 
         sceneBuilder = new SceneBuilder(scene, world);
-        softwareRenderer = new SoftwareRenderer(scene,
-                game.getLauncher().getWidth(),
-                game.getLauncher().getHeight());
+        softwareRenderer = new SoftwareRenderer(scene, game.getLauncher().getWidth(), game.getLauncher().getHeight());
         mousePicker = softwareRenderer.getMousePicker();
     }
 
@@ -77,17 +76,11 @@ public class GameRenderer extends StateRenderer {
     }
 
     private void renderMenus(Canvas canvas) {
-        canvas.drawSprite(
-                game.getLauncher().getWidth() - MENUS_OFFSET_X,
-                MENUS_OFFSET_Y,
-                SPRITE_ID_MENUS);
+        canvas.drawSprite(game.getLauncher().getWidth() - MENUS_OFFSET_X, MENUS_OFFSET_Y, SPRITE_ID_MENUS);
     }
 
     private void renderInventoryMenu(Canvas canvas) {
-        canvas.drawSprite(
-                game.getLauncher().getWidth() - INVENTORY_MENU_OFFSET_X,
-                MENUS_OFFSET_Y,
-                SPRITE_ID_INVENTORY);
+        canvas.drawSprite(game.getLauncher().getWidth() - INVENTORY_MENU_OFFSET_X, MENUS_OFFSET_Y, SPRITE_ID_INVENTORY);
     }
 
 }

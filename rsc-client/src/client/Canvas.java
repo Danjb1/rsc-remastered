@@ -9,7 +9,8 @@ import client.res.Sprite;
 /**
  * Class responsible for storing and manipulating pixel data of a 2D image.
  *
- * <p><i>Based on <code>Surface.java</code> from other RSC sources.</i>
+ * <p>
+ * <i>Based on <code>Surface.java</code> from other RSC sources.</i>
  *
  * @author Dan Bryce
  */
@@ -88,10 +89,9 @@ public class Canvas {
         /*
          * Bounds checking.
          *
-         * If part of the Sprite is offscreen, this ensures that we only draw
-         * the visible part of the image. Attempting to draw the full image
-         * would result in parts of the image wrapping onto the next row of
-         * pixels.
+         * If part of the Sprite is offscreen, this ensures that we only draw the
+         * visible part of the image. Attempting to draw the full image would result in
+         * parts of the image wrapping onto the next row of pixels.
          */
 
         if (y < 0) {
@@ -125,36 +125,37 @@ public class Canvas {
             return;
         }
 
-        setPixels(pixels, sprite.getPixels(),
-                sourceIndex, targetIndex,
-                spriteWidth, spriteHeight,
-                screenRowIncrement, spriteRowIncrement);
+        setPixels(pixels, sprite.getPixels(), sourceIndex, targetIndex, spriteWidth, spriteHeight, screenRowIncrement,
+                spriteRowIncrement);
     }
 
     /**
      * Copies a block of pixels from the source to the target.
      *
-     * @param target Target pixel data.
-     * @param source Source pixel data.
-     * @param sourceIndex Starting index for the source array.
-     * @param targetIndex Starting index for the target array.
-     * @param sourceWidth Width of the source image.
-     * @param sourceHeight Height of the source image.
+     * @param target
+     *            Target pixel data.
+     * @param source
+     *            Source pixel data.
+     * @param sourceIndex
+     *            Starting index for the source array.
+     * @param targetIndex
+     *            Starting index for the target array.
+     * @param sourceWidth
+     *            Width of the source image.
+     * @param sourceHeight
+     *            Height of the source image.
      * @param targetRowIncrement
-     *      Value to add to the target index after each row is copied.
+     *            Value to add to the target index after each row is copied.
      * @param sourceRowIncrement
-     *      Value to add to the source index after each row is copied.
+     *            Value to add to the source index after each row is copied.
      */
-    private static void setPixels(
-            int target[], int source[],
-            int sourceIndex, int targetIndex,
-            int sourceWidth, int sourceHeight,
-            int targetRowIncrement, int sourceRowIncrement) {
+    private static void setPixels(int target[], int source[], int sourceIndex, int targetIndex, int sourceWidth,
+            int sourceHeight, int targetRowIncrement, int sourceRowIncrement) {
 
         /*
-         * The original source code copied multiple pixels at a time inside the
-         * loop body, presumably intended as some kind of optimisation. Here I
-         * have favoured simplicity over efficiency.
+         * The original source code copied multiple pixels at a time inside the loop
+         * body, presumably intended as some kind of optimisation. Here I have favoured
+         * simplicity over efficiency.
          */
         for (int y = 0; y < sourceHeight; y++) {
             for (int x = 0; x < sourceWidth; x++) {
@@ -268,19 +269,8 @@ public class Canvas {
      * @param paramD
      * @param paramDModifier
      */
-    public void renderScanline_LargeTexture(
-            int texturePixels[],
-            int i,
-            int j,
-            int paramA,
-            int paramB,
-            int paramC,
-            int paramAModifier,
-            int paramBModifier,
-            int paramCModifier,
-            int length,
-            int pxOffset,
-            int paramD,
+    public void renderScanline_LargeTexture(int texturePixels[], int i, int j, int paramA, int paramB, int paramC,
+            int paramAModifier, int paramBModifier, int paramCModifier, int length, int pxOffset, int paramD,
             int paramDModifier) {
 
         if (length <= 0) {
@@ -424,20 +414,8 @@ public class Canvas {
         }
     }
 
-    public void renderScanline_LargeTranslucentTexture(
-            int texturePixels[],
-            int texOffset,
-            int texStart,
-            int k,
-            int l,
-            int i1,
-            int j1,
-            int k1,
-            int l1,
-            int length,
-            int pxIndex,
-            int k2,
-            int l2) {
+    public void renderScanline_LargeTranslucentTexture(int texturePixels[], int texOffset, int texStart, int k, int l,
+            int i1, int j1, int k1, int l1, int length, int pxIndex, int k2, int l2) {
 
         if (length <= 0) {
             return;
@@ -481,64 +459,80 @@ public class Canvas {
             texOffset += k2 & 0x600000;
             colorShift = k2 >> 23;
             k2 += l2;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
-            texOffset += texOffsetStride;
-            texStart += texStartStride;
-
-            texOffset = (texOffset & 0x3fff) + (k2 & 0x600000);
-            colorShift = k2 >> 23;
-            k2 += l2;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
-            texOffset += texOffsetStride;
-            texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
-            texOffset += texOffsetStride;
-            texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
-            texOffset += texOffsetStride;
-            texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
 
             texOffset = (texOffset & 0x3fff) + (k2 & 0x600000);
             colorShift = k2 >> 23;
             k2 += l2;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
 
             texOffset = (texOffset & 0x3fff) + (k2 & 0x600000);
             colorShift = k2 >> 23;
             k2 += l2;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            texOffset += texOffsetStride;
+            texStart += texStartStride;
+
+            texOffset = (texOffset & 0x3fff) + (k2 & 0x600000);
+            colorShift = k2 >> 23;
+            k2 += l2;
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            texOffset += texOffsetStride;
+            texStart += texStartStride;
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            texOffset += texOffsetStride;
+            texStart += texStartStride;
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            texOffset += texOffsetStride;
+            texStart += texStartStride;
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset = i3;
             texStart = j3;
 
@@ -568,27 +562,15 @@ public class Canvas {
                 colorShift = k2 >> 23;
                 k2 += l2;
             }
-            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+            pixels[pxIndex++] = (texturePixels[(texStart & 0x3f80) + (texOffset >> 7)] >>> colorShift)
+                    + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             texOffset += texOffsetStride;
             texStart += texStartStride;
         }
     }
 
-    public void renderScanline_LargeTextureWithTransparency(
-            int i,
-            int texOffset,
-            int texStart,
-            int texturePixels[],
-            int l,
-            int i1,
-            int j1,
-            int k1,
-            int l1,
-            int i2,
-            int length,
-            int pxIndex,
-            int l2,
-            int i3) {
+    public void renderScanline_LargeTextureWithTransparency(int i, int texOffset, int texStart, int texturePixels[],
+            int l, int i1, int j1, int k1, int l1, int i2, int length, int pxIndex, int l2, int i3) {
 
         if (length <= 0) {
             return;
@@ -788,20 +770,8 @@ public class Canvas {
     /*
      * Used for wooden floors!
      */
-    public void renderScanline_SmallTexture(
-            int texturePixels[],
-            int texOffset,
-            int texStart,
-            int k,
-            int l,
-            int i1,
-            int j1,
-            int k1,
-            int l1,
-            int length,
-            int pxIndex,
-            int k2,
-            int l2) {
+    public void renderScanline_SmallTexture(int texturePixels[], int texOffset, int texStart, int k, int l, int i1,
+            int j1, int k1, int l1, int length, int pxIndex, int k2, int l2) {
 
         if (length <= 0) {
             return;
@@ -912,20 +882,8 @@ public class Canvas {
 
     }
 
-    public void renderScanline_SmallTranslucentTexture(
-            int texturePixels[],
-            int texOffset,
-            int texStart,
-            int k,
-            int l,
-            int i1,
-            int j1,
-            int k1,
-            int l1,
-            int length,
-            int pxIndex,
-            int k2,
-            int l2) {
+    public void renderScanline_SmallTranslucentTexture(int texturePixels[], int texOffset, int texStart, int k, int l,
+            int i1, int j1, int k1, int l1, int length, int pxIndex, int k2, int l2) {
 
         if (length <= 0) {
             return;
@@ -965,7 +923,8 @@ public class Canvas {
             k2 += l2;
             if (i4 < 16) {
                 for (int k4 = 0; k4 < i4; k4++) {
-                    pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                    pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                            + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                     texOffset += texOffsetStride;
                     texStart += texStartStride;
                     if ((k4 & 3) == 3) {
@@ -976,78 +935,84 @@ public class Canvas {
                 }
 
             } else {
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
-                texOffset += texOffsetStride;
-                texStart += texStartStride;
-                texOffset = (texOffset & 0xfff) + (k2 & 0xc0000);
-                colorShift = k2 >> 20;
-                k2 += l2;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
-                texOffset += texOffsetStride;
-                texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
-                texOffset += texOffsetStride;
-                texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
-                texOffset += texOffsetStride;
-                texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
                 texOffset = (texOffset & 0xfff) + (k2 & 0xc0000);
                 colorShift = k2 >> 20;
                 k2 += l2;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
                 texOffset = (texOffset & 0xfff) + (k2 & 0xc0000);
                 colorShift = k2 >> 20;
                 k2 += l2;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
                 texOffset += texOffsetStride;
                 texStart += texStartStride;
-                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift) + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                texOffset += texOffsetStride;
+                texStart += texStartStride;
+                texOffset = (texOffset & 0xfff) + (k2 & 0xc0000);
+                colorShift = k2 >> 20;
+                k2 += l2;
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                texOffset += texOffsetStride;
+                texStart += texStartStride;
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                texOffset += texOffsetStride;
+                texStart += texStartStride;
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
+                texOffset += texOffsetStride;
+                texStart += texStartStride;
+                pixels[pxIndex++] = (texturePixels[(texStart & 0xfc0) + (texOffset >> 6)] >>> colorShift)
+                        + (pixels[pxIndex] >> 1 & 0x7f7f7f);
             }
         }
 
     }
 
-    public void renderScanline_SmallTextureWithTransparency(
-            int texturePixels[],
-            int l,
-            int i1,
-            int j1,
-            int k1,
-            int l1,
-            int i2,
-            int length,
-            int pxIndex,
-            int l2,
-            int i3) {
+    public void renderScanline_SmallTextureWithTransparency(int texturePixels[], int l, int i1, int j1, int k1, int l1,
+            int i2, int length, int pxIndex, int l2, int i3) {
 
         if (length <= 0) {
             return;
@@ -1215,7 +1180,8 @@ public class Canvas {
     /*
      * No idea what this is used for.
      */
-    public void renderScanline_TranslucentGradient(int length, int pxIndex, int gradient[], int gradientIndex, int stride) {
+    public void renderScanline_TranslucentGradient(int length, int pxIndex, int gradient[], int gradientIndex,
+            int stride) {
 
         if (length < 0) {
             return;

@@ -27,9 +27,11 @@ public class Input implements KeyListener, MouseListener {
     /**
      * Consumes all input for the current frame.
      *
-     * <p>This should be called every frame after input processing.
+     * <p>
+     * This should be called every frame after input processing.
      *
-     * <p>Synchronized because new input could be added at any time!
+     * <p>
+     * Synchronized because new input could be added at any time!
      */
     public synchronized void consume() {
         leftClickReleased = false;
@@ -71,10 +73,12 @@ public class Input implements KeyListener, MouseListener {
     ////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void mouseClicked(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {
+    }
 
     @Override
-    public void mousePressed(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {
+    }
 
     @Override
     public void mouseReleased(MouseEvent e) {
@@ -86,17 +90,20 @@ public class Input implements KeyListener, MouseListener {
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {
+    }
 
     @Override
-    public void mouseExited(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {
+    }
 
     ////////////////////////////////////////////////////////////////////////////
     // KeyListener methods
     ////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void keyTyped(KeyEvent e) {}
+    public void keyTyped(KeyEvent e) {
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {

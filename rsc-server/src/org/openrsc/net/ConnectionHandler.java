@@ -22,116 +22,117 @@ import org.openrsc.net.packet.PacketManager;
  */
 public class ConnectionHandler extends SimpleChannelHandler {
 
-	private ArrayList<String> connections = new ArrayList<String>();
+    private ArrayList<String> connections = new ArrayList<String>();
 
-	/**
-	 * The login decoder instance.
-	 */
-	private final GameLoginHandler loginDecoder;
+    /**
+     * The login decoder instance.
+     */
+    private final GameLoginHandler loginDecoder;
 
-	public ConnectionHandler() {
-		this.loginDecoder = new GameLoginHandler();
-	}
+    public ConnectionHandler() {
+        this.loginDecoder = new GameLoginHandler();
+    }
 
-	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
-		Packet packet = (Packet) event.getMessage();
-		if (packet == null) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received null packet from client.");
-			return;
-		}
+    @Override
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
+        Packet packet = (Packet) event.getMessage();
+        if (packet == null) {
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received null packet from client.");
+            return;
+        }
 
-		final int opcode = packet.getOpcode();
+        final int opcode = packet.getOpcode();
 
-		// XXX Opcode 0 is reserved for future pre-login handshake.
-		if (opcode == 0) {
-			return;
-		}
+        // XXX Opcode 0 is reserved for future pre-login handshake.
+        if (opcode == 0) {
+            return;
+        }
 
-		// Ping Packet
-		if (opcode == 1) {
-			// When the client sent the ping.
-			ctx.getChannel().write(new Packet(1));
-			return;
-		}
+        // Ping Packet
+        if (opcode == 1) {
+            // When the client sent the ping.
+            ctx.getChannel().write(new Packet(1));
+            return;
+        }
 
-		// Login packet
-		if (opcode == 2) {
-			loginDecoder.execute(ctx.getChannel(), packet);
-			return;
-		}
+        // Login packet
+        if (opcode == 2) {
+            loginDecoder.execute(ctx.getChannel(), packet);
+            return;
+        }
 
-		// Get player instance.
-		Player player = ((Player) ctx.getChannel().getAttachment());
-		if (player == null) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received packet from null player.");
-			return;
-		}
+        // Get player instance.
+        Player player = ((Player) ctx.getChannel().getAttachment());
+        if (player == null) {
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received packet from null player.");
+            return;
+        }
 
-		// Check if the packet exists.
-		if (PacketManager.get(opcode) == null) {
-			Logger.getLogger(getClass().getName()).log(Level.WARNING, "No packet found for " + opcode);
-			return;
-		}
+        // Check if the packet exists.
+        if (PacketManager.get(opcode) == null) {
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "No packet found for " + opcode);
+            return;
+        }
 
-		// Keep the player from idle logout.
-		player.updateLastPacketReceivedTime();
+        // Keep the player from idle logout.
+        player.updateLastPacketReceivedTime();
 
-		// Queued packet.
-		// Execute in the next game tick.
-		if (PacketManager.get(opcode).addToQueue()) {
-			player.addQueuedPacket(packet);
-			return;
-		}
+        // Queued packet.
+        // Execute in the next game tick.
+        if (PacketManager.get(opcode).addToQueue()) {
+            player.addQueuedPacket(packet);
+            return;
+        }
 
-		// Reactor-based packet.
-		// Execute immediately.
-		PacketManager.get(opcode).execute(player, packet);
-	}
+        // Reactor-based packet.
+        // Execute immediately.
+        PacketManager.get(opcode).execute(player, packet);
+    }
 
-	@Override
-	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent event) {
-		String address = ctx.getChannel().getRemoteAddress().toString().split(":")[0];
-		int count = 1;
-		for (int i = 0; i < connections.size(); i++) {
-			if (connections.get(i).equalsIgnoreCase(address)) {
-				count++;
-			}
-		}
-		if (count > Config.CONNECTION_LIMIT) {
-			ctx.getChannel().close();
-			return;
-		}
-		Logger.getLogger(getClass().getName()).log(Level.INFO, "Connection [" + count + "/" + Config.CONNECTION_LIMIT + "] accepted from " + address);
-		connections.add(address);
-	}
+    @Override
+    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent event) {
+        String address = ctx.getChannel().getRemoteAddress().toString().split(":")[0];
+        int count = 1;
+        for (int i = 0; i < connections.size(); i++) {
+            if (connections.get(i).equalsIgnoreCase(address)) {
+                count++;
+            }
+        }
+        if (count > Config.CONNECTION_LIMIT) {
+            ctx.getChannel().close();
+            return;
+        }
+        Logger.getLogger(getClass().getName()).log(Level.INFO,
+                "Connection [" + count + "/" + Config.CONNECTION_LIMIT + "] accepted from " + address);
+        connections.add(address);
+    }
 
-	@Override
-	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent event) {
-		Player player = (Player) ctx.getChannel().getAttachment();
-		if (PlayerManager.getInstance().contains(player)) {
-			PlayerManager.getInstance().queueLogout(player);
-		}
-		String address = ctx.getChannel().getRemoteAddress().toString().split(":")[0];
-		if (connections.contains(address)) {
-			connections.remove(address);
-		}
-	}
+    @Override
+    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent event) {
+        Player player = (Player) ctx.getChannel().getAttachment();
+        if (PlayerManager.getInstance().contains(player)) {
+            PlayerManager.getInstance().queueLogout(player);
+        }
+        String address = ctx.getChannel().getRemoteAddress().toString().split(":")[0];
+        if (connections.contains(address)) {
+            connections.remove(address);
+        }
+    }
 
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent event) {
-		if (!(event.getCause() instanceof IOException)) {
-			Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Exception caught: ", event.getCause());
-			return;
-		}
-		Player player = (Player) ctx.getAttachment();
-		if (PlayerManager.getInstance().contains(player)) {
-			PlayerManager.getInstance().queueLogout(player);
-		}
-		String address = ctx.getChannel().getRemoteAddress().toString().split(":")[0];
-		if (connections.contains(address)) {
-			connections.remove(address);
-		}
-	}
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent event) {
+        if (!(event.getCause() instanceof IOException)) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Exception caught: ", event.getCause());
+            return;
+        }
+        Player player = (Player) ctx.getAttachment();
+        if (PlayerManager.getInstance().contains(player)) {
+            PlayerManager.getInstance().queueLogout(player);
+        }
+        String address = ctx.getChannel().getRemoteAddress().toString().split(":")[0];
+        if (connections.contains(address)) {
+            connections.remove(address);
+        }
+    }
 
 }

@@ -8,13 +8,13 @@ public class GameObjectDef extends EntityDef {
     public String command1;
 
     public String command2;
-    
+
     public int type;
-    
+
     public int width;
-    
+
     public int height;
-    
+
     /**
      * Height of items placed atop this object.
      * 
@@ -54,5 +54,5 @@ public class GameObjectDef extends EntityDef {
     public int getGroundItemHeight() {
         return groundItemZ;
     }
-    
+
 }

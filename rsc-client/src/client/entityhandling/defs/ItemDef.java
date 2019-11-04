@@ -6,15 +6,15 @@ package client.entityhandling.defs;
 public class ItemDef extends EntityDef {
 
     public String command;
-    
+
     public int basePrice;
-    
+
     public int sprite;
-    
+
     public boolean stackable;
-    
+
     public boolean wieldable;
-    
+
     public int pictureMask;
 
     public String getCommand() {

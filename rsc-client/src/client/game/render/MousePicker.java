@@ -8,9 +8,9 @@ public class MousePicker {
 
     private int mouseX;
     private int mouseY;
-    
+
     private int baseX;
-    
+
     private int mousePickedCount;
     private Model mousePickedModels[] = new Model[MAX_MOUSE_PICKS];
     private int mousePickedFaces[] = new int[MAX_MOUSE_PICKS];
@@ -28,19 +28,19 @@ public class MousePicker {
     public int getMousePickedCount() {
         return mousePickedCount;
     }
-    
+
     public Model[] getMousePickedModels() {
         return mousePickedModels;
     }
-    
+
     public int[] getMousePickedFaces() {
         return mousePickedFaces;
     }
-    
+
     public int getMouseX() {
         return mouseX;
     }
-    
+
     public int getMouseY() {
         return mouseY;
     }

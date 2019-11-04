@@ -82,7 +82,8 @@ public class World {
     /**
      * Tile position corresponding to a given face of the terrain model.
      *
-     * <p>The index is given by the faceTag of the selected face.
+     * <p>
+     * The index is given by the faceTag of the selected face.
      */
     private int[] tileXForFace = new int[NUM_TERRAIN_FACES];
     private int[] tileZForFace = new int[NUM_TERRAIN_FACES];
@@ -90,7 +91,8 @@ public class World {
     /**
      * Currently-loaded Sectors.
      *
-     * <p>When we load sector (x, z) we end up with the following:
+     * <p>
+     * When we load sector (x, z) we end up with the following:
      *
      * <pre>
      *  sectors[0] = (x - 1, z - 1)
@@ -209,8 +211,7 @@ public class World {
         int i1 = tileX & 0x7f;
         int j1 = tileZ & 0x7f;
 
-        if (x < 0 || z < 0 ||
-                x >= World.NUM_TILES_X - 1 || z >= World.NUM_TILES_Z - 1) {
+        if (x < 0 || z < 0 || x >= World.NUM_TILES_X - 1 || z >= World.NUM_TILES_Z - 1) {
             return 0;
         }
 
@@ -347,13 +348,11 @@ public class World {
     }
 
     public boolean containsTile(int tileX, int tileZ) {
-        return tileX > mapBoundaryX1 && tileX < mapBoundaryX2 &&
-                tileZ > mapBoundaryZ1 && tileZ < mapBoundaryZ2;
+        return tileX > mapBoundaryX1 && tileX < mapBoundaryX2 && tileZ > mapBoundaryZ1 && tileZ < mapBoundaryZ2;
     }
 
     public boolean containsTileRelativeToOrigin(int tileX, int tileZ) {
-        return tileX >= 0 && tileZ >= 0 &&
-                tileX < NUM_TILES_X && tileZ < NUM_TILES_Z;
+        return tileX >= 0 && tileZ >= 0 && tileX < NUM_TILES_X && tileZ < NUM_TILES_Z;
     }
 
     public int getNumDoors() {

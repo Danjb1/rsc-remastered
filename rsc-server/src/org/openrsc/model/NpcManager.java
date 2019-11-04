@@ -12,138 +12,138 @@ import java.util.logging.Logger;
  */
 public class NpcManager {
 
-	private static final NpcManager INSTANCE = new NpcManager();
+    private static final NpcManager INSTANCE = new NpcManager();
 
-	private final Logger logger = Logger.getLogger(getClass().getName());
-	
-	/**
-	 * An incremental value. Used to generate a unique id for each entity.
-	 */
-	private final AtomicInteger uid = new AtomicInteger(0);
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
-	/**
-	 * A list of registered entities.
-	 */
-	private final Set<Npc> currentList = new HashSet<Npc>();
+    /**
+     * An incremental value. Used to generate a unique id for each entity.
+     */
+    private final AtomicInteger uid = new AtomicInteger(0);
 
-	/**
-	 * A list of entities which are pending insertion.
-	 */
-	private final Queue<Npc> insertQueue = new LinkedList<>();
+    /**
+     * A list of registered entities.
+     */
+    private final Set<Npc> currentList = new HashSet<Npc>();
 
-	/**
-	 * A list of entities which are pending removal.
-	 */
-	private final Queue<Npc> removeQueue = new LinkedList<>();
+    /**
+     * A list of entities which are pending insertion.
+     */
+    private final Queue<Npc> insertQueue = new LinkedList<>();
 
-	public NpcManager() {
-	}
+    /**
+     * A list of entities which are pending removal.
+     */
+    private final Queue<Npc> removeQueue = new LinkedList<>();
 
-	public void tick(long currentTime) {
-		/*
-		 * Execute the queued insertions.
-		 */
-		Npc queuedNpc = null;
-		while (!insertQueue.isEmpty()) {
-			queuedNpc = insertQueue.poll();
-			currentList.add(queuedNpc);
-			logger.info("Npc #" + queuedNpc.getSessionId() + " registered.");
-		}
+    public NpcManager() {
+    }
 
-		/*
-		 * Execute the queued removals.
-		 */
-		while (!removeQueue.isEmpty()) {
-			queuedNpc = removeQueue.poll();
-			currentList.remove(queuedNpc);
-			logger.info("Npc #" + queuedNpc.getSessionId() + " unregistered.");
-		}
+    public void tick(long currentTime) {
+        /*
+         * Execute the queued insertions.
+         */
+        Npc queuedNpc = null;
+        while (!insertQueue.isEmpty()) {
+            queuedNpc = insertQueue.poll();
+            currentList.add(queuedNpc);
+            logger.info("Npc #" + queuedNpc.getSessionId() + " registered.");
+        }
 
-		/*
-		 * Execute the timer based game logic.
-		 */
-		for (Npc npc : currentList) {
+        /*
+         * Execute the queued removals.
+         */
+        while (!removeQueue.isEmpty()) {
+            queuedNpc = removeQueue.poll();
+            currentList.remove(queuedNpc);
+            logger.info("Npc #" + queuedNpc.getSessionId() + " unregistered.");
+        }
 
-			// Execute the tick update.
-			npc.tick(currentTime);
+        /*
+         * Execute the timer based game logic.
+         */
+        for (Npc npc : currentList) {
 
-		}
+            // Execute the tick update.
+            npc.tick(currentTime);
 
-	}
+        }
 
-	/**
-	 * Creates a new npc instance.
-	 * 
-	 * @return The new npc instance.
-	 */
-	public Npc create(int type, int x, int z) {
-		Npc npc = new Npc(type, uid.getAndIncrement(), x, z);
-		return npc;
-	}
+    }
 
-	/**
-	 * Adds a npc to the insertion queue.
-	 * 
-	 * @param npc
-	 *            The npc to register.
-	 */
-	public void register(Npc npc) {
-		insertQueue.add(npc);
-	}
+    /**
+     * Creates a new npc instance.
+     * 
+     * @return The new npc instance.
+     */
+    public Npc create(int type, int x, int z) {
+        Npc npc = new Npc(type, uid.getAndIncrement(), x, z);
+        return npc;
+    }
 
-	/**
-	 * Adds the npc into the removal queue.
-	 * 
-	 * @param npc
-	 *            The npc to unregister.
-	 */
-	public void unregister(Npc npc) {
-		removeQueue.add(npc);
-	}
+    /**
+     * Adds a npc to the insertion queue.
+     * 
+     * @param npc
+     *            The npc to register.
+     */
+    public void register(Npc npc) {
+        insertQueue.add(npc);
+    }
 
-	/**
-	 * @return True, if the list contains the given object.
-	 */
-	public boolean contains(Npc npc) {
-		return currentList.contains(npc);
-	}
+    /**
+     * Adds the npc into the removal queue.
+     * 
+     * @param npc
+     *            The npc to unregister.
+     */
+    public void unregister(Npc npc) {
+        removeQueue.add(npc);
+    }
 
-	/**
-	 * @return The npc with the matching <code>sessionId</code>.matching
-	 *         <code>sessionId</code>.matching <code>sessionId</code>.
-	 */
-	public Npc getForSessionId(int sessionId) {
-		for (Npc npc : currentList) {
-			if (npc.getSessionId() == sessionId) {
-				return npc;
-			}
-		}
-		return null;
-	}
+    /**
+     * @return True, if the list contains the given object.
+     */
+    public boolean contains(Npc npc) {
+        return currentList.contains(npc);
+    }
 
-	/**
-	 * @return A lost of registered npcs. This does not include npcs from the
-	 *         login queue.
-	 */
-	public Set<Npc> getList() {
-		return currentList;
-	}
+    /**
+     * @return The npc with the matching <code>sessionId</code>.matching
+     *         <code>sessionId</code>.matching <code>sessionId</code>.
+     */
+    public Npc getForSessionId(int sessionId) {
+        for (Npc npc : currentList) {
+            if (npc.getSessionId() == sessionId) {
+                return npc;
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * @return The number of users online.
-	 */
-	public int getCount() {
-		return currentList.size();
-	}
+    /**
+     * @return A lost of registered npcs. This does not include npcs from the login
+     *         queue.
+     */
+    public Set<Npc> getList() {
+        return currentList;
+    }
 
-	@SuppressWarnings("unused")
-	public void onShutdown() {
-		for (Npc npc : currentList) {
-		}
-	}
+    /**
+     * @return The number of users online.
+     */
+    public int getCount() {
+        return currentList.size();
+    }
 
-	public static NpcManager getInstance() {
-		return INSTANCE;
-	}
+    @SuppressWarnings("unused")
+    public void onShutdown() {
+        for (Npc npc : currentList) {
+        }
+    }
+
+    public static NpcManager getInstance() {
+        return INSTANCE;
+    }
 
 }

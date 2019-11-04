@@ -28,318 +28,319 @@ import client.net.Packet;
 /**
  * Class responsible for setting up and running the game.
  *
- * <p><i>Based on <code>GameShell.java</code> from other RSC sources.</i>
+ * <p>
+ * <i>Based on <code>GameShell.java</code> from other RSC sources.</i>
  *
  * @author Dan Bryce
  */
 public class RuneClient {
-	
-	private final Logger logger = Logger.getLogger(getClass().getName());
 
-	private static final int WINDOW_WIDTH = 512;
-	private static final int WINDOW_HEIGHT = 346;
-	private static final String WINDOW_TITLE = "OpenRSC";
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
-	private static final int MS_PER_FRAME = 16; // 60fps
+    private static final int WINDOW_WIDTH = 512;
+    private static final int WINDOW_HEIGHT = 346;
+    private static final String WINDOW_TITLE = "OpenRSC";
 
-	/**
-	 * Flag used to tell the game to exit.
-	 *
-	 * The original RSC used an exit timer instead, to give the game time to
-	 * finish any outstanding operations before exiting.
-	 */
-	private boolean exiting;
+    private static final int MS_PER_FRAME = 16; // 60fps
 
-	private JFrame frame;
-	private JPanel gamePanel;
-	private Canvas canvas;
-	private BufferedImage screenBuffer;
+    /**
+     * Flag used to tell the game to exit.
+     *
+     * The original RSC used an exit timer instead, to give the game time to finish
+     * any outstanding operations before exiting.
+     */
+    private boolean exiting;
 
-	// Client states
-	private State state;
-	private LoadingScreen loadingScreen;
-	private LoginScreen loginScreen;
-	private Game game;
+    private JFrame frame;
+    private JPanel gamePanel;
+    private Canvas canvas;
+    private BufferedImage screenBuffer;
 
-	// Network
-	private Connection connection;
-	private BlockingQueue<Packet> packetQueue = new LinkedBlockingQueue<>();
-	private long pingLastTime = 0L;
+    // Client states
+    private State state;
+    private LoadingScreen loadingScreen;
+    private LoginScreen loginScreen;
+    private Game game;
 
-	// Packet constants
-	private final int OPCODE_RSA_HANDSHAKE = 0;
-	private final int OPCODE_PING = 1;
-	private final int OPCODE_LOGIN_RESPONSE = 2;
+    // Network
+    private Connection connection;
+    private BlockingQueue<Packet> packetQueue = new LinkedBlockingQueue<>();
+    private long pingLastTime = 0L;
 
-	public RuneClient() {
-		createFrame(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
+    // Packet constants
+    private final int OPCODE_RSA_HANDSHAKE = 0;
+    private final int OPCODE_PING = 1;
+    private final int OPCODE_LOGIN_RESPONSE = 2;
 
-		screenBuffer = new BufferedImage(WINDOW_WIDTH, WINDOW_HEIGHT, BufferedImage.TYPE_INT_RGB);
-		canvas = new Canvas(screenBuffer);
+    public RuneClient() {
+        createFrame(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
 
-		this.loadingScreen = new LoadingScreen(this);
-		this.loginScreen = new LoginScreen(this);
-		this.game = new Game(this);
-	}
+        screenBuffer = new BufferedImage(WINDOW_WIDTH, WINDOW_HEIGHT, BufferedImage.TYPE_INT_RGB);
+        canvas = new Canvas(screenBuffer);
 
-	private void createFrame(int width, int height, String title) {
+        this.loadingScreen = new LoadingScreen(this);
+        this.loginScreen = new LoginScreen(this);
+        this.game = new Game(this);
+    }
 
-		// Create the content pane
-		gamePanel = new JPanel();
-		gamePanel.setPreferredSize(new Dimension(width, height));
+    private void createFrame(int width, int height, String title) {
 
-		// Create the frame itself
-		frame = new JFrame(title);
-		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		frame.setResizable(false);
-		
-		// Pseudo-fullscreen if window fills the screen
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		frame.setUndecorated(width == screenSize.width && height == screenSize.height);
-		frame.setContentPane(gamePanel);
-		frame.pack();
-		
-		// Load the frame icon image.
-		try {
-			Image icon = ImageIO.read(ClassLoader.getSystemResource("res/data/icon.png"));
-			if (icon != null) {
-				frame.setIconImage(icon);
-			}
-		} catch (Exception ignore) {
-			ignore.printStackTrace();
-		}
-		
-		// Make the frame visible.
-		frame.setLocationRelativeTo(null);
-		frame.setVisible(true);
-		frame.toFront();
-	}
+        // Create the content pane
+        gamePanel = new JPanel();
+        gamePanel.setPreferredSize(new Dimension(width, height));
 
-	public void load() {
+        // Create the frame itself
+        frame = new JFrame(title);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.setResizable(false);
 
-		//LoadingScreen loadingScreen = new LoadingScreen(this);
-		state = loadingScreen;
+        // Pseudo-fullscreen if window fills the screen
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        frame.setUndecorated(width == screenSize.width && height == screenSize.height);
+        frame.setContentPane(gamePanel);
+        frame.pack();
 
-		while (!loadingScreen.isLoaded()){
-			loadingScreen.continueLoading();
-			render();
-			try {
-				// Don't hog the thread
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+        // Load the frame icon image.
+        try {
+            Image icon = ImageIO.read(ClassLoader.getSystemResource("res/data/icon.png"));
+            if (icon != null) {
+                frame.setIconImage(icon);
+            }
+        } catch (Exception ignore) {
+            ignore.printStackTrace();
+        }
 
-	public void run() {
-		Thread.currentThread().setName(WINDOW_TITLE);
-		Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-		
-		while (!exiting) {
-			long before = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+        // Make the frame visible.
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+        frame.toFront();
+    }
 
-			pollInput();
-			tick();
-			render();
+    public void load() {
 
-			int elapsed = (int) (TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) - before);
-			int sleepTime = MS_PER_FRAME - elapsed;
+        // LoadingScreen loadingScreen = new LoadingScreen(this);
+        state = loadingScreen;
 
-			if (sleepTime < 1) {
-				sleepTime = 1;
-			}
+        while (!loadingScreen.isLoaded()) {
+            loadingScreen.continueLoading();
+            render();
+            try {
+                // Don't hog the thread
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-			try {
-				Thread.sleep(sleepTime);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+    public void run() {
+        Thread.currentThread().setName(WINDOW_TITLE);
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
-	private void pollInput() {
-		Point mouseLoc = MouseInfo.getPointerInfo().getLocation();
-		SwingUtilities.convertPointFromScreen(mouseLoc, gamePanel);
-		Input input = state.getInput();
-		input.setMousePos(mouseLoc.x, mouseLoc.y);
+        while (!exiting) {
+            long before = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
 
-		synchronized (input) {
-			state.pollInput();
-			input.consume();
-		}
-	}
+            pollInput();
+            tick();
+            render();
 
-	private void tick() {
-		pollNetwork();
-		state.tick();
-	}
+            int elapsed = (int) (TimeUnit.NANOSECONDS.toMillis(System.nanoTime()) - before);
+            int sleepTime = MS_PER_FRAME - elapsed;
 
-	private void render() {
+            if (sleepTime < 1) {
+                sleepTime = 1;
+            }
 
-		// Clear the Canvas
-		canvas.clear();
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-		// Render the state onto our Canvas
-		state.getRenderer().render(canvas);
+    private void pollInput() {
+        Point mouseLoc = MouseInfo.getPointerInfo().getLocation();
+        SwingUtilities.convertPointFromScreen(mouseLoc, gamePanel);
+        Input input = state.getInput();
+        input.setMousePos(mouseLoc.x, mouseLoc.y);
 
-		// Render this Canvas to the screen
-		gamePanel.getGraphics().drawImage(canvas.getImage(), 0, 0, null);
-	}
+        synchronized (input) {
+            state.pollInput();
+            input.consume();
+        }
+    }
 
-	private void changeState(State newState) {
+    private void tick() {
+        pollNetwork();
+        state.tick();
+    }
 
-		// Remove listeners from previous state
-		Input input = state.getInput();
-		gamePanel.removeMouseListener(input);
-		frame.removeKeyListener(input);
+    private void render() {
 
-		// Reset previous state
-		state.reset();
+        // Clear the Canvas
+        canvas.clear();
 
-		// Set new state
-		state = newState;
-		state.start();
+        // Render the state onto our Canvas
+        state.getRenderer().render(canvas);
 
-		// Add listeners to new state
-		input = state.getInput();
-		gamePanel.addMouseListener(input);
-		frame.addKeyListener(input);
-	}
+        // Render this Canvas to the screen
+        gamePanel.getGraphics().drawImage(canvas.getImage(), 0, 0, null);
+    }
 
-	/**
-	 * Handles network logic.
-	 */
-	private void pollNetwork() {
-		final long currentTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+    private void changeState(State newState) {
 
-		// Send ping.
-		if (isConnected() && currentTime - pingLastTime > 15000) {
-			pingLastTime = currentTime;
-			sendPacket(new Packet(1));
-			//System.out.println("PING");
-		}
+        // Remove listeners from previous state
+        Input input = state.getInput();
+        gamePanel.removeMouseListener(input);
+        frame.removeKeyListener(input);
 
-		// Execute the incoming packets.
-		List<Packet> toProcess = new ArrayList<Packet>();
-		packetQueue.drainTo(toProcess);
-		for (Packet packet : toProcess) {
+        // Reset previous state
+        state.reset();
 
-			// Opcode 0 reserved for future pre-login handshake.
-			if (packet.getOpcode() == OPCODE_RSA_HANDSHAKE) {
-				continue;
-			}
+        // Set new state
+        state = newState;
+        state.start();
 
-			// Handle pong
-			if (packet.getOpcode() == OPCODE_PING) {
-				//System.out.println("PONG");
-				continue;
-			}
+        // Add listeners to new state
+        input = state.getInput();
+        gamePanel.addMouseListener(input);
+        frame.addKeyListener(input);
+    }
 
-			// Login response
-			if (packet.getOpcode() == OPCODE_LOGIN_RESPONSE) {
-				handleLoginResponse(packet);
-				continue;
-			}
+    /**
+     * Handles network logic.
+     */
+    private void pollNetwork() {
+        final long currentTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
 
-			// The game state is enabled.
-			// Pass the incoming packet to the game state.
-			if (state instanceof Game) {
-				game.executePacket(packet);
-				continue;
-			}
+        // Send ping.
+        if (isConnected() && currentTime - pingLastTime > 15000) {
+            pingLastTime = currentTime;
+            sendPacket(new Packet(1));
+            // System.out.println("PING");
+        }
 
-		}
+        // Execute the incoming packets.
+        List<Packet> toProcess = new ArrayList<Packet>();
+        packetQueue.drainTo(toProcess);
+        for (Packet packet : toProcess) {
 
-	}
+            // Opcode 0 reserved for future pre-login handshake.
+            if (packet.getOpcode() == OPCODE_RSA_HANDSHAKE) {
+                continue;
+            }
 
-	private void handleLoginResponse(Packet packet) {
-		// The login response code.
-		boolean loginAccepted = packet.getBoolean();
+            // Handle pong
+            if (packet.getOpcode() == OPCODE_PING) {
+                // System.out.println("PONG");
+                continue;
+            }
 
-		// Login request accepted.
-		if (loginAccepted) {
-			String displayName = packet.getBase37();
-			int sessionId = packet.getInt();
-			int privilege = packet.getByte();
-			game.loggedIn(displayName, sessionId, privilege);
-			changeState(new Game(this));
-			return;
-		}
+            // Login response
+            if (packet.getOpcode() == OPCODE_LOGIN_RESPONSE) {
+                handleLoginResponse(packet);
+                continue;
+            }
 
-		// Login request denied.
-		// Read the error message.
-		String errorMessage = packet.getString();
-		
-		// TODO pass the errorMessage to the login screen
-		System.out.println("Login Rejected, Reason: " + errorMessage);
-	}
+            // The game state is enabled.
+            // Pass the incoming packet to the game state.
+            if (state instanceof Game) {
+                game.executePacket(packet);
+                continue;
+            }
 
-	/**
-	 * Tries to connect to the server.
-	 */
-	public boolean connect(String address, int port) {
-		if (isConnected()) {
-			disconnect();
-			return true;
-		}
-		logger.info("Connecting to server " + address + ":" + port);
-		this.connection = new Connection(this);
+        }
 
-		if (connection.connect(address, port)) {
-			logger.info("Connection established");
-		}
-		return isConnected();
-	}
+    }
 
-	/**
-	 * Disconnects from the server.
-	 */
-	public void disconnect() {
-		connection.disconnect();
-		connection = null;
-		packetQueue.clear();
+    private void handleLoginResponse(Packet packet) {
+        // The login response code.
+        boolean loginAccepted = packet.getBoolean();
 
-		// Go to login screen.
-		if (state instanceof Game) {
-			changeState(loginScreen);
-		}
-	}
+        // Login request accepted.
+        if (loginAccepted) {
+            String displayName = packet.getBase37();
+            int sessionId = packet.getInt();
+            int privilege = packet.getByte();
+            game.loggedIn(displayName, sessionId, privilege);
+            changeState(new Game(this));
+            return;
+        }
 
-	public boolean isConnected() {
-		return connection != null && connection.isConnected();
-	}
+        // Login request denied.
+        // Read the error message.
+        String errorMessage = packet.getString();
 
-	/**
-	 * Sends a packet to the server.
-	 */
-	public void sendPacket(Packet packet) {
-		connection.sendPacket(packet);
-	}
+        // TODO pass the errorMessage to the login screen
+        System.out.println("Login Rejected, Reason: " + errorMessage);
+    }
 
-	/**
-	 * Adds an incoming packet to the queue. Incoming packets have to be queued and
-	 * executed in the main thread to prevent concurrency issues.
-	 */
-	public void queuePacket(Packet packet) {
-		packetQueue.add(packet);
-	}
+    /**
+     * Tries to connect to the server.
+     */
+    public boolean connect(String address, int port) {
+        if (isConnected()) {
+            disconnect();
+            return true;
+        }
+        logger.info("Connecting to server " + address + ":" + port);
+        this.connection = new Connection(this);
 
-	// Called by LoadingScreen when loading is complete.
-	public void onLoaded() {
-		changeState(loginScreen);
-	}
+        if (connection.connect(address, port)) {
+            logger.info("Connection established");
+        }
+        return isConnected();
+    }
 
-	public State getState() {
-		return state;
-	}
+    /**
+     * Disconnects from the server.
+     */
+    public void disconnect() {
+        connection.disconnect();
+        connection = null;
+        packetQueue.clear();
 
-	public int getWidth() {
-		return WINDOW_WIDTH;
-	}
+        // Go to login screen.
+        if (state instanceof Game) {
+            changeState(loginScreen);
+        }
+    }
 
-	public int getHeight() {
-		return WINDOW_HEIGHT;
-	}
+    public boolean isConnected() {
+        return connection != null && connection.isConnected();
+    }
+
+    /**
+     * Sends a packet to the server.
+     */
+    public void sendPacket(Packet packet) {
+        connection.sendPacket(packet);
+    }
+
+    /**
+     * Adds an incoming packet to the queue. Incoming packets have to be queued and
+     * executed in the main thread to prevent concurrency issues.
+     */
+    public void queuePacket(Packet packet) {
+        packetQueue.add(packet);
+    }
+
+    // Called by LoadingScreen when loading is complete.
+    public void onLoaded() {
+        changeState(loginScreen);
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    public int getWidth() {
+        return WINDOW_WIDTH;
+    }
+
+    public int getHeight() {
+        return WINDOW_HEIGHT;
+    }
 
 }

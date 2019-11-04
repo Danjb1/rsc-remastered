@@ -22,8 +22,7 @@ public class ResourceLoader {
     /**
      * Package containing entity definitions.
      */
-    private static final String ENTITY_DEF_PACKAGE_NAME =
-            "client.entityhandling.defs";
+    private static final String ENTITY_DEF_PACKAGE_NAME = "client.entityhandling.defs";
 
     /**
      * XStream used to read from / write to XML.
@@ -32,22 +31,21 @@ public class ResourceLoader {
 
     static {
         // XStream aliases
-        addAlias("AnimationDef",  ENTITY_DEF_PACKAGE_NAME + ".AnimationDef");
-        addAlias("DoorDef",       ENTITY_DEF_PACKAGE_NAME + ".DoorDef");
-        addAlias("ElevationDef",  ENTITY_DEF_PACKAGE_NAME + ".ElevationDef");
+        addAlias("AnimationDef", ENTITY_DEF_PACKAGE_NAME + ".AnimationDef");
+        addAlias("DoorDef", ENTITY_DEF_PACKAGE_NAME + ".DoorDef");
+        addAlias("ElevationDef", ENTITY_DEF_PACKAGE_NAME + ".ElevationDef");
         addAlias("GameObjectDef", ENTITY_DEF_PACKAGE_NAME + ".GameObjectDef");
-        addAlias("ItemDef",       ENTITY_DEF_PACKAGE_NAME + ".ItemDef");
-        addAlias("ItemDropDef",   ENTITY_DEF_PACKAGE_NAME + ".ItemDropDef");
-        addAlias("NPCDef",        ENTITY_DEF_PACKAGE_NAME + ".NpcDef");
-        addAlias("PrayerDef",     ENTITY_DEF_PACKAGE_NAME + ".PrayerDef");
-        addAlias("SpellDef",      ENTITY_DEF_PACKAGE_NAME + ".SpellDef");
-        addAlias("TextureDef",    ENTITY_DEF_PACKAGE_NAME + ".TextureDef");
-        addAlias("TileDef",       ENTITY_DEF_PACKAGE_NAME + ".TileDef");
+        addAlias("ItemDef", ENTITY_DEF_PACKAGE_NAME + ".ItemDef");
+        addAlias("ItemDropDef", ENTITY_DEF_PACKAGE_NAME + ".ItemDropDef");
+        addAlias("NPCDef", ENTITY_DEF_PACKAGE_NAME + ".NpcDef");
+        addAlias("PrayerDef", ENTITY_DEF_PACKAGE_NAME + ".PrayerDef");
+        addAlias("SpellDef", ENTITY_DEF_PACKAGE_NAME + ".SpellDef");
+        addAlias("TextureDef", ENTITY_DEF_PACKAGE_NAME + ".TextureDef");
+        addAlias("TileDef", ENTITY_DEF_PACKAGE_NAME + ".TileDef");
     }
 
     public static InputStream getResourceAsStream(String filename) {
-        return ResourceLoader.class.getClassLoader()
-                .getResourceAsStream(filename);
+        return ResourceLoader.class.getClassLoader().getResourceAsStream(filename);
     }
 
     private static void addAlias(String name, String className) {
@@ -69,8 +67,7 @@ public class ResourceLoader {
 
     public static Object loadGzipData(String filename) {
         try {
-            InputStream is = new GZIPInputStream(
-                    getResourceAsStream(DATA_DIR + filename));
+            InputStream is = new GZIPInputStream(getResourceAsStream(DATA_DIR + filename));
             return xStream.fromXML(is);
         } catch (IOException ex) {
             ex.printStackTrace();

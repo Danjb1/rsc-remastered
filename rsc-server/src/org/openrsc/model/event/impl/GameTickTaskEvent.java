@@ -13,28 +13,28 @@ import org.openrsc.task.TaskEngine;
  */
 public class GameTickTaskEvent extends Event {
 
-	public GameTickTaskEvent() {
-		super(600);
-	}
+    public GameTickTaskEvent() {
+        super(600);
+    }
 
-	@Override
-	public void execute(TaskEngine context) {
-		context.pushTask(new UpdateTask());
-	}
+    @Override
+    public void execute(TaskEngine context) {
+        context.pushTask(new UpdateTask());
+    }
 
 }
 
 class UpdateTask implements Task {
 
-	@Override
-	public void execute(TaskEngine context) {
-		context.submitTask(new Runnable() {
-			public void run() {
-				long currentTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-				PlayerManager.getInstance().tick(currentTime);
-				NpcManager.getInstance().tick(currentTime);
-			}
-		});
-	}
+    @Override
+    public void execute(TaskEngine context) {
+        context.submitTask(new Runnable() {
+            public void run() {
+                long currentTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+                PlayerManager.getInstance().tick(currentTime);
+                NpcManager.getInstance().tick(currentTime);
+            }
+        });
+    }
 
 }

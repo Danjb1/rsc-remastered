@@ -14,19 +14,19 @@ public class SpriteEntity {
     private int width;
     private int height;
     private int translateX;
-    
+
     public int getId() {
         return id;
     }
-    
+
     public int getX() {
         return x;
     }
-    
+
     public int getY() {
         return y;
     }
-    
+
     public int getZ() {
         return z;
     }
@@ -34,13 +34,13 @@ public class SpriteEntity {
     public int getWidth() {
         return width;
     }
-    
+
     public int getHeight() {
         return height;
     }
-    
+
     public int getTranslateX() {
         return translateX;
     }
-    
+
 }

@@ -16,8 +16,7 @@ public class DataUtils {
      * @return
      * @throws IOException
      */
-    public static final ByteBuffer streamToBuffer(BufferedInputStream in)
-            throws IOException {
+    public static final ByteBuffer streamToBuffer(BufferedInputStream in) throws IOException {
         byte[] buffer = new byte[in.available()];
         in.read(buffer, 0, buffer.length);
         return ByteBuffer.wrap(buffer);

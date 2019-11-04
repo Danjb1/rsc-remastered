@@ -4,28 +4,28 @@ package client.entityhandling.defs;
  * Data relating to an NPC.
  */
 public class NpcDef extends EntityDef {
-    
+
     public String command;
-    
+
     public int[] sprites;
 
     public int hairColour;
     public int topColour;
     public int bottomColour;
     public int skinColour;
-    
+
     public int camera1;
     public int camera2;
-    
+
     public int walkModel;
     public int combatModel;
     public int combatSprite;
-    
+
     public int hits;
     public int attack;
     public int defense;
     public int strength;
-    
+
     public boolean attackable;
     public int respawnTime;
     public boolean aggressive;
@@ -106,5 +106,5 @@ public class NpcDef extends EntityDef {
     public boolean isAggressive() {
         return aggressive;
     }
-    
+
 }

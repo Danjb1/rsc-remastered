@@ -6,7 +6,7 @@ import client.util.ModelUtils;
 public class Door {
 
     private World world;
-    
+
     private int x;
     private int z;
     private int orientation;
@@ -19,7 +19,7 @@ public class Door {
         this.z = z;
         this.orientation = orientation;
         this.id = id;
-        
+
         model = ModelUtils.createDoor(this, world, entityId);
     }
 
@@ -28,23 +28,23 @@ public class Door {
         z += dz;
         model = ModelUtils.createDoor(this, world, model.entityId);
     }
-    
+
     public int getX() {
         return x;
     }
-    
+
     public int getZ() {
         return z;
     }
-    
+
     public int getOrientation() {
         return orientation;
     }
-    
+
     public int getId() {
         return id;
     }
-    
+
     public Model getModel() {
         return model;
     }

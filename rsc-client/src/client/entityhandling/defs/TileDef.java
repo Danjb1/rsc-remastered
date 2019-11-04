@@ -4,9 +4,9 @@ package client.entityhandling.defs;
  * Data relating to a tile of the game world.
  */
 public class TileDef {
-    
+
     public static final int TYPE_BRIDGE = 4;
-    
+
     public int colour;
     public int unknown;
     public int objectType;
@@ -22,5 +22,5 @@ public class TileDef {
     public int getObjectType() {
         return objectType;
     }
-    
+
 }

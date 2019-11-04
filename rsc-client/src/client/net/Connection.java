@@ -23,81 +23,82 @@ import client.RuneClient;
 
 public class Connection extends SimpleChannelHandler implements ChannelPipelineFactory {
 
-	private Logger logger = Logger.getLogger(getClass().getName());
+    private Logger logger = Logger.getLogger(getClass().getName());
 
-	private final RuneClient client;
-	private Channel channel;
+    private final RuneClient client;
+    private Channel channel;
 
-	public Connection(final RuneClient client) {
-		this.client = client;
-	}
+    public Connection(final RuneClient client) {
+        this.client = client;
+    }
 
-	@Override
-	public ChannelPipeline getPipeline() throws Exception {
-		ChannelPipeline pipeline = pipeline();
-		pipeline.addLast("decoder", new PacketDecoder());
-		pipeline.addLast("encoder", new PacketEncoder());
-		pipeline.addLast("handler", this);
-		return pipeline;
-	}
+    @Override
+    public ChannelPipeline getPipeline() throws Exception {
+        ChannelPipeline pipeline = pipeline();
+        pipeline.addLast("decoder", new PacketDecoder());
+        pipeline.addLast("encoder", new PacketEncoder());
+        pipeline.addLast("handler", this);
+        return pipeline;
+    }
 
-	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-		Packet packet = (Packet) e.getMessage();
-		if (packet == null) {
-			return;
-		}
-		client.queuePacket(packet);
-	}
+    @Override
+    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
+        Packet packet = (Packet) e.getMessage();
+        if (packet == null) {
+            return;
+        }
+        client.queuePacket(packet);
+    }
 
-	@Override
-	public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
-	}
+    @Override
+    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
+    }
 
-	@Override
-	public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
-	}
+    @Override
+    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
+    }
 
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-		if (e.getCause() instanceof ConnectException) {
-			logger.log(Level.INFO, "Connection refused.", e);
-			return;
-		}
-		logger.log(Level.WARNING, "Exception caught in network.", e.getCause());
-	}
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
+        if (e.getCause() instanceof ConnectException) {
+            logger.log(Level.INFO, "Connection refused.", e);
+            return;
+        }
+        logger.log(Level.WARNING, "Exception caught in network.", e.getCause());
+    }
 
-	public boolean connect(String hostname, int port) {
-		try {
-			ClientBootstrap bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(Executors.newSingleThreadExecutor(), Executors.newCachedThreadPool(), 2));
-			bootstrap.setPipelineFactory(this);
-			channel = bootstrap.connect(new InetSocketAddress(hostname, port)).awaitUninterruptibly().getChannel();
-		} catch (Exception e) {
-			logger.log(Level.WARNING, "Error connecting to server.", e);
-			return false;
-		}
-		return isConnected();
-	}
+    public boolean connect(String hostname, int port) {
+        try {
+            ClientBootstrap bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(
+                    Executors.newSingleThreadExecutor(), Executors.newCachedThreadPool(), 2));
+            bootstrap.setPipelineFactory(this);
+            channel = bootstrap.connect(new InetSocketAddress(hostname, port)).awaitUninterruptibly().getChannel();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error connecting to server.", e);
+            return false;
+        }
+        return isConnected();
+    }
 
-	public void disconnect() {
-		if (channel != null) {
-			channel.close();
-		}
-	}
+    public void disconnect() {
+        if (channel != null) {
+            channel.close();
+        }
+    }
 
-	public boolean isConnected() {
-		return channel != null ? channel.isConnected() : false;
-	}
+    public boolean isConnected() {
+        return channel != null ? channel.isConnected() : false;
+    }
 
-	/**
-	 * Sends a packet to the server.
-	 */
-	public void sendPacket(Packet packet) {
-		if (!channel.isConnected()) {
-			logger.log(Level.WARNING, "Error sending packet #" + packet.getOpcode() + ". Not connected.");
-			return;
-		}
-		channel.write(packet);
-	}
+    /**
+     * Sends a packet to the server.
+     */
+    public void sendPacket(Packet packet) {
+        if (!channel.isConnected()) {
+            logger.log(Level.WARNING, "Error sending packet #" + packet.getOpcode() + ". Not connected.");
+            return;
+        }
+        channel.write(packet);
+    }
 
 }
