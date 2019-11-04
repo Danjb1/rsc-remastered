@@ -37,8 +37,8 @@ public class GameRenderer extends StateRenderer {
 
         sceneBuilder = new SceneBuilder(scene, world);
         softwareRenderer = new SoftwareRenderer(scene,
-                game.getLauncher().getWidth(),
-                game.getLauncher().getHeight());
+                game.getClient().getWidth(),
+                game.getClient().getHeight());
         mousePicker = softwareRenderer.getMousePicker();
 
         menuRenderer = new MenuBarRenderer(game);

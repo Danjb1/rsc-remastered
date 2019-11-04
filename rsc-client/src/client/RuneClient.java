@@ -23,7 +23,7 @@ public class RuneClient {
 
     private static final int WINDOW_WIDTH = 1280;
     private static final int WINDOW_HEIGHT = 720;
-    private static final String WINDOW_TITLE = "OpenRSC";
+    private static final String WINDOW_TITLE = "RSC Remastered";
 
     private static final int MS_PER_FRAME = 16; // 60fps
 

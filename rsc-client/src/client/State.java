@@ -2,12 +2,12 @@ package client;
 
 public abstract class State {
 
-    protected RuneClient launcher;
+    protected RuneClient client;
 
     protected Input input = new Input();
 
     public State(RuneClient launcher) {
-        this.launcher = launcher;
+        this.client = launcher;
     }
 
     public void start() {}
@@ -22,8 +22,8 @@ public abstract class State {
         return input;
     }
 
-    public RuneClient getLauncher() {
-        return launcher;
+    public RuneClient getClient() {
+        return client;
     }
 
 }

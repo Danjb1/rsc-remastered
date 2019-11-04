@@ -19,7 +19,7 @@ public class MenuBarRenderer {
 
     public void render(Canvas canvas) {
 
-        int x = game.getLauncher().getWidth() - MENU_BAR_OFFSET_X;
+        int x = game.getClient().getWidth() - MENU_BAR_OFFSET_X;
         int y = MENU_BAR_OFFSET_Y;
 
         canvas.drawSprite(x, y, SPRITE_ID_MENU_BAR);

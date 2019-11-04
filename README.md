@@ -41,6 +41,7 @@ The client and server should be built separately. Be sure to include the provide
 ## :video_game: Controls
 
 **Left Click:** Teleport\
+**Left / Right:** Rotate camera\
 **Page Up:** Go up a layer\
 **Page Down:** Go down a layer
 

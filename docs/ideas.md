@@ -6,6 +6,10 @@ RSC Remastered aims to remain faithful to the original game, but some quality of
 
  - Reset view to north
 
+ - OpenGL support
+
+ - Single-player launcher (with built-in server)
+
 ## [RSC+ Features](https://www.youtube.com/watch?v=rwxdNGl9_4A)
 
  - High resolution support

@@ -107,7 +107,7 @@ public class LoadingScreen extends State {
             updateProgress(100, "Starting game...");
         }
 
-        launcher.changeState(new LoginScreen(launcher));
+        client.changeState(new LoginScreen(client));
     }
 
     private void generateExperienceTable() {

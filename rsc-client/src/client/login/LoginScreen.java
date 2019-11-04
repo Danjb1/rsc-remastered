@@ -47,7 +47,7 @@ public class LoginScreen extends State {
         }
 
         if (conn != null) {
-            launcher.changeState(new Game(launcher, conn));
+            client.changeState(new Game(client, conn));
         }
     }
 
