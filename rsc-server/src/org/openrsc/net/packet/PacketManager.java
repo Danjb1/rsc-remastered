@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.openrsc.model.net.packet.SilentPacket;
+import org.openrsc.model.net.packet.*;
 import org.openrsc.model.player.Player;
 
 /**
@@ -31,6 +31,8 @@ public class PacketManager {
         // #0 = RSA Handshake
         // #1 = Ping
         // #2 = Login Request
+        packets.put(10, new SectorUpdatePacket());
+        packets.put(12, new SectorUpdatePacket());
         packets.put(100, new SilentPacket());
         Logger.getLogger(PacketManager.class.getName()).log(Level.INFO, "Loaded " + packets.size() + " packets.");
     }

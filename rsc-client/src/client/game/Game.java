@@ -60,8 +60,11 @@ public class Game extends State {
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
 
     // Server session
+    @SuppressWarnings("unused")
     private String displayName;
+    @SuppressWarnings("unused")
     private int sessionId;
+    @SuppressWarnings("unused")
     private int privilege;
 
     public Game(RuneClient client) {
@@ -181,7 +184,13 @@ public class Game extends State {
             // Read chatbox message
             int icon = packet.getByte();
             String message = packet.getString();
-            System.out.println("[icon-" + icon + "]" + message);
+            System.out.println((icon == -1 ? "" : "[icon-" + icon + "]") + message);
+            break;
+        case 10:
+            // Set player position
+            player.x = packet.getInt();
+            player.z = packet.getInt();
+            world.setCurrentLayer(packet.getByte());
             break;
         default:
             logger.log(Level.WARNING, "Unhandled Packet, opcode: " + packet.getOpcode() + ", length: " + packet.getPacketLength());
@@ -207,23 +216,33 @@ public class Game extends State {
     }
 
     private void loadSectors() {
+        boolean sectorUpdateFlag = false;
 
         if (player.x < 16 * World.TILE_WIDTH) {
+            sectorUpdateFlag = true;
             worldLoader.loadSector(world.getSectorX() - 1, world.getSectorZ());
             player.x += Sector.WIDTH * World.TILE_WIDTH;
 
         } else if (player.x > 80 * World.TILE_WIDTH) {
+            sectorUpdateFlag = true;
             worldLoader.loadSector(world.getSectorX() + 1, world.getSectorZ());
             player.x -= Sector.WIDTH * World.TILE_WIDTH;
         }
 
         if (player.z < 16 * World.TILE_DEPTH) {
+            sectorUpdateFlag = true;
             worldLoader.loadSector(world.getSectorX(), world.getSectorZ() - 1);
             player.z += Sector.DEPTH * World.TILE_DEPTH;
 
         } else if (player.z > 80 * World.TILE_DEPTH) {
+            sectorUpdateFlag = true;
             worldLoader.loadSector(world.getSectorX(), world.getSectorZ() + 1);
             player.z -= Sector.DEPTH * World.TILE_DEPTH;
+        }
+
+        // This is a temporary feature, used for development purposes.
+        if (sectorUpdateFlag) {
+            sendSectorUpdate();
         }
     }
 
@@ -251,6 +270,27 @@ public class Game extends State {
         player = null;
     }
 
+    // Send position to server.
+    private void sendSectorUpdate() {
+        Packet packet = new Packet(10);
+        packet.putInt(player.x);
+        packet.putInt(player.z);
+        packet.putByte(world.getCurrentLayer());
+        getClient().sendPacket(packet);
+    }
+
+    /**
+     * Send a button click event request to the server.
+     * @param parentId The parent interface index.
+     * @param buttonId The button index.
+     */
+    public void sendMenuButtonClick(int parentId, int buttonId) {
+        Packet packet = new Packet(12);
+        packet.putByte(parentId);
+        packet.putSmallInt(buttonId);
+        getClient().sendPacket(packet);
+    }
+    
     public Scene getScene() {
         return scene;
     }

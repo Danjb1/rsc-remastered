@@ -6,7 +6,7 @@ import org.openrsc.net.Server;
 import org.openrsc.net.packet.PacketManager;
 
 /**
- * The main class of the OpenRSC Server.
+ * The main class of the RS-Remastered server.
  */
 public class Main {
 

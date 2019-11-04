@@ -19,7 +19,7 @@ import org.openrsc.net.codec.PacketEncoder;
 import org.openrsc.task.TaskEngine;
 
 /**
- * Integrates the Netty api into the OpenRSC project. The server class is tied
+ * Integrates the Netty api into the RS-Remastered project. The server class is tied
  * together with the task event and event manager.
  */
 public class Server {
@@ -34,7 +34,9 @@ public class Server {
      * https://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/nio/NioServerSocketChannelFactory.html
      */
     private final ServerBootstrap SERVER_BOOTSTRAP = new ServerBootstrap(new NioServerSocketChannelFactory(
-            Config.NETTY_BOSS_EXECUTOR, Config.NETTY_WORK_EXECUTOR, Config.NETTY_MAXIMUM_WORKER_COUNT));
+            Config.NETTY_BOSS_EXECUTOR,
+            Config.NETTY_WORK_EXECUTOR,
+            Config.NETTY_MAXIMUM_WORKER_COUNT));
 
     private final TaskEngine taskEngine;
     private final EventManager eventManager;

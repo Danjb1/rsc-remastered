@@ -193,6 +193,16 @@ public class PlayerManager {
         }
     }
 
+    /**
+     * Sends a game message to all players.
+     * @param string The message to send.
+     */
+    public void sendMessage(String string) {
+        for (Player player : currentList) {
+            player.getPacketDispatcher().sendGameMessage(string);
+        }
+    }
+
     // TODO Auto-generated method stub
     public boolean checkPassword(String username, String password) {
         logger.info("TODO");

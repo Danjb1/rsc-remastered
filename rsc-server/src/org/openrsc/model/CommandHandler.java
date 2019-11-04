@@ -22,12 +22,10 @@ public class CommandHandler {
         // /yell command
         if (command.startsWith("yell") && !player.isMuted()) {
             if (player.hasYellThrottle()) {
-                player.getPacketDispatcher()
-                        .sendMessage("You can only yell once every " + Constants.YELL_COMMAND_DELAY + " seconds.");
+                player.getPacketDispatcher().sendGameMessage("You can only yell once every 15 seconds.");
                 return;
             }
-            // PlayerManager.getInstance().sendGlobalMessage("[Yell]" +
-            // player.getDisplayName() + ": " + command.substring(5));
+            PlayerManager.getInstance().sendMessage("[Yell]" + player.getDisplayName() + ": " + command.substring(5));
             return;
         }
 

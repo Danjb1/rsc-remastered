@@ -17,11 +17,34 @@ public class PacketDispatcher {
         this.player = player;
     }
 
-    public void sendMessage(String string) {
+    /**
+     * Sends a message to the client, as well as the player's privilege value.
+     * @param string The message.
+     */
+    public void sendPublicMessage(String string) {
         Packet packet = new Packet(3);
         packet.putByte(player.getPrivileges().toInteger());
         packet.putString(string);
         player.getChannel().write(packet);
     }
 
+    /**
+     * Sends a message to the client.
+     * @param string The message.
+     */
+    public void sendGameMessage(String string) {
+        Packet packet = new Packet(3);
+        packet.putByte(-1);
+        packet.putString(string);
+        player.getChannel().write(packet);
+    }
+
+    public void sendSectorUpdate() {
+        Packet packet = new Packet(10);
+        packet.putInt(player.getLocation().getX());
+        packet.putInt(player.getLocation().getZ());
+        packet.putByte(player.getLocation().getHeight());
+        player.getChannel().write(packet);
+    }
+    
 }

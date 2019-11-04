@@ -9,6 +9,11 @@ public class Location {
     private int z;
 
     /**
+     * Index of the map height layer. Ground level is 0.
+     */
+    private int currentHeight = 0;
+
+    /**
      * Creates a location instance at 0,0
      */
     public Location() {
@@ -36,12 +41,26 @@ public class Location {
         setZ(z);
     }
 
+    public void set(int x, int z, int height) {
+        setX(x);
+        setZ(z);
+        setHeight(height);
+    }
+
     public int getX() {
         return x;
     }
 
     public int getZ() {
         return z;
+    }
+
+    public int getHeight() {
+        return currentHeight;
+    }
+    
+    public void setHeight(int height) {
+        this.currentHeight = height;
     }
 
     public int getDistance(Location location) {

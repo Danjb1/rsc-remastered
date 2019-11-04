@@ -124,7 +124,7 @@ public class Player extends Mob {
     public void executeLogin() {
         super.setLocation(Constants.DEFAULT_LOCATION);
         super.setTravelBack();
-        packetDispatcher.sendMessage("Welcome to RuneScape.");
+        packetDispatcher.sendGameMessage("Welcome to RuneScape.");
     }
 
     /**
@@ -164,7 +164,7 @@ public class Player extends Mob {
             return false;
         }
         long currentTimeMillis = GameUtils.getCurrentTimeMillis();
-        if (currentTimeMillis - lastYellTime > (Constants.YELL_COMMAND_DELAY * 1000)) {
+        if (currentTimeMillis - lastYellTime > 15_000) {
             lastYellTime = currentTimeMillis;
             return false;
         }

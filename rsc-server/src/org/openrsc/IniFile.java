@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
  */
 public class IniFile {
 
-    public static void main(String[] args) {
-        try {
-            new IniFile("./config.ini");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) {
+//        try {
+//            new IniFile("./config.ini");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private Pattern _section = Pattern.compile("\\s*\\[([^]]*)\\]\\s*");
     private Pattern _keyValue = Pattern.compile("\\s*([^=]*)=(.*)");
