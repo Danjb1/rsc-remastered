@@ -8,16 +8,16 @@ public class GameObjectDef extends EntityDef {
     public String command1;
 
     public String command2;
-    
+
     public int type;
-    
+
     public int width;
-    
+
     public int height;
-    
+
     /**
      * Height of items placed atop this object.
-     * 
+     *
      * This should be renamed in the game data, since it actually refers to the
      * y-axis.
      */
@@ -54,5 +54,5 @@ public class GameObjectDef extends EntityDef {
     public int getGroundItemHeight() {
         return groundItemZ;
     }
-    
+
 }

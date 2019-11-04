@@ -4,7 +4,7 @@ package client.entityhandling.defs;
  * Data relating to a texture.
  */
 public class TextureDef {
-    
+
     public String dataName;
     public String animationName;
 
@@ -15,5 +15,5 @@ public class TextureDef {
     public String getAnimationName() {
         return animationName;
     }
-    
+
 }

@@ -89,7 +89,7 @@ public abstract class Fonts {
             }
         }
         int maxAscent = fontMetrics.getMaxAscent();
-        int maxCharHeight = 
+        int maxCharHeight =
                 fontMetrics.getMaxAscent() + fontMetrics.getMaxDescent();
         int standardCharHeight = fontMetrics.getHeight();
 

@@ -6,11 +6,11 @@ package client.entityhandling.defs;
 public class DoorDef extends EntityDef {
 
     public String command1;
-    
+
     public String command2;
-    
+
     public int doorType;
-    
+
     public int unknown;
 
     public int modelVar1;
@@ -44,5 +44,5 @@ public class DoorDef extends EntityDef {
     public int getBackTexture() {
         return modelVar3;
     }
-    
+
 }

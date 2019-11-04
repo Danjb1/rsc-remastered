@@ -1,6 +1,7 @@
 package client.game.render;
 
 import client.Canvas;
+import client.Input;
 import client.StateRenderer;
 import client.game.Game;
 import client.game.scene.Scene;
@@ -27,6 +28,7 @@ public class GameRenderer extends StateRenderer {
 
     private SoftwareRenderer softwareRenderer;
     private MousePicker mousePicker;
+    private Input input;
 
     private MenuBarRenderer menuRenderer;
 
@@ -40,6 +42,7 @@ public class GameRenderer extends StateRenderer {
                 game.getClient().getWidth(),
                 game.getClient().getHeight());
         mousePicker = softwareRenderer.getMousePicker();
+        input = game.getInput();
 
         menuRenderer = new MenuBarRenderer(game);
     }
@@ -57,8 +60,13 @@ public class GameRenderer extends StateRenderer {
             return;
         }
 
-        // Render the scene
+        // Build the scene
         sceneBuilder.build();
+
+        // Prepare for mouse picking
+        mousePicker.setMousePos(input.getMouseX(), input.getMouseY());
+
+        // Render the scene
         softwareRenderer.render(canvas);
     }
 

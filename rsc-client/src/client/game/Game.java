@@ -3,8 +3,8 @@ package client.game;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import client.RuneClient;
 import client.State;
@@ -25,12 +25,7 @@ import client.game.ui.SettingsMenu;
 import client.game.ui.StatsMenu;
 import client.game.world.World;
 import client.game.world.WorldLoader;
-import client.loading.LoadingScreen;
-import client.login.LoginScreen;
-import client.net.Connection;
-import client.packets.Packet;
-import client.packets.PacketHandler;
-import client.packets.PacketHandlers;
+import client.net.Packet;
 
 /**
  * State responsible for running the game.
@@ -41,11 +36,10 @@ import client.packets.PacketHandlers;
  */
 public class Game extends State {
 
+    private final Logger logger = Logger.getLogger(getClass().getName());
+
     public static final int SPAWN_SECTOR_X = 50;
     public static final int SPAWN_SECTOR_Z = 51;
-
-    private ExecutorService executor;
-    private Connection connection;
 
     private List<Menu> menus;
 
@@ -55,8 +49,6 @@ public class Game extends State {
     private Mob player;
 
     private GameRenderer renderer;
-    private LoadingScreen loadingScreen;
-    private LoginScreen loginScreen;
 
     // 192 = West
     // 128 = North
@@ -67,11 +59,13 @@ public class Game extends State {
     private int cameraPositionZ;
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
 
-    public Game(RuneClient launcher, Connection connection) {
-        super(launcher);
+    // Server session
+    private String displayName;
+    private int sessionId;
+    private int privilege;
 
-        this.connection = connection;
-
+    public Game(RuneClient client) {
+        super(client);
         scene = new Scene();
         world = new World(scene);
         worldLoader = new WorldLoader(world);
@@ -88,8 +82,6 @@ public class Game extends State {
 
     @Override
     public void start() {
-        executor = Executors.newCachedThreadPool();
-        executor.execute(connection.getPacketReaderThread());
     }
 
     @Override
@@ -162,8 +154,15 @@ public class Game extends State {
 
     @Override
     public void tick() {
+        // Check for unexpected disconnection.
+        if (player != null && !client.isConnected()) {
+            logger.log(Level.WARNING, "Connection Lost!");
+            client.disconnect();
+            return;
+        }
 
-        handlePackets();
+        // Client is connected.
+        // Put any network game logic below.
 
         if (player == null) {
             // Not yet logged in
@@ -173,12 +172,20 @@ public class Game extends State {
         updateCamera();
     }
 
-    private void handlePackets() {
-        for (Packet p : connection.getPacketsReceived()) {
-            PacketHandler handler = PacketHandlers.get(p.id);
-            if (handler != null) {
-                handler.apply(p, this);
-            }
+    /**
+     * Executes an incoming packet.
+     */
+    public void executePacket(Packet packet) {
+        switch (packet.getOpcode()) {
+        case 3:
+            // Read chatbox message
+            int icon = packet.getByte();
+            String message = packet.getString();
+            System.out.println("[icon-" + icon + "]" + message);
+            break;
+        default:
+            logger.log(Level.WARNING, "Unhandled Packet, opcode: " + packet.getOpcode() + ", length: " + packet.getPacketLength());
+            break;
         }
     }
 
@@ -220,7 +227,15 @@ public class Game extends State {
         }
     }
 
-    public void loggedIn() {
+    /**
+     * Executed when the server accepts our login request.
+     */
+    public void loggedIn(String displayName, int sessionId, int privilege) {
+        // Get the server variables for later.
+        this.displayName = displayName;
+        this.sessionId = sessionId;
+        this.privilege = privilege;
+
         // Player position is relative to the World origin
         player = new Mob();
         player.x = 66 * World.TILE_WIDTH;
@@ -228,12 +243,12 @@ public class Game extends State {
         worldLoader.loadSector(SPAWN_SECTOR_X, SPAWN_SECTOR_Z);
     }
 
-    public LoadingScreen getLoadingScreen() {
-        return loadingScreen;
-    }
-
-    public LoginScreen getLoginScreen() {
-        return loginScreen;
+    @Override
+    public void reset() {
+        displayName = "";
+        sessionId = -1;
+        privilege = -1;
+        player = null;
     }
 
     public Scene getScene() {

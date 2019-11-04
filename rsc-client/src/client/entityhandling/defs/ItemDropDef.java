@@ -4,7 +4,7 @@ package client.entityhandling.defs;
  * Data relating to an inventory item that has been dropped.
  */
 public class ItemDropDef {
-    
+
     public int id;
     public int amount;
     public int weight;
@@ -20,5 +20,5 @@ public class ItemDropDef {
     public int getWeight() {
         return weight;
     }
-    
+
 }

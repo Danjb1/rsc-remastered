@@ -4,7 +4,7 @@ package client.entityhandling.defs;
  * Data relating to an animation.
  */
 public class AnimationDef {
-    
+
     public String name;
     public int charColour;
     public int genderModel;
@@ -35,5 +35,5 @@ public class AnimationDef {
     public int getNumber() {
         return number;
     }
-    
+
 }

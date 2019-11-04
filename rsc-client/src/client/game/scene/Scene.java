@@ -3,7 +3,7 @@ package client.game.scene;
 /**
  * A collection of models and sprites along with lighting settings, ready for
  * rendering.
- * 
+ *
  * @author Dan Bryce
  */
 public class Scene {
@@ -22,18 +22,18 @@ public class Scene {
      * Fog "density".
      */
     public int fogZFalloff = 1;
-    
+
     public int fogZDistance = 2100 + (Camera.DEFAULT_HEIGHT * 2);
-    
+
     public Scene() {
         for (int l = 0; l < spriteEntities.length; l++) {
             spriteEntities[l] = new SpriteEntity();
         }
         sprites = new Model(MAX_SPRITES * 2, MAX_SPRITES);
         camera = new Camera();
-        
+
         camera.set(0, 0, 0, 912, 0, 0, 2000);
-        
+
         setLight(-50, -10, -50);
     }
 
@@ -121,19 +121,19 @@ public class Scene {
     public Model getSprites() {
         return sprites;
     }
-    
+
     public Camera getCamera() {
         return camera;
     }
-    
+
     public int getNumModels() {
         return numModels;
     }
-    
+
     public Model[] getModels() {
         return models;
     }
-    
+
     public SpriteEntity[] getSpriteEntities() {
         return spriteEntities;
     }

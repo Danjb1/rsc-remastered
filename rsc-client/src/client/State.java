@@ -18,6 +18,8 @@ public abstract class State {
 
     public abstract StateRenderer getRenderer();
 
+    public abstract void reset();
+
     public Input getInput() {
         return input;
     }
