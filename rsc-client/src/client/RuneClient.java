@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -12,6 +13,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -90,11 +92,24 @@ public class RuneClient {
 		frame = new JFrame(title);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.setResizable(false);
+		
 		// Pseudo-fullscreen if window fills the screen
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setUndecorated(width == screenSize.width && height == screenSize.height);
 		frame.setContentPane(gamePanel);
 		frame.pack();
+		
+		// Load the frame icon image.
+		try {
+			Image icon = ImageIO.read(ClassLoader.getSystemResource("res/data/icon.png"));
+			if (icon != null) {
+				frame.setIconImage(icon);
+			}
+		} catch (Exception ignore) {
+			ignore.printStackTrace();
+		}
+		
+		// Make the frame visible.
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 		frame.toFront();
