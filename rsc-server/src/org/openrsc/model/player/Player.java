@@ -1,7 +1,9 @@
 package org.openrsc.model.player;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -59,16 +61,13 @@ public class Player extends Mob {
     private boolean isMuted = false;
 
     /**
-     * A list of nearby players. The client will only have information for these
-     * entities.
+     * A list of nearby entities.
+     * The mob will only know about the existence of these entities.
      */
     private Set<Player> localPlayerList = null;
-
-    /**
-     * A list of nearby npcs. The client will only have information for these
-     * entities.
-     */
+    private final Queue<Player> playerRemovalQueue = new LinkedList<>();
     private Set<Npc> localNpcList = null;
+    private final Queue<Npc> npcRemovalQueue = new LinkedList<>();
 
     private long lastYellTime = 0L;
 
@@ -95,7 +94,9 @@ public class Player extends Mob {
     }
 
     @Override
-    public void tick(long currentTime) {
+    public void tick(long currentTime, Set<Player> globalPlayerList, Set<Npc> globalNpcList) {
+        updateLocalList(globalPlayerList, globalNpcList);
+        
         // Execute the queued packets.
         List<Packet> toProcess = new ArrayList<>();
         packetQueue.drainTo(toProcess);
@@ -116,6 +117,74 @@ public class Player extends Mob {
     @Override
     public boolean isDead() {
         return false;
+    }
+
+    /**
+     * Loop through each entity in the world and create a list of nearby entities.
+     */
+    private void updateLocalList(Set<Player> globalPlayerList, Set<Npc> globalNpcList) {
+        boolean isLocal;
+
+        // Check if an entity has been unregistered from the server.
+        for (Player player : localPlayerList) {
+            if (!globalPlayerList.contains(player)) {
+                playerRemovalQueue.add(player);
+                continue;
+            }
+        }
+
+        // Check for new entities that should be added to the local list.
+        for (Player player : globalPlayerList) {
+            isLocal = getLocation().getDistance(player.getLocation()) < Constants.MAXIMUM_INTERACTION_DISTANCE;
+
+            // Register a new entity.
+            if (isLocal && !localPlayerList.contains(player)) {
+                localPlayerList.add(player);
+                continue;
+            }
+
+            // Unregister a entity.
+            if (!isLocal && localPlayerList.contains(player)) {
+                playerRemovalQueue.add(player);
+                continue;
+            }
+        }
+
+        // Merge the list changes.
+        while (!playerRemovalQueue.isEmpty()) {
+            localPlayerList.remove(playerRemovalQueue.poll());
+        }
+
+
+        // Check if an entity has been unregistered from the server.
+        for (Npc npc : localNpcList) {
+            if (!globalNpcList.contains(npc)) {
+                npcRemovalQueue.add(npc);
+                continue;
+            }
+        }
+
+        // Check for new entities that should be added to the local list.
+        for (Npc npc : globalNpcList) {
+            isLocal = getLocation().getDistance(npc.getLocation()) < Constants.MAXIMUM_INTERACTION_DISTANCE;
+
+            // Register a new entity.
+            if (isLocal && !localNpcList.contains(npc)) {
+                localNpcList.add(npc);
+                continue;
+            }
+
+            // Unregister a entity.
+            if (!isLocal && localNpcList.contains(npc)) {
+                npcRemovalQueue.add(npc);
+                continue;
+            }
+        }
+
+        // Merge the list changes.
+        while (!npcRemovalQueue.isEmpty()) {
+            localNpcList.remove(npcRemovalQueue.poll());
+        }
     }
 
     /**
@@ -170,18 +239,18 @@ public class Player extends Mob {
         }
         return true;
     }
-
+    
     /**
-     * The list of players which are visible client-side.
+     * The list of players available to this mob.
      */
-    public Set<Player> getLocalPlayerList() {
+    public Set<Player> getLocalPlayers() {
         return localPlayerList;
     }
 
     /**
-     * The list of npcs which are visible client-side.
+     * The list of npc available to this mob.
      */
-    public Set<Npc> getLocalNpcList() {
+    public Set<Npc> getLocalNpcs() {
         return localNpcList;
     }
 

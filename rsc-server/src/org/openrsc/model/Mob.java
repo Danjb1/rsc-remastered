@@ -1,5 +1,9 @@
 package org.openrsc.model;
 
+import java.util.Set;
+
+import org.openrsc.model.player.Player;
+
 /**
  * A dynamic mobile entity with combat attributes.
  */
@@ -67,7 +71,7 @@ public abstract class Mob {
     /**
      * Executed every 600 ms.
      */
-    public abstract void tick(long currentTime);
+    public abstract void tick(final long currentTime, Set<Player> globalPlayerList, Set<Npc> globalNpcList);
 
     /**
      * @return True, if the mob is dead.

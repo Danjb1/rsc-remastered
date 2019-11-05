@@ -1,6 +1,5 @@
 package org.openrsc.model;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
@@ -14,6 +13,18 @@ import org.openrsc.model.player.Player;
  */
 public class Npc extends Mob {
 
+    /**
+     * A list of nearby entities.
+     * The mob will only know about the existence of these entities.
+     */
+    private Set<Player> localPlayerList = null;
+    private final Queue<Player> playerRemovalQueue = new LinkedList<>();
+    private Set<Npc> localNpcList = null;
+    private final Queue<Npc> npcRemovalQueue = new LinkedList<>();
+
+    /**
+     * The cache index for this npc.
+     */
     private int type;
 
     /**
@@ -31,13 +42,6 @@ public class Npc extends Mob {
      */
     private boolean retreatToOrigin = false;
 
-    /**
-     * A list of nearby players. The npc will only have information for these
-     * entities.
-     */
-    private final Set<Player> playerList = new HashSet<>();
-    private final Queue<Player> playerRemovalQueue = new LinkedList<>();
-
     public Npc(int sessionId, int type, int x, int z) {
         super(sessionId);
         this.origin = new Location(x, z);
@@ -52,18 +56,9 @@ public class Npc extends Mob {
      */
     protected void init(int type) {
         this.type = type;
-        /*
-         * setHealthMaximum(Resources.npcs[type].hits);
-         * setHealthCurrent(getHealthMaximum());
-         *
-         * // TODO Calculate combat level. int atk = Resources.npcs[type].attack; int
-         * def = Resources.npcs[type].defense; int str = Resources.npcs[type].strength;
-         * int cmb = 0; // 1 level in Attack, Strength, Hits or Defense is equal to 1/4
-         * of a combat level. // 1 level in Magic or Prayer is equivalent to 1/8 of a
-         * combat level. // If ranged multiplied by 1.5 is equal to Attack + Strength
-         * combined, 1 ranged level is worth 0.375 combat levels, and attack and
-         * strength aren't counted. setCombatLevel(cmb);
-         */
+        setHealthMaximum(Resources.npcs[type].hits);
+        setHealthCurrent(getHealthMaximum());
+        setCombatLevel(1); // FIXME
     }
 
     /**
@@ -74,7 +69,8 @@ public class Npc extends Mob {
     }
 
     @Override
-    public void tick(final long currentTime) {
+    public void tick(final long currentTime, Set<Player> globalPlayerList, Set<Npc> globalNpcList) {
+        this.updateLocalList(globalPlayerList, globalNpcList);
         // Npc is aggressive.
         // Loop through nearby players.
         // Find a low level player to attack.
@@ -89,32 +85,31 @@ public class Npc extends Mob {
     }
 
     /**
-     * Loop through each player in the world and create a list of nearby players.
-     * This allows NPCs to acknowledge and interact with nearby players.
+     * Loop through each entity in the world and create a list of nearby entities.
      */
-    public void updateLocalPlayerList(Set<Player> globalPlayerList) {
+    private void updateLocalList(Set<Player> globalPlayerList, Set<Npc> globalNpcList) {
+        boolean isLocal;
 
-        // Check if a local player has logged out.
-        for (Player player : playerList) {
+        // Check if an entity has been unregistered from the server.
+        for (Player player : localPlayerList) {
             if (!globalPlayerList.contains(player)) {
                 playerRemovalQueue.add(player);
                 continue;
             }
         }
 
-        // Check for new players that should be added to the local list.
-        boolean isLocal;
+        // Check for new entities that should be added to the local list.
         for (Player player : globalPlayerList) {
             isLocal = getLocation().getDistance(player.getLocation()) < Constants.MAXIMUM_INTERACTION_DISTANCE;
 
-            // Register a new local player.
-            if (isLocal && !playerList.contains(player)) {
-                playerList.add(player);
+            // Register a new entity.
+            if (isLocal && !localPlayerList.contains(player)) {
+                localPlayerList.add(player);
                 continue;
             }
 
-            // Unregister a local player.
-            if (!isLocal && playerList.contains(player)) {
+            // Unregister a entity.
+            if (!isLocal && localPlayerList.contains(player)) {
                 playerRemovalQueue.add(player);
                 continue;
             }
@@ -122,15 +117,53 @@ public class Npc extends Mob {
 
         // Merge the list changes.
         while (!playerRemovalQueue.isEmpty()) {
-            playerList.remove(playerRemovalQueue.poll());
+            localPlayerList.remove(playerRemovalQueue.poll());
+        }
+
+
+        // Check if an entity has been unregistered from the server.
+        for (Npc npc : localNpcList) {
+            if (!globalNpcList.contains(npc)) {
+                npcRemovalQueue.add(npc);
+                continue;
+            }
+        }
+
+        // Check for new entities that should be added to the local list.
+        for (Npc npc : globalNpcList) {
+            isLocal = getLocation().getDistance(npc.getLocation()) < Constants.MAXIMUM_INTERACTION_DISTANCE;
+
+            // Register a new entity.
+            if (isLocal && !localNpcList.contains(npc)) {
+                localNpcList.add(npc);
+                continue;
+            }
+
+            // Unregister a entity.
+            if (!isLocal && localNpcList.contains(npc)) {
+                npcRemovalQueue.add(npc);
+                continue;
+            }
+        }
+
+        // Merge the list changes.
+        while (!npcRemovalQueue.isEmpty()) {
+            localNpcList.remove(npcRemovalQueue.poll());
         }
     }
 
     /**
-     * The list of players which are within interaction distance of the npc.
+     * The list of players available to this mob.
      */
     public Set<Player> getLocalPlayers() {
-        return playerList;
+        return localPlayerList;
+    }
+
+    /**
+     * The list of npc available to this mob.
+     */
+    public Set<Npc> getLocalNpcs() {
+        return localNpcList;
     }
 
     public int getType() {
@@ -176,7 +209,7 @@ public class Npc extends Mob {
     }
 
     public int getLocalPlayerCount() {
-        return playerList.size();
+        return localPlayerList.size();
     }
 
 }

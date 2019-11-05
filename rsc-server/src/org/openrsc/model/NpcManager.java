@@ -4,8 +4,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
+
+import org.openrsc.model.player.Player;
 
 /**
  * Manages the npc instances.
@@ -39,7 +42,9 @@ public class NpcManager {
     public NpcManager() {
     }
 
-    public void tick(long currentTime) {
+    public void tick(Set<Player> cachedPlayerList, Set<Npc> cachedNpcList) {
+        final long currentTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+        
         /*
          * Execute the queued insertions.
          */
@@ -65,8 +70,7 @@ public class NpcManager {
         for (Npc npc : currentList) {
 
             // Execute the tick update.
-            npc.tick(currentTime);
-
+            npc.tick(currentTime, cachedPlayerList, cachedNpcList);
         }
 
     }

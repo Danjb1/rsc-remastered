@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,7 +51,9 @@ public class PlayerManager {
     public PlayerManager() {
     }
 
-    public void tick(long currentTime) {
+    public void tick(Set<Player> cachedPlayerList, Set<Npc> cachedNpcList) {
+        final long currentTime = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+        
         tickCounter++;
         boolean oneMinuteTimeLapse = tickCounter % 100 == 0;
 
@@ -96,7 +99,7 @@ public class PlayerManager {
         for (Player player : currentList) {
 
             // Execute the tick update.
-            player.tick(currentTime);
+            player.tick(currentTime, cachedPlayerList, cachedNpcList);
 
             // Check for disconnected clients.
             if (!player.getChannel().isConnected()) {
