@@ -12,7 +12,6 @@ RSC Remastered is an attempt to recreate RuneScape Classic, in all its pixellate
 
  - **Faithful:** No hacky, money-grabbing changes detracting from the classic RuneScape experience.
  - **Simple:** Heavily rewritten and drastically simplified source code.
- - **Standalone:** No need to maintain compatibility with existing client-server protocols.
 
  > There are actually some fantastic projects out there - see the links below.
 

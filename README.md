@@ -2,7 +2,7 @@
 
 *(Formerly OpenRSC)*
 
-An open-source re-implementation of RuneScape Classic for private use.
+An open-source re-implementation of the RuneScape Classic client for private use.
 
 [![Screenshot](docs/screenshot.png)](https://youtu.be/o6hY1LMLiSU)
 
@@ -14,13 +14,13 @@ While other projects have had great success in deobfuscating the source code, it
 
 Refactoring it can make it significantly easier to read and maintain the code, as shown by [this example](docs/example_refactor.md). This could pave the way for all sorts of future enhancements, and perhaps ports to other platforms.
 
+There are plenty of excellent server implementations out there already; any that support the latest client-server protocol will work alongside this client.
+
  > See **[about](docs/about.md)** for more information.
 
 ## :hammer: Build
 
-The project should work out-of-the-box with Eclipse.
-
-The client and server should be built separately. Be sure to include the provided `libs` and the `res` folder!
+The project should work out-of-the-box with Eclipse. Be sure to include the provided `libs` and the `res` folder in the Build Path!
 
 ## :chart_with_upwards_trend: Progress
 
@@ -28,17 +28,18 @@ The client and server should be built separately. Be sure to include the provide
 :heavy_check_mark:️ Title screen\
 :heavy_check_mark:️ Dynamic world loading\
 :heavy_check_mark:️ Camera rotation\
-:heavy_check_mark:️ Landscape rendering\
-:heavy_check_mark:️ Wall rendering\
-:heavy_check_mark:️ Roof rendering\
-:x: Door rendering\
-:x: Model rendering (e.g. trees, fountains)\
-:x: Mob rendering\
+:heavy_check_mark:️ Landscape\
+:heavy_check_mark:️ Walls\
+:heavy_check_mark:️ Roofs\
+:x: Objects (doors, trees, fountains, etc.)\
+:x: Mobs\
 :x: User interface
 
 > See **[ideas](docs/ideas.md)** for planned enhancements.
 
 ## :video_game: Controls
+
+Currently the world can be navigated freely:
 
 **Left Click:** Teleport\
 **Left / Right:** Rotate camera\
