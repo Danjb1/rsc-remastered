@@ -14,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jboss.netty.channel.Channel;
-import org.openrsc.Config;
 import org.openrsc.model.player.Player;
 
 /**
@@ -174,13 +173,6 @@ public class PlayerManager {
      */
     public Set<Player> getList() {
         return currentList;
-    }
-
-    /**
-     * @return True, if the world is full.
-     */
-    public boolean isUnderMaximumWorkload() {
-        return currentList.size() >= Config.USER_LIMIT;
     }
 
     /**

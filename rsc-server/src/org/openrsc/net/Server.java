@@ -3,6 +3,8 @@ package org.openrsc.net;
 import static org.jboss.netty.channel.Channels.pipeline;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,12 +21,30 @@ import org.openrsc.net.codec.PacketEncoder;
 import org.openrsc.task.TaskEngine;
 
 /**
- * Integrates the Netty api into the RS-Remastered project. The server class is tied
- * together with the task event and event manager.
+ * Integrates the Netty api into the RS-Remastered project. The server class is
+ * tied together with the task event and event manager.
  */
 public class Server {
 
     private static final Server INSTANCE = new Server();
+
+    /**
+     * The Executor which will execute the boss threads.
+     */
+    private final Executor NETTY_BOSS_EXECUTOR = Config.get().isLowPowerMode() ? Executors.newSingleThreadExecutor()
+            : Executors.newCachedThreadPool();
+
+    /**
+     * The Executor which will execute the I/O worker threads.
+     */
+    private final Executor NETTY_WORK_EXECUTOR = Config.get().isLowPowerMode() ? Executors.newSingleThreadExecutor()
+            : Executors.newCachedThreadPool();
+
+    /**
+     * The maximum number of I/O worker threads
+     */
+    private final int NETTY_MAXIMUM_WORKER_COUNT = Config.get().isLowPowerMode() ? 1
+            : Runtime.getRuntime().availableProcessors() / 2;
 
     /**
      * Creates a new instance. Calling this constructor is same with calling
@@ -33,10 +53,8 @@ public class Server {
      * obtained by Runtime.availableProcessors().
      * https://docs.jboss.org/netty/3.2/api/org/jboss/netty/channel/socket/nio/NioServerSocketChannelFactory.html
      */
-    private final ServerBootstrap SERVER_BOOTSTRAP = new ServerBootstrap(new NioServerSocketChannelFactory(
-            Config.NETTY_BOSS_EXECUTOR,
-            Config.NETTY_WORK_EXECUTOR,
-            Config.NETTY_MAXIMUM_WORKER_COUNT));
+    private final ServerBootstrap SERVER_BOOTSTRAP = new ServerBootstrap(
+            new NioServerSocketChannelFactory(NETTY_BOSS_EXECUTOR, NETTY_WORK_EXECUTOR, NETTY_MAXIMUM_WORKER_COUNT));
 
     private final TaskEngine taskEngine;
     private final EventManager eventManager;
@@ -50,7 +68,7 @@ public class Server {
     }
 
     public void bind() throws Exception {
-        Logger.getLogger(getClass().getName()).info("Binding to port " + Config.SERVER_PORT + "..");
+        Logger.getLogger(getClass().getName()).info("Binding to port " + Config.get().serverPort() + "..");
 
         try {
             // The ChannelPipelineFactory creates a new ChannelPipeline for each new
@@ -78,7 +96,7 @@ public class Server {
             SERVER_BOOTSTRAP.setOption("tcpNoDelay", true);
 
             // Bind the server bootstrap to the specified port.
-            SERVER_BOOTSTRAP.bind(new InetSocketAddress(Config.SERVER_PORT));
+            SERVER_BOOTSTRAP.bind(new InetSocketAddress(Config.get().serverPort()));
             Logger.getLogger(getClass().getName()).info("Server is ONLINE!");
         } catch (Exception e) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Startup aborted due to network error.", e);

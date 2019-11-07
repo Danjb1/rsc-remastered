@@ -1,6 +1,7 @@
 package org.openrsc.model.player;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -64,9 +65,9 @@ public class Player extends Mob {
      * A list of nearby entities.
      * The mob will only know about the existence of these entities.
      */
-    private Set<Player> localPlayerList = null;
+    private Set<Player> localPlayerList = new HashSet<>();
     private final Queue<Player> playerRemovalQueue = new LinkedList<>();
-    private Set<Npc> localNpcList = null;
+    private Set<Npc> localNpcList = new HashSet<>();
     private final Queue<Npc> npcRemovalQueue = new LinkedList<>();
 
     private long lastYellTime = 0L;
@@ -106,7 +107,7 @@ public class Player extends Mob {
         }
 
         // Idle logout timer.
-        if (currentTime - lastPacketReceived > (60_000 * Config.IDLE_DISCONNECT)) {
+        if (currentTime - lastPacketReceived > (60_000 * Config.get().idleDisconnect())) {
             System.out.println("[" + displayName + "]Disconnected - Idle logout.");
             PlayerManager.getInstance().queueLogout(this);
             return;

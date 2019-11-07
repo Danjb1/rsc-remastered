@@ -46,11 +46,14 @@ public class TaskEngine implements Runnable {
      */
     private Thread thread;
 
-    @SuppressWarnings("unused")
     public TaskEngine() {
-        this.taskService = Config.TASK_ENGINE_THREAD_COUNT == 1
+        if (Config.get().isLowPowerMode()) {
+            this.taskService = new BlockingExecutorService(Executors.newSingleThreadExecutor());
+            return;
+        }
+        this.taskService = Config.get().taskEngineThreadCount() == 1
                 ? new BlockingExecutorService(Executors.newSingleThreadExecutor())
-                : new BlockingExecutorService(Executors.newFixedThreadPool(Config.TASK_ENGINE_THREAD_COUNT));
+                : new BlockingExecutorService(Executors.newFixedThreadPool(Config.get().taskEngineThreadCount()));
     }
 
     /**

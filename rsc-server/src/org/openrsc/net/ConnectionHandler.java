@@ -22,6 +22,8 @@ import org.openrsc.net.packet.PacketManager;
  */
 public class ConnectionHandler extends SimpleChannelHandler {
 
+    private final Logger logger = Logger.getLogger(getClass().getName());
+
     private ArrayList<String> connections = new ArrayList<String>();
 
     /**
@@ -37,13 +39,13 @@ public class ConnectionHandler extends SimpleChannelHandler {
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent event) {
         Packet packet = (Packet) event.getMessage();
         if (packet == null) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received null packet from client.");
+            logger.log(Level.WARNING, "Received null packet from client.");
             return;
         }
 
         final int opcode = packet.getOpcode();
 
-        // XXX Opcode 0 is reserved for future pre-login handshake.
+        // Opcode 0 is reserved for future pre-login handshake.
         if (opcode == 0) {
             return;
         }
@@ -64,13 +66,13 @@ public class ConnectionHandler extends SimpleChannelHandler {
         // Get player instance.
         Player player = ((Player) ctx.getChannel().getAttachment());
         if (player == null) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Received packet from null player.");
+            logger.log(Level.WARNING, "Received packet from null player.");
             return;
         }
 
         // Check if the packet exists.
         if (PacketManager.get(opcode) == null) {
-            Logger.getLogger(getClass().getName()).log(Level.WARNING, "No packet found for " + opcode);
+            logger.log(Level.WARNING, "No packet found for " + opcode);
             return;
         }
 
@@ -98,12 +100,12 @@ public class ConnectionHandler extends SimpleChannelHandler {
                 count++;
             }
         }
-        if (count > Config.CONNECTION_LIMIT) {
+        if (count > Config.get().connectionLimit()) {
+            logger.info("Connection [" + count + "/" + Config.get().connectionLimit() + "] rejected from " + address);
             ctx.getChannel().close();
             return;
         }
-        Logger.getLogger(getClass().getName()).log(Level.INFO,
-                "Connection [" + count + "/" + Config.CONNECTION_LIMIT + "] accepted from " + address);
+        logger.info("Connection [" + count + "/" + Config.get().connectionLimit() + "] accepted from " + address);
         connections.add(address);
     }
 
@@ -122,7 +124,7 @@ public class ConnectionHandler extends SimpleChannelHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent event) {
         if (!(event.getCause() instanceof IOException)) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, "Exception caught: ", event.getCause());
+            logger.log(Level.SEVERE, "Exception caught: ", event.getCause());
             return;
         }
         Player player = (Player) ctx.getAttachment();

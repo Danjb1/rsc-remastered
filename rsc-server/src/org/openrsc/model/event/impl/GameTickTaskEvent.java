@@ -33,13 +33,12 @@ class UpdateTask implements Task {
         context.submitTask(new Runnable() {
             @Override
             public void run() {
-                // Get mob lists.
-                Set<Player> cachedPlayerList = PlayerManager.getInstance().getList();
-                Set<Npc> cachedNpcList = NpcManager.getInstance().getList();
+                Set<Player> playerList = PlayerManager.getInstance().getList();
+                Set<Npc> npcList = NpcManager.getInstance().getList();
                 
                 // Execute the game tick.
-                PlayerManager.getInstance().tick(cachedPlayerList, cachedNpcList);
-                NpcManager.getInstance().tick(cachedPlayerList, cachedNpcList);
+                PlayerManager.getInstance().tick(playerList, npcList);
+                NpcManager.getInstance().tick(playerList, npcList);
             }
         });
     }

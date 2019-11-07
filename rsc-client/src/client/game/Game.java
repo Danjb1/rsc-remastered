@@ -26,6 +26,7 @@ import client.game.ui.StatsMenu;
 import client.game.world.World;
 import client.game.world.WorldLoader;
 import client.net.Packet;
+import client.res.Sound;
 
 /**
  * State responsible for running the game.
@@ -185,6 +186,11 @@ public class Game extends State {
             int icon = packet.getByte();
             String message = packet.getString();
             System.out.println((icon == -1 ? "" : "[icon-" + icon + "]") + message);
+            break;
+        case 5:
+            // Play a sound file
+            String sound = packet.getString();
+            Sound.play(sound);
             break;
         case 10:
             // Set player position

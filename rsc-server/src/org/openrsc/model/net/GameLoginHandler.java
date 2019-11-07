@@ -46,7 +46,7 @@ public class GameLoginHandler {
         }
 
         // Server is full.
-        if (PlayerManager.getInstance().getCount() >= Config.USER_LIMIT) {
+        if (PlayerManager.getInstance().getCount() >= Config.get().userLimit()) {
             sendLoginError(channel, "Server is full");
             return;
         }

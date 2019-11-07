@@ -1,35 +1,35 @@
-package org.openrsc;
+package org.openrsc.util;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * NOTE: Not implemented, yet. This will be used to replace Config.java soon
+ * INI is a file extension for an initialization file format, as the name
+ * implies. INI files are plain text (ASCII) and are used to set parameters for
+ * the operating system and some programs.
  */
 public class IniFile {
 
-//    public static void main(String[] args) {
-//        try {
-//            new IniFile("./config.ini");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    private Pattern _section = Pattern.compile("\\s*\\[([^]]*)\\]\\s*");
-    private Pattern _keyValue = Pattern.compile("\\s*([^=]*)=(.*)");
+    private final Pattern _section = Pattern.compile("\\s*\\[([^]]*)\\]\\s*");
+    private final Pattern _keyValue = Pattern.compile("\\s*([^=]*)=(.*)");
     private Map<String, Map<String, String>> _entries = new HashMap<>();
 
-    public IniFile(String path) throws IOException {
-        load(path);
+    public IniFile(String path) {
+        try {
+            load(path);
+        } catch (IOException e) {
+            Logger.getLogger(getClass().getName()).log(Level.WARNING, "Error loading ini file: " + path, e);
+        }
     }
 
-    public void load(String path) throws IOException {
+    private void load(String path) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
             String section = null;
@@ -92,4 +92,5 @@ public class IniFile {
         }
         return Double.parseDouble(kv.get(key));
     }
+    
 }

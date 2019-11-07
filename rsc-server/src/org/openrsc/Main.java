@@ -1,5 +1,7 @@
 package org.openrsc;
 
+import java.util.logging.Logger;
+
 import org.openrsc.model.World;
 import org.openrsc.model.event.impl.GameTickTaskEvent;
 import org.openrsc.net.Server;
@@ -11,10 +13,13 @@ import org.openrsc.net.packet.PacketManager;
 public class Main {
 
     public static void main(String[] args) {
+        Logger.getLogger(Main.class.getName()).info("Booting up..");
         new Main();
     }
 
     public Main() {
+        Config.get();
+
         // Load world
         World.getInstance();
 

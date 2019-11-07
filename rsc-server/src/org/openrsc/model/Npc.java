@@ -1,5 +1,6 @@
 package org.openrsc.model;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
@@ -17,9 +18,9 @@ public class Npc extends Mob {
      * A list of nearby entities.
      * The mob will only know about the existence of these entities.
      */
-    private Set<Player> localPlayerList = null;
+    private Set<Player> localPlayerList = new HashSet<>();
     private final Queue<Player> playerRemovalQueue = new LinkedList<>();
-    private Set<Npc> localNpcList = null;
+    private Set<Npc> localNpcList = new HashSet<>();
     private final Queue<Npc> npcRemovalQueue = new LinkedList<>();
 
     /**
@@ -56,9 +57,10 @@ public class Npc extends Mob {
      */
     protected void init(int type) {
         this.type = type;
-        setHealthMaximum(Resources.npcs[type].hits);
-        setHealthCurrent(getHealthMaximum());
-        setCombatLevel(1); // FIXME
+        // FIXME
+        //setHealthMaximum(Resources.npcs[type].hits);
+        //setHealthCurrent(getHealthMaximum());
+        //setCombatLevel(1);
     }
 
     /**

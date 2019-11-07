@@ -19,7 +19,9 @@ public class PacketDispatcher {
 
     /**
      * Sends a message to the client, as well as the player's privilege value.
-     * @param string The message.
+     * 
+     * @param string
+     *            The message.
      */
     public void sendPublicMessage(String string) {
         Packet packet = new Packet(3);
@@ -30,7 +32,9 @@ public class PacketDispatcher {
 
     /**
      * Sends a message to the client.
-     * @param string The message.
+     * 
+     * @param string
+     *            The message.
      */
     public void sendGameMessage(String string) {
         Packet packet = new Packet(3);
@@ -46,5 +50,18 @@ public class PacketDispatcher {
         packet.putByte(player.getLocation().getHeight());
         player.getChannel().write(packet);
     }
-    
+
+    /**
+     * Sends a sound request to the client.
+     * 
+     * @param sound
+     *            The sound file name, minus the file extension, because all files
+     *            end with .wav
+     */
+    public void sendSoundRequest(String sound) {
+        Packet packet = new Packet(5);
+        packet.putString(sound);
+        player.getChannel().write(packet);
+    }
+
 }
