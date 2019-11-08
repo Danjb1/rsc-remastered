@@ -31,7 +31,7 @@ Alternatively, it can be compiled manually on Windows by running `build.bat`, an
 :heavy_check_mark:️ Landscape\
 :heavy_check_mark:️ Walls\
 :heavy_check_mark:️ Roofs\
-:pencil2: User interface
+:pencil2: User interface\
 :x: Server login\
 :x: Retrieve server data\
 
