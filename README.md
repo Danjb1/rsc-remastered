@@ -14,13 +14,13 @@ While other projects have had great success in deobfuscating the source code, it
 
 Refactoring it can make it significantly easier to read and maintain the code, as shown by [this example](docs/example_refactor.md). This could pave the way for all sorts of future enhancements, and perhaps ports to other platforms.
 
-There are plenty of excellent server implementations out there already; any that support the latest client-server protocol will work alongside this client.
-
  > See **[about](docs/about.md)** for more information.
 
-## :hammer: Build
+## :hammer: Build & Run
 
-The project should work out-of-the-box with Eclipse. Be sure to include the provided `libs` and the `res` folder in the Build Path!
+The project should work out-of-the-box with Eclipse.
+
+Alternatively, it can be compiled manually on Windows by running `build.bat`, and subsequently run using `run.bat`.
 
 ## :chart_with_upwards_trend: Progress
 
@@ -31,9 +31,9 @@ The project should work out-of-the-box with Eclipse. Be sure to include the prov
 :heavy_check_mark:️ Landscape\
 :heavy_check_mark:️ Walls\
 :heavy_check_mark:️ Roofs\
-:x: Objects (doors, trees, fountains, etc.)\
-:x: Mobs\
-:x: User interface
+:pencil2: User interface
+:x: Server login\
+:x: Retrieve server data\
 
 > See **[ideas](docs/ideas.md)** for planned enhancements.
 
