@@ -19,6 +19,7 @@ import client.entityhandling.defs.PrayerDef;
 import client.entityhandling.defs.SpellDef;
 import client.entityhandling.defs.TextureDef;
 import client.entityhandling.defs.TileDef;
+import client.login.LoginScreen;
 import client.res.ResourceLoader;
 import client.res.Resources;
 import client.res.Sprite;
@@ -106,9 +107,7 @@ public class LoadingScreen extends State {
             updateProgress(100, "Starting game...");
         }
 
-        // Finished loading.
-        // Update the launcher state.
-        client.onLoaded();
+        client.changeState(new LoginScreen(client));
     }
 
     private void generateExperienceTable() {
@@ -257,11 +256,11 @@ public class LoadingScreen extends State {
                 if (l2 == -1) {
                     int i3 = 0x3b9ac9ff;
                     int j3 = j2 >> 16 & 0xff;
-                        int k3 = j2 >> 8 & 0xff;
-                        int l3 = j2 & 0xff;
-                        for (int i4 = 0; i4 < 256; i4++) {
-                            int j4 = dictionary[i4];
-                            int k4 = j4 >> 16 & 0xff;
+                    int k3 = j2 >> 8 & 0xff;
+                    int l3 = j2 & 0xff;
+                    for (int i4 = 0; i4 < 256; i4++) {
+                        int j4 = dictionary[i4];
+                        int k4 = j4 >> 16 & 0xff;
                         int l4 = j4 >> 8 & 0xff;
                         int i5 = j4 & 0xff;
                         int j5 = (j3 - k4) * (j3 - k4) + (k3 - l4) * (k3 - l4) + (l3 - i5) * (l3 - i5);
@@ -269,9 +268,9 @@ public class LoadingScreen extends State {
                             i3 = j5;
                             l2 = i4;
                         }
-                        }
+                    }
 
-                        ai1[k2] = l2;
+                    ai1[k2] = l2;
                 }
                 indices[l1] = (byte) l2;
             }
@@ -284,10 +283,6 @@ public class LoadingScreen extends State {
     protected final void updateProgress(int progress, String message) {
         this.progress = progress;
         this.message = message;
-    }
-
-    @Override
-    public void reset() {
     }
 
     public boolean isLoaded() {

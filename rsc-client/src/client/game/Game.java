@@ -3,8 +3,8 @@ package client.game;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import client.RuneClient;
 import client.State;
@@ -25,8 +25,11 @@ import client.game.ui.SettingsMenu;
 import client.game.ui.StatsMenu;
 import client.game.world.World;
 import client.game.world.WorldLoader;
-import client.net.Packet;
-import client.res.Sound;
+import client.net.Connection;
+import client.packets.Packet;
+import client.packets.PacketContext;
+import client.packets.PacketHandler;
+import client.packets.PacketRegistry;
 
 /**
  * State responsible for running the game.
@@ -35,12 +38,13 @@ import client.res.Sound;
  *
  * @author Dan Bryce
  */
-public class Game extends State {
-
-    private final Logger logger = Logger.getLogger(getClass().getName());
+public class Game extends State implements PacketContext {
 
     public static final int SPAWN_SECTOR_X = 50;
     public static final int SPAWN_SECTOR_Z = 51;
+
+    private ExecutorService executor;
+    private Connection connection;
 
     private List<Menu> menus;
 
@@ -60,16 +64,11 @@ public class Game extends State {
     private int cameraPositionZ;
     private int cameraHeight = Camera.DEFAULT_HEIGHT;
 
-    // Server session
-    @SuppressWarnings("unused")
-    private String displayName;
-    @SuppressWarnings("unused")
-    private int sessionId;
-    @SuppressWarnings("unused")
-    private int privilege;
-
-    public Game(RuneClient client) {
+    public Game(RuneClient client, Connection connection) {
         super(client);
+
+        this.connection = connection;
+
         scene = new Scene();
         world = new World(scene);
         worldLoader = new WorldLoader(world);
@@ -86,6 +85,14 @@ public class Game extends State {
 
     @Override
     public void start() {
+        executor = Executors.newCachedThreadPool();
+        executor.execute(connection.getPacketReaderThread());
+    }
+
+    @Override
+    public void destroy() {
+        executor.shutdown();
+        connection.close();
     }
 
     @Override
@@ -158,15 +165,8 @@ public class Game extends State {
 
     @Override
     public void tick() {
-        // Check for unexpected disconnection.
-        if (player != null && !client.isConnected()) {
-            logger.log(Level.WARNING, "Connection Lost!");
-            client.disconnect();
-            return;
-        }
 
-        // Client is connected.
-        // Put any network game logic below.
+        handlePackets();
 
         if (player == null) {
             // Not yet logged in
@@ -176,31 +176,12 @@ public class Game extends State {
         updateCamera();
     }
 
-    /**
-     * Executes an incoming packet.
-     */
-    public void executePacket(Packet packet) {
-        switch (packet.getOpcode()) {
-        case 3:
-            // Read chatbox message
-            int icon = packet.getByte();
-            String message = packet.getString();
-            System.out.println((icon == -1 ? "" : "[icon-" + icon + "]") + message);
-            break;
-        case 5:
-            // Play a sound file
-            String sound = packet.getString();
-            Sound.play(sound);
-            break;
-        case 10:
-            // Set player position
-            player.x = packet.getInt();
-            player.z = packet.getInt();
-            world.setCurrentLayer(packet.getByte());
-            break;
-        default:
-            logger.log(Level.WARNING, "Unhandled Packet, opcode: " + packet.getOpcode() + ", length: " + packet.getPacketLength());
-            break;
+    private void handlePackets() {
+        for (Packet p : connection.getPacketsReceived()) {
+            PacketHandler handler = PacketRegistry.getPacketHandler(p.id);
+            if (handler != null) {
+                handler.apply(p, this);
+            }
         }
     }
 
@@ -222,45 +203,28 @@ public class Game extends State {
     }
 
     private void loadSectors() {
-        boolean sectorUpdateFlag = false;
 
         if (player.x < 16 * World.TILE_WIDTH) {
-            sectorUpdateFlag = true;
             worldLoader.loadSector(world.getSectorX() - 1, world.getSectorZ());
             player.x += Sector.WIDTH * World.TILE_WIDTH;
 
         } else if (player.x > 80 * World.TILE_WIDTH) {
-            sectorUpdateFlag = true;
             worldLoader.loadSector(world.getSectorX() + 1, world.getSectorZ());
             player.x -= Sector.WIDTH * World.TILE_WIDTH;
         }
 
         if (player.z < 16 * World.TILE_DEPTH) {
-            sectorUpdateFlag = true;
             worldLoader.loadSector(world.getSectorX(), world.getSectorZ() - 1);
             player.z += Sector.DEPTH * World.TILE_DEPTH;
 
         } else if (player.z > 80 * World.TILE_DEPTH) {
-            sectorUpdateFlag = true;
             worldLoader.loadSector(world.getSectorX(), world.getSectorZ() + 1);
             player.z -= Sector.DEPTH * World.TILE_DEPTH;
         }
-
-        // This is a temporary feature, used for development purposes.
-        if (sectorUpdateFlag) {
-            sendSectorUpdate();
-        }
     }
 
-    /**
-     * Executed when the server accepts our login request.
-     */
-    public void loggedIn(String displayName, int sessionId, int privilege) {
-        // Get the server variables for later.
-        this.displayName = displayName;
-        this.sessionId = sessionId;
-        this.privilege = privilege;
-
+    @Override
+    public void loggedIn() {
         // Player position is relative to the World origin
         player = new Mob();
         player.x = 66 * World.TILE_WIDTH;
@@ -268,35 +232,6 @@ public class Game extends State {
         worldLoader.loadSector(SPAWN_SECTOR_X, SPAWN_SECTOR_Z);
     }
 
-    @Override
-    public void reset() {
-        displayName = "";
-        sessionId = -1;
-        privilege = -1;
-        player = null;
-    }
-
-    // Send position to server.
-    private void sendSectorUpdate() {
-        Packet packet = new Packet(10);
-        packet.putInt(player.x);
-        packet.putInt(player.z);
-        packet.putByte(world.getCurrentLayer());
-        getClient().sendPacket(packet);
-    }
-
-    /**
-     * Send a button click event request to the server.
-     * @param parentId The parent interface index.
-     * @param buttonId The button index.
-     */
-    public void sendMenuButtonClick(int parentId, int buttonId) {
-        Packet packet = new Packet(12);
-        packet.putByte(parentId);
-        packet.putSmallInt(buttonId);
-        getClient().sendPacket(packet);
-    }
-    
     public Scene getScene() {
         return scene;
     }

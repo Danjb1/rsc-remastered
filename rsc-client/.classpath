@@ -6,6 +6,5 @@
 	<classpathentry kind="lib" path="libs/joml-1.9.19.jar"/>
 	<classpathentry kind="lib" path="libs/xpp3.jar"/>
 	<classpathentry kind="lib" path="libs/xstream.jar"/>
-	<classpathentry kind="lib" path="libs/netty-3.10.6.Final.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

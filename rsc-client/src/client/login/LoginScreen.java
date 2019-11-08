@@ -1,13 +1,17 @@
 package client.login;
 
-import java.util.Random;
+import java.io.IOException;
 
 import client.RuneClient;
 import client.State;
 import client.StateRenderer;
-import client.net.Packet;
+import client.game.Game;
+import client.net.Connection;
 
 public class LoginScreen extends State {
+
+    private static final String SERVER_ADDRESS = "localhost";
+    private static final int SERVER_PORT = 43594;
 
     private LoginScreenRenderer renderer;
 
@@ -26,41 +30,25 @@ public class LoginScreen extends State {
     public void pollInput() {
         if (input.wasLeftClickReleased()) {
             // For now, just connect to the server immediately
-
-            boolean connected = client.isConnected() || client.connect("localhost", 7780);
-            if (connected) {
-                sendLoginRequest("Player" + new Random().nextInt(1000), "topsecret");
-            }
+            connect(SERVER_ADDRESS, SERVER_PORT);
         }
     }
 
-    @Override
-    public void tick() {
+    private void connect(String address, int port) {
+
+        try {
+            Connection conn = new Connection(address, port);
+            sendLoginPacket(conn);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    /**
-     * Sends a login request to the server.
-     */
-    private void sendLoginRequest(String name, String password) {
-        // Create a packet.
-        // Send the username and password.
-        Packet packet = new Packet(2);
-
-        // Send the client build.
-        packet.putDouble(0.1); // TODO Add client build value to code somewhere?
-
-        // Send name
-        packet.putString(name);
-
-        // Send password
-        packet.putString(password); // TODO Use RSA
-
-        // Send the packet.
-        client.sendPacket(packet);
-    }
-
-    @Override
-    public void reset() {
+    private void sendLoginPacket(Connection conn) {
+        // TODO: send login details and check response
+        Game game = new Game(client, conn);
+        client.changeState(game);
+        game.loggedIn();
     }
 
 }

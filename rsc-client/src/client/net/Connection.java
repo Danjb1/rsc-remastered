@@ -1,103 +1,65 @@
 package client.net;
 
-import static org.jboss.netty.channel.Channels.pipeline;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
-import java.net.ConnectException;
-import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import client.packets.Packet;
 
-import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ChannelPipeline;
-import org.jboss.netty.channel.ChannelPipelineFactory;
-import org.jboss.netty.channel.ChannelStateEvent;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelHandler;
-import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
+public class Connection implements PacketListener {
 
-import client.RuneClient;
+    private Socket socket;
+    private DataInputStream in;
+    private DataOutputStream out;
+    private PacketReaderThread packetReaderThread;
+    private List<Packet> packetsReceived = new ArrayList<>();
+    private boolean closed;
 
-public class Connection extends SimpleChannelHandler implements ChannelPipelineFactory {
+    public Connection(String address, int port) throws IOException {
 
-    private Logger logger = Logger.getLogger(getClass().getName());
+        socket = new Socket(address, port);
 
-    private final RuneClient client;
-    private Channel channel;
+        in = new DataInputStream(socket.getInputStream());
+        out = new DataOutputStream(socket.getOutputStream());
 
-    public Connection(final RuneClient client) {
-        this.client = client;
+        packetReaderThread = new PacketReaderThread(in, this);
+    }
+
+    public Runnable getPacketReaderThread() {
+        return packetReaderThread;
     }
 
     @Override
-    public ChannelPipeline getPipeline() throws Exception {
-        ChannelPipeline pipeline = pipeline();
-        pipeline.addLast("decoder", new PacketDecoder());
-        pipeline.addLast("encoder", new PacketEncoder());
-        pipeline.addLast("handler", this);
-        return pipeline;
+    public void packetReceived(Packet p) {
+        synchronized (packetsReceived) {
+            packetsReceived.add(p);
+        }
     }
 
     @Override
-    public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
-        Packet packet = (Packet) e.getMessage();
-        if (packet == null) {
-            return;
-        }
-        client.queuePacket(packet);
+    public void packetReadError(IOException e) {
+        packetReaderThread.stop();
+        close();
     }
 
-    @Override
-    public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
-    }
-
-    @Override
-    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) {
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {
-        if (e.getCause() instanceof ConnectException) {
-            logger.log(Level.INFO, "Connection refused.", e);
-            return;
-        }
-        logger.log(Level.WARNING, "Exception caught in network.", e.getCause());
-    }
-
-    public boolean connect(String hostname, int port) {
-        try {
-            ClientBootstrap bootstrap = new ClientBootstrap(new NioClientSocketChannelFactory(Executors.newSingleThreadExecutor(), Executors.newCachedThreadPool(), 2));
-            bootstrap.setPipelineFactory(this);
-            channel = bootstrap.connect(new InetSocketAddress(hostname, port)).awaitUninterruptibly().getChannel();
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Error connecting to server.", e);
-            return false;
-        }
-        return isConnected();
-    }
-
-    public void disconnect() {
-        if (channel != null) {
-            channel.close();
+    public List<Packet> getPacketsReceived() {
+        synchronized (packetsReceived) {
+            List<Packet> packets = new ArrayList<Packet>(packetsReceived);
+            packetsReceived.clear();
+            return packets;
         }
     }
 
-    public boolean isConnected() {
-        return channel != null ? channel.isConnected() : false;
+    public void close() {
+        closed = true;
+        SocketUtils.close(socket);
     }
 
-    /**
-     * Sends a packet to the server.
-     */
-    public void sendPacket(Packet packet) {
-        if (!channel.isConnected()) {
-            logger.log(Level.WARNING, "Error sending packet #" + packet.getOpcode() + ". Not connected.");
-            return;
-        }
-        channel.write(packet);
+    public boolean isClosed() {
+        return closed;
     }
 
 }
