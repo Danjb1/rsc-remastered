@@ -7,14 +7,14 @@
 The Open-RSC community has succeeded in creating by far the most comprehensive collection of RSC resources, and, of course, a fully playable and faithful recreation of the game.
 
 - [Discord](https://discord.gg/ABdFCqn) - Open-RSC community.
-- [GitLab Organisation](https://gitlab.com/open-runescape-classic) - Source code and utilities.
-- [GitHub Organisation](https://github.com/Open-RSC) - Source code and utilities.
+- [GitLab](https://gitlab.com/open-runescape-classic) - Source code and utilities.
+- [GitHub](https://github.com/Open-RSC) - Source code and utilities.
 
 ### [2003Scape](https://2003scape.github.io/)
 
 Similar to Open-RSC, the 2003scape community have recreated RuneScape Classic and its website, and even ported the game to JavaScript and C!
 
-- [GitHub Organisation](https://github.com/2003scape) - Source code and utilities.
+- [GitHub](https://github.com/2003scape) - Source code and utilities.
 
 ### [RSCGo](https://github.com/spkaeros/RSCGo)
 

@@ -8,10 +8,10 @@ RuneScape today is unrecognisable from its original implementation back in 2001.
 
 **:warning: This project has effectively been superseded by [Open-RSC](https://github.com/Open-RSC), which is a community effort to faithfully recreate RuneScape as it existed on 8 May 2001.**
 
-This project was an attempt to [refactor](docs/example_refactor.md) the RuneScape client source code to make it easier to understand and maintain. Now, this repository remains purely as a reference.
+This project was an attempt to refactor the RuneScape client source code to make it easier to understand and maintain. Now, this repository remains purely as a reference.
 
-> Further information about this project can be found [here](docs/about.md).
+> Further information can be found [here](docs/about.md).
 
 ## Links
 
-A list of useful links can be found [here](docs/links.md)
+A list of useful links can be found [here](docs/links.md).
