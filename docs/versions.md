@@ -1,6 +1,8 @@
-# Versions
+# Client Versions
 
-## Client
+Being a continually-updated game, RuneScape Classic has been through numerous iterations. Many different client versions can be found online, each requiring different data files and a different client-server protocol.
+
+## JAR Files
 
 Here are some of the known client versions:
 
@@ -48,7 +50,7 @@ Here are some of the known client versions:
 | **[mudclient199](http://rscdump.com/mudclient199.jar)** | |
 | **[mudclient201](http://rscdump.com/mudclient201.jar)** | |
 | **[mudclient202](https://github.com/tomfitzhenry/runescape-classic-dump/tree/master/rs1/rs1/v202)** | |
-| **[mudclient204](https://github.com/tomfitzhenry/RuneScape-classic-dump/blob/master/eXemplar's-collection/exemplar/rs1/rs1/mudclients/mudclient204.jar)** | [Source](https://bitbucket.org/eggsampler/rsc/src/master/204/) - [Mirror](https://github.com/2003scape/mudclient204) |
+| **[mudclient204](https://github.com/tomfitzhenry/RuneScape-classic-dump/blob/master/eXemplar's-collection/exemplar/rs1/rs1/mudclients/mudclient204.jar)** | [Source](https://bitbucket.org/eggsampler/rsc/src/master/204/) - [Mirror](https://github.com/2003scape/mudclient204) - Used by 2003scape |
 | **[mudclient233](https://bitbucket.org/eggsampler/rsc/src/63e3a5c9482c27b3555b38b6a6b9453d2f1771c4/jars)** | [Source](https://bitbucket.org/eggsampler/rsc/src/master/233/) |
 | **mudclient235** | The final version ([Source](https://github.com/rsc-g15/rsc-235-deob)) |
 
@@ -57,3 +59,11 @@ These are not to be confused with the RuneScape 2 versions, which follow a simil
  - **[r194](http://rsclients.wikia.com/wiki/Revision_194)** - RuneScape 2 beta (1 December 2003)
  - **[r289](http://rsclients.wikia.com/wiki/Revision_289)** - Early version popular with private servers (January 23 2005)
  - **[r317](http://rsclients.wikia.com/wiki/Revision_317)** - Early version popular with private servers (May 5th 2005)
+
+## Game Data
+
+The client is useless without the game data (maps, images, sounds, etc.).
+
+Historically, the server would send these resources to the client, where they would be stored in the browser cache. These cache files contain Jagex Archives (`.jag` / `.mem` files), which have been analysed extensively by the community.
+
+See the [README](/) for some relevant links.

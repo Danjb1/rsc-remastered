@@ -1,51 +1,17 @@
 # RSC Remastered
 
-*(Formerly OpenRSC)*
+RuneScape today is unrecognisable from its original implementation back in 2001. It has been through several engine overhauls, and has long since moved away from its 2.5D roots. "RuneScape Classic" is now used to refer to the original version of the engine, before the first major 3D update (originally known as "RuneScape 2").
 
-An open-source re-implementation of the RuneScape Classic client for private use.
+![RSC Screenshot](http://www.runescape.com/img/main/classic/screen-2.jpg "RuneScape Classic")
 
-[![Screenshot](docs/screenshot.png)](https://youtu.be/o6hY1LMLiSU)
+## About
 
-## :dart: Aim
+**:warning: This project has effectively been superseded by [Open-RSC](https://github.com/Open-RSC), which is a community effort to faithfully recreate RuneScape as it existed on 8 May 2001.**
 
-The primary aim of this project is to **deobfuscate**, **refactor** and **modernize** the RuneScape Classic client.
+This project was an attempt to [refactor](docs/example_refactor.md) the RuneScape client source code to make it easier to understand and maintain. Now, this repository remains purely as a reference.
 
-While other projects have had great success in deobfuscating the source code, it is still very messy and difficult to understand, due to the nature of the decompilation process. The original game was also constrained by the need to run on old hardware and primitive web browsers.
+> Further information about this project can be found [here](docs/about.md).
 
-Refactoring it can make it significantly easier to read and maintain the code, as shown by [this example](docs/example_refactor.md). This could pave the way for all sorts of future enhancements, and perhaps ports to other platforms.
+## Links
 
- > See **[about](docs/about.md)** for more information.
-
-## :hammer: Build & Run
-
-The project should work out-of-the-box with Eclipse.
-
-Alternatively, it can be compiled manually on Windows by running `build.bat`, and subsequently run using `run.bat`.
-
-## :chart_with_upwards_trend: Progress
-
-:heavy_check_mark: Loading screen\
-:heavy_check_mark:️ Title screen\
-:heavy_check_mark:️ Dynamic world loading\
-:heavy_check_mark:️ Camera rotation\
-:heavy_check_mark:️ Landscape\
-:heavy_check_mark:️ Walls\
-:heavy_check_mark:️ Roofs\
-:pencil2: User interface\
-:pencil2: Server login\
-:x: Retrieve server data
-
-> See **[ideas](docs/ideas.md)** for planned enhancements.
-
-## :video_game: Controls
-
-Currently the world can be navigated freely:
-
-**Left Click:** Teleport\
-**Left / Right:** Rotate camera\
-**Page Up:** Go up a layer\
-**Page Down:** Go down a layer
-
-## :page_with_curl: Disclaimer
-
-The game data and original RuneScape source code referred to here is the intellectual property of *Jagex Ltd*.
+A list of useful links can be found [here](docs/links.md)
